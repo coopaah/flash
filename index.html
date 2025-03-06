@@ -62,6 +62,41 @@
         opacity: 1;
       }
     }
+    footer {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      background-color: #333;
+      color: #fff;
+      text-align: center;
+      padding: 10px 0;
+    }
+    .copy-container {
+      margin-top: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .copy-input {
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      margin-right: 10px;
+    }
+    .copy-button {
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 4px;
+      background-color: #007bff;
+      color: #fff;
+      cursor: pointer;
+      transition: background-color 0.3s ease-in-out;
+    }
+    .copy-button:hover {
+      background-color: #0056b3;
+    }
   </style>
   <script>
     if ('serviceWorker' in navigator) {
@@ -78,6 +113,8 @@
     document.addEventListener('DOMContentLoaded', () => {
       const searchBar = document.getElementById('search-bar');
       const suggestionsContainer = document.getElementById('suggestions');
+      const copyButton = document.getElementById('copy-button');
+      const copyInput = document.getElementById('copy-input');
 
       searchBar.addEventListener('input', () => {
         const query = searchBar.value;
@@ -107,6 +144,12 @@
           suggestionsContainer.innerHTML = '';
         }
       });
+
+      copyButton.addEventListener('click', () => {
+        copyInput.select();
+        document.execCommand('copy');
+        alert('Link copied to clipboard!');
+      });
     });
   </script>
 </head>
@@ -116,5 +159,13 @@
     <input type="text" id="search-bar" class="search-bar" placeholder="Search...">
     <div id="suggestions" class="suggestions"></div>
   </div>
+  <footer>
+    <p>Search all of your favorite sites from one place.</p>
+    <p>Set this page as your browser's search engine!</p>
+    <div class="copy-container">
+      <input type="text" id="copy-input" class="copy-input" value="https://fl.coopr.tech?f=%s" readonly>
+      <button id="copy-button" class="copy-button">Copy</button>
+    </div>
+  </footer>
 </body>
 </html>
