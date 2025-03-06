@@ -8,6 +8,10 @@
       "title": "Google",
       "site": "https://www.google.com/search?q=",
       "alias": ["g", "google"]
+    },
+    {
+        "title": "GitHub",
+        "site": "https://github.com/search?q=",
+        "alias": ["gh", "github"]
     }
-
 ]
