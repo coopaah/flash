@@ -4,6 +4,8 @@ const urlsToCache = [
   '/index.html',
   '/styles.css',
   '/script.js',
+  '/sites.json',
+  '/logo.png'
 ];
 
 self.addEventListener('install', event => {
