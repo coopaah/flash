@@ -10,8 +10,268 @@
       "alias": ["g", "google"]
     },
     {
-        "title": "GitHub",
-        "site": "https://github.com/search?q=",
-        "alias": ["gh", "github"]
+      "title": "GitHub",
+      "site": "https://github.com/search?q=",
+      "alias": ["gh", "github"]
+    },
+    {
+      "title": "Stack Overflow",
+      "site": "https://stackoverflow.com/search?q=",
+      "alias": ["so", "stack"]
+    },
+    {
+      "title": "Reddit",
+      "site": "https://www.reddit.com/search?q=",
+      "alias": ["r", "reddit"]
+    },
+    {
+      "title": "Twitter",
+      "site": "https://twitter.com/search?q=",
+      "alias": ["tw", "twitter"]
+    },
+    {
+      "title": "Bing",
+      "site": "https://www.bing.com/search?q=",
+      "alias": ["b", "bing"]
+    },
+    {
+      "title": "DuckDuckGo",
+      "site": "https://duckduckgo.com/?q=",
+      "alias": ["ddg", "duckduckgo"]
+    },
+    {
+      "title": "Amazon",
+      "site": "https://www.amazon.com/s?k=",
+      "alias": ["amz", "amazon"]
+    },
+    {
+      "title": "Wikipedia",
+      "site": "https://en.wikipedia.org/wiki/Special:Search?search=",
+      "alias": ["wiki", "wikipedia"]
+    },
+    {
+      "title": "eBay",
+      "site": "https://www.ebay.com/sch/i.html?_nkw=",
+      "alias": ["eb", "ebay"]
+    },
+    {
+      "title": "Yahoo",
+      "site": "https://search.yahoo.com/search?p=",
+      "alias": ["y", "yahoo"]
+    },
+    {
+      "title": "LinkedIn",
+      "site": "https://www.linkedin.com/search/results/all/?keywords=",
+      "alias": ["li", "linkedin"]
+    },
+    {
+      "title": "Pinterest",
+      "site": "https://www.pinterest.com/search/pins/?q=",
+      "alias": ["pin", "pinterest"]
+    },
+    {
+      "title": "Instagram",
+      "site": "https://www.instagram.com/explore/tags/",
+      "alias": ["ig", "instagram"]
+    },
+    {
+      "title": "TikTok",
+      "site": "https://www.tiktok.com/search?q=",
+      "alias": ["tt", "tik"]
+    },
+    {
+      "title": "Google Drive",
+      "site": "https://drive.google.com/drive/search?q=",
+      "alias": ["gd", "drive"]
+    },
+    {
+      "title": "Facebook",
+      "site": "https://www.facebook.com/search/top/?q=",
+      "alias": ["fb", "facebook"]
+    },
+    {
+      "title": "Quora",
+      "site": "https://www.quora.com/search?q=",
+      "alias": ["qu", "quora"]
+    },
+    {
+      "title": "Medium",
+      "site": "https://medium.com/search?q=",
+      "alias": ["md", "medium"]
+    },
+    {
+      "title": "Vimeo",
+      "site": "https://vimeo.com/search?q=",
+      "alias": ["vm", "vimeo"]
+    },
+    {
+      "title": "SoundCloud",
+      "site": "https://soundcloud.com/search?q=",
+      "alias": ["sc", "soundcloud"]
+    },
+    {
+      "title": "Spotify",
+      "site": "https://open.spotify.com/search/",
+      "alias": ["sp", "spotify"]
+    },
+    {
+      "title": "Netflix",
+      "site": "https://www.netflix.com/search?q=",
+      "alias": ["nf", "netflix"]
+    },
+    {
+      "title": "Hulu",
+      "site": "https://www.hulu.com/search?q=",
+      "alias": ["hu", "hulu"]
+    },
+    {
+      "title": "Twitch",
+      "site": "https://www.twitch.tv/search?term=",
+      "alias": ["tw", "twitch"]
+    },
+    {
+      "title": "IMDB",
+      "site": "https://www.imdb.com/find?q=",
+      "alias": ["imdb"]
+    },
+    {
+      "title": "Rotten Tomatoes",
+      "site": "https://www.rottentomatoes.com/search?search=",
+      "alias": ["rt", "rottentomatoes"]
+    },
+    {
+      "title": "Yelp",
+      "site": "https://www.yelp.com/search?find_desc=",
+      "alias": ["yp", "yelp"]
+    },
+    {
+      "title": "TripAdvisor",
+      "site": "https://www.tripadvisor.com/Search?q=",
+      "alias": ["ta", "tripadvisor"]
+    },
+    {
+      "title": "Booking.com",
+      "site": "https://www.booking.com/searchresults.html?ss=",
+      "alias": ["bk", "booking"]
+    },
+    {
+      "title": "Expedia",
+      "site": "https://www.expedia.com/Hotel-Search?destination=",
+      "alias": ["ex", "expedia"]
+    },
+    {
+      "title": "Airbnb",
+      "site": "https://www.airbnb.com/s/all?query=",
+      "alias": ["ab", "airbnb"]
+    },
+    {
+      "title": "Indeed",
+      "site": "https://www.indeed.com/jobs?q=",
+      "alias": ["id", "indeed"]
+    },
+    {
+      "title": "Glassdoor",
+      "site": "https://www.glassdoor.com/Job/jobs.htm?sc.keyword=",
+      "alias": ["gd", "glassdoor"]
+    },
+    {
+      "title": "Monster",
+      "site": "https://www.monster.com/jobs/search/?q=",
+      "alias": ["mn", "monster"]
+    },
+    {
+      "title": "Craigslist",
+      "site": "https://www.craigslist.org/search/sss?query=",
+      "alias": ["cl", "craigslist"]
+    },
+    {
+      "title": "Etsy",
+      "site": "https://www.etsy.com/search?q=",
+      "alias": ["et", "etsy"]
+    },
+    {
+      "title": "Alibaba",
+      "site": "https://www.alibaba.com/trade/search?SearchText=",
+      "alias": ["al", "ali"]
+    },
+    {
+      "title": "Walmart",
+      "site": "https://www.walmart.com/search/?query=",
+      "alias": ["wm", "wal"]
+    },
+    {
+      "title": "Target",
+      "site": "https://www.target.com/s?searchTerm=",
+      "alias": ["tg", "target"]
+    },
+    {
+      "title": "Best Buy",
+      "site": "https://www.bestbuy.com/site/searchpage.jsp?st=",
+      "alias": ["bb", "bestbuy"]
+    },
+    {
+      "title": "Home Depot",
+      "site": "https://www.homedepot.com/s/",
+      "alias": ["hd", "home"]
+    },
+    {
+      "title": "Lowe's",
+      "site": "https://www.lowes.com/search?searchTerm=",
+      "alias": ["lw", "lowes"]
+    },
+    {
+      "title": "Costco",
+      "site": "https://www.costco.com/CatalogSearch?keyword=",
+      "alias": ["cs", "cost"]
+    },
+    {
+      "title": "IKEA",
+      "site": "https://www.ikea.com/us/en/search/?q=",
+      "alias": ["ik", "ikea"]
+    },
+    {
+      "title": "Newegg",
+      "site": "https://www.newegg.com/p/pl?d=",
+      "alias": ["ng", "new"]
+    },
+    {
+      "title": "AliExpress",
+      "site": "https://www.aliexpress.com/wholesale?SearchText=",
+      "alias": ["ae", "ax"]
+    },
+    {
+      "title": "Flipkart",
+      "site": "https://www.flipkart.com/search?q=",
+      "alias": ["fk", "flipkart"]
+    },
+    {
+      "title": "Snapdeal",
+      "site": "https://www.snapdeal.com/search?keyword=",
+      "alias": ["sd", "snapdeal"]
+    },
+    {
+      "title": "Myntra",
+      "site": "https://www.myntra.com/",
+      "alias": ["my", "myntra"]
+    },
+    {
+      "title": "Shopify",
+      "site": "https://www.shopify.com/search?q=",
+      "alias": ["sh", "shopify"]
+    },
+    {
+      "title": "Zillow",
+      "site": "https://www.zillow.com/homes/for_sale/",
+      "alias": ["zl", "zillow"]
+    },
+    {
+      "title": "Realtor",
+      "site": "https://www.realtor.com/realestateandhomes-search/",
+      "alias": ["rl", "realtor"]
+    },
+    {
+      "title": "Trulia",
+      "site": "https://www.trulia.com/for_sale/",
+      "alias": ["tr", "trulia"]
     }
 ]
