@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (alias) {
           const site = sites.find(s => s.alias.includes(alias));
           if (site) {
-            siteInfo.textContent = `Searching on ${site.title}`;
+            siteInfo.textContent = `Searching ${site.title}`;
             siteInfo.style.display = 'block';
           } else {
             siteInfo.textContent = '';
