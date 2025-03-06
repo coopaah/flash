@@ -1,0 +1,13 @@
+[
+    {
+      "title": "YouTube",
+      "site": "https://www.youtube.com/search?q=",
+      "alias": ["yt"]
+    },
+    {
+      "title": "Google",
+      "site": "https://www.google.com/search?q=",
+      "alias": ["g", "google"]
+    }
+
+]
