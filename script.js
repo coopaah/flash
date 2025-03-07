@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
           performSearch(queryParam);
         }
   
-        searchBar.addEventListener('input', () => {
+        searchBar?.addEventListener('input', () => {
           const query = searchBar.value;
           const [searchTerm, alias] = query.split(' !');
           if (alias) {
@@ -66,26 +66,26 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         });
   
-        searchBar.addEventListener('keydown', (event) => {
+        searchBar?.addEventListener('keydown', (event) => {
           if (event.key === 'Enter') {
             const query = searchBar.value;
             window.location.href = `/?f=${encodeURIComponent(query)}`;
           }
         });
   
-        searchIcon.addEventListener('click', () => {
+        searchIcon?.addEventListener('click', () => {
           const query = searchBar.value;
           window.location.href = `/?f=${encodeURIComponent(query)}`;
         });
   
-        suggestionsContainer.addEventListener('click', (event) => {
+        suggestionsContainer?.addEventListener('click', (event) => {
           if (event.target.classList.contains('suggestion')) {
             searchBar.value = event.target.textContent;
             suggestionsContainer.innerHTML = '';
           }
         });
   
-        copyButton.addEventListener('click', () => {
+        copyButton?.addEventListener('click', () => {
           copyInput.select();
           document.execCommand('copy');
           alert('Link copied to clipboard!');
