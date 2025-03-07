@@ -6,7 +6,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchIcon = document.getElementById('search-icon');
     const siteInfo = document.getElementById('site-info');
     const flashtagsContainer = document.getElementById('flashtags-container');
-  
+      if (window.location.href.includes('fl.coopr.tech')) {
+        window.location.href = 'https://flashtags.tech';
+      }    
     fetch('/sites.json')
       .then(response => response.json())
       .then(sites => {
