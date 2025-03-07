@@ -4,7 +4,8 @@ const urlsToCache = [
   '/index.html',
   '/script.js',
   '/sites.json',
-  '/flashtags/index.html',
+  '/flashtags/',
+  '/flashtags',
   '/offline.html'
 ];
 
