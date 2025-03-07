@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const copyInput = document.getElementById('copy-input');
   const searchButton = document.getElementById('search-button');
   const siteInfo = document.getElementById('site-info');
+  const flashtagsContainer = document.getElementById('flashtags-container');
 
   fetch('/sites.json')
     .then(response => response.json())
@@ -35,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (alias) {
           const site = sites.find(s => s.alias.includes(alias));
           if (site) {
-            siteInfo.textContent = `Searching ${site.title}`;
+            siteInfo.textContent = `Searching on ${site.title}`;
             siteInfo.style.display = 'block';
           } else {
             siteInfo.textContent = '';
@@ -82,6 +83,17 @@ document.addEventListener('DOMContentLoaded', () => {
         document.execCommand('copy');
         alert('Link copied to clipboard!');
       });
+
+      if (flashtagsContainer) {
+        sites.forEach(site => {
+          site.alias.forEach(alias => {
+            const flashtagElement = document.createElement('div');
+            flashtagElement.className = 'flashtag';
+            flashtagElement.textContent = `!${alias}`;
+            flashtagsContainer.appendChild(flashtagElement);
+          });
+        });
+      }
     })
     .catch(error => {
       console.error('Error loading sites:', error);
