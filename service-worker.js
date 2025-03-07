@@ -2,10 +2,10 @@ const CACHE_NAME = 'flash-cache-v1';
 const urlsToCache = [
   '/',
   '/index.html',
-  '/styles.css',
   '/script.js',
   '/sites.json',
-  '/logo.png'
+  '/flashtags/index.html',
+  '/offline.html'
 ];
 
 self.addEventListener('install', event => {
