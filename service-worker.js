@@ -2,11 +2,11 @@ const CACHE_NAME = 'flash-cache-v1';
 const urlsToCache = [
   '/',
   '/index.html',
+  '/offline.html',
+  '/styles.css',
   '/script.js',
   '/sites.json',
-  '/flashtags/',
-  '/flashtags',
-  '/offline.html'
+  '/logo.png'
 ];
 
 self.addEventListener('install', event => {
@@ -19,10 +19,19 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.match(event.request)
-      .then(response => {
-        return response || fetch(event.request);
+  const url = new URL(event.request.url);
+  if (url.pathname === '/' && url.searchParams.has('f')) {
+    event.respondWith(
+      fetch(event.request).catch(() => {
+        return caches.match('/offline.html');
       })
-  );
+    );
+  } else {
+    event.respondWith(
+      caches.match(event.request)
+        .then(response => {
+          return response || fetch(event.request);
+        })
+    );
+  }
 });
