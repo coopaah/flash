@@ -61,7 +61,7 @@
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('https://fl.coopr.tech/service-worker.js')
+        navigator.serviceWorker.register('https://flashtags.tech/service-worker.js')
           .then(registration => {
             console.log('ServiceWorker registration successful with scope: ', registration.scope);
           }, err => {
@@ -70,10 +70,10 @@
       });
     }
   </script>
-  <script src="https://fl.coopr.tech/script.js"></script>
+  <script src="https://flashtags.tech/script.js"></script>
 </head>
 <body>
-  <img src="https://fl.coopr.tech/logo.png" alt="Logo" class="logo">
+  <img src="https://flashtags.tech/logo.png" alt="Logo" class="logo">
   <div class="flashtags-container" id="flashtags-container">
     <!-- Flashtags will be dynamically inserted here -->
   </div>
