@@ -38,7 +38,7 @@
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
       outline: none;
     }
-    .search-icon {
+    .search-icon, .ai-icon {
       width: 24px;
       height: 24px;
       margin-left: 10px;
@@ -98,6 +98,9 @@
     <svg id="search-icon" class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
       <path d="M10 2a8 8 0 105.293 14.707l5 5a1 1 0 001.414-1.414l-5-5A8 8 0 0010 2zm0 2a6 6 0 110 12 6 6 0 010-12z"/>
     </svg>
+    <svg id="ai-icon" class="ai-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+      <path d="M13 2v8h8l-8-8zm-2 0h-8v8h8v-8zm0 10h-8v8h8v-8zm2 0v8h8v-8h-8z"/>
+    </svg>
   </div>
   <div class="results-container">
     <div id="ai-summary" class="ai-summary"></div>
@@ -110,9 +113,31 @@
 
       const searchBar = document.getElementById('search-bar');
       const searchIcon = document.getElementById('search-icon');
+      const aiIcon = document.getElementById('ai-icon');
 
-      const performSearch = (query) => {
-        window.location.href = `/results?f=${encodeURIComponent(query)}`;
+      const performSearch = (query, useAI = false) => {
+        if (useAI) {
+          window.location.href = `/results?f=${encodeURIComponent(query)}&ai=true`;
+        } else {
+          const [searchTerm, alias] = query.split(' !');
+          if (alias) {
+            fetch('/sites.json')
+              .then(response => response.json())
+              .then(sites => {
+                const site = sites.find(s => s.alias.includes(alias));
+                if (site) {
+                  window.location.href = site.site + encodeURIComponent(searchTerm);
+                } else {
+                  window.location.href = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
+                }
+              })
+              .catch(error => {
+                console.error('Error loading sites:', error);
+              });
+          } else {
+            window.location.href = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
+          }
+        }
       };
 
       searchBar?.addEventListener('keydown', (event) => {
@@ -125,8 +150,12 @@
         performSearch(searchBar.value);
       });
 
+      aiIcon?.addEventListener('click', () => {
+        performSearch(searchBar.value, true);
+      });
+
       if (query) {
-        fetch(`https://api.coopr.tech:8148/flashtag-ai/query?f=${encodeURIComponent(query)}`)
+        fetch(`/flashtag-ai/query?f=${encodeURIComponent(query)}`)
           .then(response => response.json())
           .then(data => {
             const aiSummaryElement = document.getElementById('ai-summary');
@@ -173,6 +202,7 @@
           });
       } else {
         document.getElementById('results').textContent = 'No query provided.';
+        window.location.href = "https://flashtags.tech/"
       }
     });
 
