@@ -31,6 +31,7 @@
       align-items: center;
       height: 100vh;
       color: var(--text-color);
+      transition: all 0.4s ease;
     }
 
     .logo {
@@ -38,6 +39,7 @@
       position: absolute;
       top: 40%;
       transform: translate(-50%, -50%);
+      opacity: 1;
     }
 
     .search-container {
@@ -45,7 +47,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      transition: top 0.4s ease;
+      transition: top 0.4s ease, width 0.4s ease;
     }
 
     .search-container input {
@@ -63,7 +65,7 @@
     }
 
     .search-container input.filled {
-      width: 400px;
+      width: 500px;
     }
 
     .ai-button {
@@ -105,6 +107,21 @@
     .footer a:hover {
       color: #3653d6;
     }
+
+    /* Transition to results page look */
+    .expanded-layout .logo {
+      top: 10%;
+      opacity: 0;
+    }
+
+    .expanded-layout .search-container {
+      top: 10%;
+    }
+
+    .expanded-layout body {
+      background-color: white;
+      display: block;
+    }
   </style>
 </head>
 <body>
@@ -116,7 +133,10 @@
   <div class="search-container">
     <input type="text" id="searchBar" placeholder="Search..." oninput="handleInputChange()" />
     <button class="ai-button" id="aiSearchButton" onclick="performSearch()">
-      <svg class="ai-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 13h-6.2c-.2 0-.4.2-.4.4s.2.4.4.4H20v6.2c0 .2.2.4.4.4s.4-.2.4-.4V13c0-.2-.2-.4-.4-.4s-.4.2-.4.4v6.2zM12 4c2.2 0 4 1.8 4 4s-1.8 4-4 4-4-1.8-4-4 1.8-4 4-4zm0-2C7.6 2 4 5.6 4 10s3.6 8 8 8 8-3.6 8-8-3.6-8-8-8z"/></svg>
+      <!-- Reverted SVG -->
+      <svg class="ai-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <path d="M20 13h-6.2c-.2 0-.4.2-.4.4s.2.4.4.4H20v6.2c0 .2.2.4.4.4s.4-.2.4-.4V13c0-.2-.2-.4-.4-.4s-.4.2-.4.4v6.2zM12 4c2.2 0 4 1.8 4 4s-1.8 4-4 4-4-1.8-4-4 1.8-4 4-4zm0-2C7.6 2 4 5.6 4 10s3.6 8 8 8 8-3.6 8-8-3.6-8-8-8z"/>
+      </svg>
     </button>
   </div>
 
@@ -129,17 +149,16 @@
       const searchBar = document.getElementById("searchBar");
       const logo = document.querySelector(".logo");
       const searchContainer = document.querySelector(".search-container");
+      const body = document.querySelector("body");
 
-      // Center elements if input is empty
-      if (searchBar.value === "") {
-        logo.style.top = "40%";
-        searchContainer.style.top = "40%";
-        searchBar.classList.remove("filled");
-      } else {
-        // Transition elements to top as the user types
-        logo.style.top = "10%";
-        searchContainer.style.top = "10%";
+      // If typing starts, switch to expanded layout
+      if (searchBar.value !== "") {
+        body.classList.add("expanded-layout");
         searchBar.classList.add("filled");
+      } else {
+        // Revert layout when input is empty
+        body.classList.remove("expanded-layout");
+        searchBar.classList.remove("filled");
       }
     }
 
