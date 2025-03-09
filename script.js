@@ -4,23 +4,28 @@ document.addEventListener('DOMContentLoaded', () => {
     const copyButton = document.getElementById('copy-button');
     const copyInput = document.getElementById('copy-input');
     const searchIcon = document.getElementById('search-icon');
+    const aiIcon = document.getElementById('ai-icon');
     const siteInfo = document.getElementById('site-info');
     const flashtagsContainer = document.getElementById('flashtags-container');
- 
+  
     fetch('/sites.json')
       .then(response => response.json())
       .then(sites => {
-        const performSearch = (query) => {
-          const [searchTerm, alias] = query.split(' !');
-          if (alias) {
-            const site = sites.find(s => s.alias.includes(alias));
-            if (site) {
-              window.location.href = site.site + encodeURIComponent(searchTerm);
+        const performSearch = (query, useAI = false) => {
+          if (useAI) {
+            window.location.href = `/results?f=${encodeURIComponent(query)}&ai=true`;
+          } else {
+            const [searchTerm, alias] = query.split(' !');
+            if (alias) {
+              const site = sites.find(s => s.alias.includes(alias));
+              if (site) {
+                window.location.href = site.site + encodeURIComponent(searchTerm);
+              } else {
+                window.location.href = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
+              }
             } else {
               window.location.href = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
             }
-          } else {
-            window.location.href = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
           }
         };
   
@@ -68,14 +73,16 @@ document.addEventListener('DOMContentLoaded', () => {
   
         searchBar?.addEventListener('keydown', (event) => {
           if (event.key === 'Enter') {
-            const query = searchBar.value;
-            window.location.href = `/?f=${encodeURIComponent(query)}`;
+            performSearch(searchBar.value);
           }
         });
   
         searchIcon?.addEventListener('click', () => {
-          const query = searchBar.value;
-          window.location.href = `/?f=${encodeURIComponent(query)}`;
+          performSearch(searchBar.value);
+        });
+  
+        aiIcon?.addEventListener('click', () => {
+          performSearch(searchBar.value, true);
         });
   
         suggestionsContainer?.addEventListener('click', (event) => {
