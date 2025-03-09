@@ -228,7 +228,7 @@
 
       if (query) {
         loadingElement.style.display = 'flex';
-        fetch(`https://api.coopr.tech:8148/flashtag-ai/query?f=${encodeURIComponent(query)}`)
+        fetch(`/flashtag-ai/query?f=${encodeURIComponent(query)}`)
           .then(response => response.json())
           .then(data => {
             loadingElement.style.display = 'none';
@@ -280,45 +280,45 @@
       }
     });
 
-    function typeText(element, text, delay = 69) {
+    function typeText(element, text, delay = 50) {
       const words = text.split(' ');
       let index = 0;
       element.innerHTML = '';
       function type() {
-      if (index < words.length) {
-        const wordSpan = document.createElement('span');
-        wordSpan.textContent = words[index] + ' ';
-        wordSpan.style.opacity = 0;
-        element.appendChild(wordSpan);
-        fadeIn(wordSpan, () => {
-          if (index === words.length - 1) {
-            element.innerHTML = highlightText(element.innerHTML);
-          }
-        });
-        index++;
-        setTimeout(type, delay);
+        if (index < words.length) {
+          const wordSpan = document.createElement('span');
+          wordSpan.innerHTML = highlightText(words[index]) + ' ';
+          wordSpan.style.opacity = 0;
+          element.appendChild(wordSpan);
+          fadeIn(wordSpan, () => {
+            if (index === words.length - 1) {
+              element.innerHTML = highlightText(element.innerHTML);
+            }
+          });
+          index++;
+          setTimeout(type, delay);
+        }
       }
-  }
-  type();
-}
-
-function fadeIn(element, callback) {
-  let opacity = 0;
-  function increase() {
-    opacity += 0.1;
-    if (opacity <= 1) {
-      element.style.opacity = opacity;
-      requestAnimationFrame(increase);
-    } else if (callback) {
-      callback();
+      type();
     }
-  }
-  increase();
-}
 
-function highlightText(text) {
-  return text.replace(/__(.*?)__/g, '<span class="highlight">$1</span>');
-}
+    function fadeIn(element, callback) {
+      let opacity = 0;
+      function increase() {
+        opacity += 0.1;
+        if (opacity <= 1) {
+          element.style.opacity = opacity;
+          requestAnimationFrame(increase);
+        } else if (callback) {
+          callback();
+        }
+      }
+      increase();
+    }
+
+    function highlightText(text) {
+      return text.replace(/__(.*?)__/g, '<span class="highlight">$1</span>');
+    }
   </script>
 </body>
 </html>
