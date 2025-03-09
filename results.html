@@ -23,6 +23,32 @@
       width: 80%;
       max-width: 800px;
       margin: 20px 0;
+      display: flex;
+      align-items: center;
+    }
+    .search-bar {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #d9d9d9;
+      border-radius: 4px;
+      transition: box-shadow 0.3s ease-in-out;
+    }
+    .search-bar:focus {
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+      outline: none;
+    }
+    .search-icon {
+      width: 24px;
+      height: 24px;
+      margin-left: 10px;
+      cursor: pointer;
+      fill: #5271ff;
+    }
+    .results-container {
+      width: 80%;
+      max-width: 800px;
+      text-align: left;
     }
     .ai-summary {
       background-color: #f0f0f0;
@@ -52,6 +78,12 @@
       font-size: 14px;
       color: #333;
     }
+    .highlight {
+      background-color: #5271ff;
+      color: #ffffff;
+      padding: 2px 4px;
+      border-radius: 4px;
+    }
     @keyframes fadeIn {
       to {
         opacity: 1;
@@ -62,6 +94,12 @@
 <body>
   <img src="logo.png" alt="Logo" class="logo">
   <div class="search-container">
+    <input type="text" id="search-bar" class="search-bar" placeholder="Search...">
+    <svg id="search-icon" class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+      <path d="M10 2a8 8 0 105.293 14.707l5 5a1 1 0 001.414-1.414l-5-5A8 8 0 0010 2zm0 2a6 6 0 110 12 6 6 0 010-12z"/>
+    </svg>
+  </div>
+  <div class="results-container">
     <div id="ai-summary" class="ai-summary"></div>
     <div id="results"></div>
   </div>
@@ -70,15 +108,32 @@
       const urlParams = new URLSearchParams(window.location.search);
       const query = urlParams.get('f');
 
+      const searchBar = document.getElementById('search-bar');
+      const searchIcon = document.getElementById('search-icon');
+
+      const performSearch = (query) => {
+        window.location.href = `/results?f=${encodeURIComponent(query)}`;
+      };
+
+      searchBar?.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+          performSearch(searchBar.value);
+        }
+      });
+
+      searchIcon?.addEventListener('click', () => {
+        performSearch(searchBar.value);
+      });
+
       if (query) {
-        fetch(`https://api.coopr.tech:8148/flashtag-ai/query?f=${encodeURIComponent(query)}`)
+        fetch(`/flashtag-ai/query?f=${encodeURIComponent(query)}`)
           .then(response => response.json())
           .then(data => {
             const aiSummaryElement = document.getElementById('ai-summary');
             const resultsElement = document.getElementById('results');
 
             if (data.ai_summary_answer) {
-              aiSummaryElement.textContent = data.ai_summary_answer;
+              aiSummaryElement.innerHTML = highlightText(data.ai_summary_answer);
             } else {
               aiSummaryElement.style.display = 'none';
             }
@@ -120,6 +175,10 @@
         document.getElementById('results').textContent = 'No query provided.';
       }
     });
+
+    function highlightText(text) {
+      return text.replace(/__(.*?)__/g, '<span class="highlight">$1</span>');
+    }
   </script>
 </body>
 </html>
