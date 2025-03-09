@@ -236,7 +236,8 @@
             const resultsElement = document.getElementById('results');
 
             if (data.ai_summary_answer) {
-              typeText(aiSummaryElement, data.ai_summary_answer);
+              aiSummaryElement.innerHTML = highlightText(data.ai_summary_answer);
+              fadeInWords(aiSummaryElement);
             } else {
               aiSummaryElement.style.display = 'none';
             }
@@ -280,40 +281,19 @@
       }
     });
 
-    function typeText(element, text, delay = 50) {
-      const words = text.split(' ');
-      let index = 0;
+    function fadeInWords(element) {
+      const words = element.innerHTML.split(' ');
       element.innerHTML = '';
-      function type() {
-        if (index < words.length) {
-          const wordSpan = document.createElement('span');
-          wordSpan.innerHTML = highlightText(words[index]) + ' ';
-          wordSpan.style.opacity = 0;
-          element.appendChild(wordSpan);
-          fadeIn(wordSpan, () => {
-            if (index === words.length - 1) {
-              element.innerHTML = highlightText(element.innerHTML);
-            }
-          });
-          index++;
-          setTimeout(type, delay);
-        }
-      }
-      type();
-    }
-
-    function fadeIn(element, callback) {
-      let opacity = 0;
-      function increase() {
-        opacity += 0.1;
-        if (opacity <= 1) {
-          element.style.opacity = opacity;
-          requestAnimationFrame(increase);
-        } else if (callback) {
-          callback();
-        }
-      }
-      increase();
+      words.forEach((word, index) => {
+        const wordSpan = document.createElement('span');
+        wordSpan.innerHTML = word + ' ';
+        wordSpan.style.opacity = 0;
+        wordSpan.style.transition = `opacity 0.5s ease ${index * 0.1}s`;
+        element.appendChild(wordSpan);
+        setTimeout(() => {
+          wordSpan.style.opacity = 1;
+        }, 0);
+      });
     }
 
     function highlightText(text) {
