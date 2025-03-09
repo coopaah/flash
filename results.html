@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Flash - Results</title>
+  <title>Search Results - Flash</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -50,20 +50,19 @@
       margin-left: 10px;
       cursor: pointer;
       fill: #5271ff;
-      position: relative;
     }
     .search-icon:hover::after, .ai-icon:hover::after {
       content: attr(data-tooltip);
       position: absolute;
-      bottom: -30px;
-      left: 50%;
-      transform: translateX(-50%);
       background-color: #333;
       color: #fff;
       padding: 5px;
       border-radius: 4px;
-      font-size: 12px;
+      top: 30px;
+      left: 50%;
+      transform: translateX(-50%);
       white-space: nowrap;
+      font-size: 12px;
       z-index: 10;
     }
     .results-container {
@@ -111,6 +110,51 @@
         opacity: 1;
       }
     }
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      width: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.5) 50%, rgba(255, 255, 255, 0) 100%);
+      background-size: 200% 100%;
+      animation: loadingGradient 1.5s infinite;
+    }
+    @keyframes loadingGradient {
+      0% {
+        background-position: 200% 0;
+      }
+      100% {
+        background-position: -200% 0;
+      }
+    }
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 5px solid rgba(0, 0, 0, 0.1);
+      border-top: 5px solid #5271ff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite, changeLength 1.5s ease-in-out infinite;
+    }
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+    @keyframes changeLength {
+      0%, 100% {
+        border-top-width: 5px;
+      }
+      50% {
+        border-top-width: 10px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -130,6 +174,9 @@
     <div id="ai-summary" class="ai-summary"></div>
     <div id="results"></div>
   </div>
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+  </div>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const urlParams = new URLSearchParams(window.location.search);
@@ -138,13 +185,7 @@
       const searchBar = document.getElementById('search-bar');
       const searchIcon = document.getElementById('search-icon');
       const aiIcon = document.getElementById('ai-icon');
-      const siteInfo = document.createElement('div');
-      siteInfo.id = 'site-info';
-      siteInfo.style.display = 'none';
-      siteInfo.style.marginTop = '10px';
-      siteInfo.style.fontSize = '14px';
-      siteInfo.style.color = '#333';
-      document.querySelector('.search-container').appendChild(siteInfo);
+      const loadingElement = document.getElementById('loading');
 
       const performSearch = (query, useAI = false) => {
         if (useAI) {
@@ -171,31 +212,6 @@
         }
       };
 
-      searchBar?.addEventListener('input', () => {
-        const query = searchBar.value;
-        const [searchTerm, alias] = query.split(' !');
-        if (alias) {
-          fetch('/sites.json')
-            .then(response => response.json())
-            .then(sites => {
-              const site = sites.find(s => s.alias.includes(alias));
-              if (site) {
-                siteInfo.textContent = `Searching on ${site.title}`;
-                siteInfo.style.display = 'block';
-              } else {
-                siteInfo.textContent = '';
-                siteInfo.style.display = 'none';
-              }
-            })
-            .catch(error => {
-              console.error('Error loading sites:', error);
-            });
-        } else {
-          siteInfo.textContent = '';
-          siteInfo.style.display = 'none';
-        }
-      });
-
       searchBar?.addEventListener('keydown', (event) => {
         if (event.key === 'Enter') {
           performSearch(searchBar.value);
@@ -211,14 +227,16 @@
       });
 
       if (query) {
+        loadingElement.style.display = 'flex';
         fetch(`https://api.coopr.tech:8148/flashtag-ai/query?f=${encodeURIComponent(query)}`)
           .then(response => response.json())
           .then(data => {
+            loadingElement.style.display = 'none';
             const aiSummaryElement = document.getElementById('ai-summary');
             const resultsElement = document.getElementById('results');
 
             if (data.ai_summary_answer) {
-              aiSummaryElement.innerHTML = highlightText(data.ai_summary_answer);
+              typeText(aiSummaryElement, data.ai_summary_answer);
             } else {
               aiSummaryElement.style.display = 'none';
             }
@@ -253,6 +271,7 @@
             }
           })
           .catch(error => {
+            loadingElement.style.display = 'none';
             console.error('Error fetching search results:', error);
             document.getElementById('results').textContent = 'Error fetching search results.';
           });
@@ -263,6 +282,21 @@
 
     function highlightText(text) {
       return text.replace(/__(.*?)__/g, '<span class="highlight">$1</span>');
+    }
+
+    function typeText(element, text, delay = 50) {
+      let index = 0;
+      element.innerHTML = '';
+      function type() {
+        if (index < text.length) {
+          element.innerHTML += text.charAt(index);
+          index++;
+          setTimeout(type, delay);
+        } else {
+          element.innerHTML = highlightText(element.innerHTML);
+        }
+      }
+      type();
     }
   </script>
 </body>
