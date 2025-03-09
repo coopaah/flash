@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Search Results - Flash</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #ffffff;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .logo {
+      width: 200px;
+      height: auto;
+      margin: 20px 0;
+    }
+    .search-container {
+      width: 80%;
+      max-width: 800px;
+      margin: 20px 0;
+    }
+    .ai-summary {
+      background-color: #f0f0f0;
+      padding: 20px;
+      border-radius: 4px;
+      margin-bottom: 20px;
+      font-size: 16px;
+      color: #333;
+      opacity: 0;
+      animation: fadeIn 1s forwards;
+    }
+    .result {
+      margin-bottom: 20px;
+      opacity: 0;
+      animation: fadeIn 1s forwards;
+    }
+    .result-title {
+      font-size: 18px;
+      color: #5271ff;
+      text-decoration: none;
+    }
+    .result-url {
+      font-size: 14px;
+      color: #006621;
+    }
+    .result-description {
+      font-size: 14px;
+      color: #333;
+    }
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <img src="logo.png" alt="Logo" class="logo">
+  <div class="search-container">
+    <div id="ai-summary" class="ai-summary"></div>
+    <div id="results"></div>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const query = urlParams.get('f');
+
+      if (query) {
+        fetch(`/flashtag-ai/query?f=${encodeURIComponent(query)}`)
+          .then(response => response.json())
+          .then(data => {
+            const aiSummaryElement = document.getElementById('ai-summary');
+            const resultsElement = document.getElementById('results');
+
+            if (data.ai_summary_answer) {
+              aiSummaryElement.textContent = data.ai_summary_answer;
+            } else {
+              aiSummaryElement.style.display = 'none';
+            }
+
+            if (data.results && data.results.length > 0) {
+              data.results.forEach((result, index) => {
+                const resultElement = document.createElement('div');
+                resultElement.className = 'result';
+                resultElement.style.animationDelay = `${index * 0.1}s`;
+
+                const titleElement = document.createElement('a');
+                titleElement.className = 'result-title';
+                titleElement.href = result.result_url;
+                titleElement.textContent = result.result_title;
+
+                const urlElement = document.createElement('div');
+                urlElement.className = 'result-url';
+                urlElement.textContent = result.result_url;
+
+                const descriptionElement = document.createElement('div');
+                descriptionElement.className = 'result-description';
+                descriptionElement.textContent = result.result_og_description;
+
+                resultElement.appendChild(titleElement);
+                resultElement.appendChild(urlElement);
+                resultElement.appendChild(descriptionElement);
+
+                resultsElement.appendChild(resultElement);
+              });
+            } else {
+              resultsElement.textContent = 'No results found.';
+            }
+          })
+          .catch(error => {
+            console.error('Error fetching search results:', error);
+            document.getElementById('results').textContent = 'Error fetching search results.';
+          });
+      } else {
+        document.getElementById('results').textContent = 'No query provided.';
+      }
+    });
+  </script>
+</body>
+</html>
