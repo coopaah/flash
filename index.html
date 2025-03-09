@@ -20,7 +20,7 @@
       --input-bg-light: #f1f3f5;
       --input-bg-dark: #444;
     }
-    
+
     * {
       box-sizing: border-box;
     }
@@ -34,6 +34,9 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
       transition: background-color 0.3s, color 0.3s;
     }
 
@@ -45,13 +48,10 @@
     .header {
       width: 100%;
       display: flex;
-      align-items: center;
-      padding: 20px 40px;
+      justify-content: center;
+      padding: 20px;
       background: var(--card-bg-light);
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-      position: sticky;
-      top: 0;
-      z-index: 1000;
     }
 
     .header.dark-mode {
@@ -59,27 +59,27 @@
     }
 
     .logo {
-      width: 150px;
+      width: 200px;
       cursor: pointer;
     }
 
     .search-container {
-      flex-grow: 1;
+      margin-top: 20px;
       display: flex;
-      align-items: center;
-      margin-left: 20px;
-      position: relative;
+      justify-content: center;
+      width: 100%;
+      transition: transform 0.3s;
     }
 
     .search-bar {
-      width: 100%;
+      width: 60%;
       padding: 12px 16px;
       font-size: 16px;
       border: none;
-      border-radius: 50px;
+      border-radius: 25px;
       background-color: var(--input-bg-light);
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-      transition: box-shadow 0.3s;
+      transition: background-color 0.3s, box-shadow 0.3s;
     }
 
     .search-bar.dark-mode {
@@ -91,8 +91,7 @@
       box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
     }
 
-    .search-icon,
-    .ai-icon {
+    .search-icon {
       width: 32px;
       height: 32px;
       margin-left: 10px;
@@ -101,15 +100,14 @@
       transition: transform 0.3s;
     }
 
-    .search-icon:hover,
-    .ai-icon:hover {
+    .search-icon:hover {
       transform: scale(1.1);
     }
 
     .theme-toggle {
       position: absolute;
-      top: 10px;
-      right: 10px;
+      top: 20px;
+      right: 20px;
       cursor: pointer;
       width: 32px;
       height: 32px;
@@ -123,18 +121,16 @@
 
   <div class="header">
     <img src="logo.png" alt="Logo" class="logo" onclick="window.location.href='/'" />
-    <div class="search-container">
-      <input type="text" id="search-bar" class="search-bar" placeholder="Search..." />
-      <svg id="search-icon" class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-        <path
-          d="M10 2a8 8 0 105.293 14.707l5 5a1 1 0 001.414-1.414l-5-5A8 8 0=" />
-      </svg>
-      <svg id="ai-icon" class="ai-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-        <path d="M13 2v8h8l-8-8zm-2 0h-8v8h8v-8zm0 10h-8v8h8v-8zm2 0v8h8v-8h-8z" />
-      </svg>
-    </div>
   </div>
   
+  <div class="search-container">
+    <input type="text" id="search-bar" class="search-bar" placeholder="Search..." />
+    <svg id="search-icon" class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+      <path
+        d="M10 2a8 8 0 105.293 14.707l5 5a1 1 0 001.414-1.414l-5-5A8 8 0=" />
+    </svg>
+  </div>
+
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const themeToggleButton = document.getElementById('theme-toggle');
