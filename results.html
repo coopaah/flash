@@ -228,7 +228,7 @@
 
       if (query) {
         loadingElement.style.display = 'flex';
-        fetch(`/flashtag-ai/query?f=${encodeURIComponent(query)}`)
+        fetch(`https://api.coopr.tech:8148/flashtag-ai/query?f=${encodeURIComponent(query)}`)
           .then(response => response.json())
           .then(data => {
             loadingElement.style.display = 'none';
