@@ -5,20 +5,34 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Flash - Search Sites in a Flash</title>
   <style>
+    :root {
+      --bg-light: #ffffff;
+      --text-light: #000000;
+      --bg-dark: #1e1e1e;
+      --text-dark: #ffffff;
+    }
     body {
       font-family: Arial, sans-serif;
-      background-color: #ffffff;
+      background-color: var(--bg-light);
+      color: var(--text-light);
       margin: 0;
       padding: 0;
       display: flex;
       flex-direction: column;
       align-items: center;
+      transition: background-color 0.3s, color 0.3s;
     }
-    .logo {
-      width: 200px;
-      height: auto;
-      margin: 20px 0;
+    body.dark-mode {
+      background-color: var(--bg-dark);
+      color: var(--text-dark);
+    }
+    .theme-toggle {
+      position: absolute;
+      top: 10px;
+      right: 10px;
       cursor: pointer;
+      width: 32px;
+      height: 32px;
     }
     .search-container {
       width: 80%;
@@ -33,57 +47,6 @@
       font-size: 16px;
       border: 1px solid #d9d9d9;
       border-radius: 4px;
-      transition: box-shadow 0.3s ease-in-out;
-    }
-    .search-bar:focus {
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-      outline: none;
-    }
-    .search-icon, .ai-icon {
-      width: 24px;
-      height: 24px;
-      margin-left: 10px;
-      cursor: pointer;
-      fill: #5271ff;
-      position: relative;
-    }
-    .search-icon:hover::after, .ai-icon:hover::after {
-      content: attr(data-tooltip);
-      position: absolute;
-      bottom: -30px;
-      left: 50%;
-      transform: translateX(-50%);
-      background-color: #333;
-      color: #fff;
-      padding: 5px;
-      border-radius: 4px;
-      font-size: 12px;
-      white-space: nowrap;
-      z-index: 10;
-    }
-    .suggestions {
-      width: 80%;
-      max-width: 800px;
-      margin-top: 10px;
-      border: 1px solid #d9d9d9;
-      border-radius: 4px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      background-color: #fff;
-    }
-    .suggestion {
-      padding: 10px;
-      cursor: pointer;
-    }
-    .suggestion:hover {
-      background-color: #f0f0f0;
-    }
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-      }
-      to {
-        opacity: 1;
-      }
     }
     footer {
       position: absolute;
@@ -94,50 +57,38 @@
       text-align: center;
       padding: 10px 0;
     }
-    .copy-container {
-      display: flex;
-      align-items: center;
-      margin-top: 20px;
-    }
-    .copy-input {
-      width: 100%;
-      padding: 10px;
-      font-size: 16px;
-      border: 1px solid #d9d9d9;
-      border-radius: 4px;
-      margin-right: 10px;
-    }
-    .copy-button {
-      padding: 10px 20px;
-      font-size: 16px;
-      border: none;
-      border-radius: 4px;
-      background-color: #5271ff;
-      color: #ffffff;
-      cursor: pointer;
-      transition: background-color 0.3s ease-in-out;
-    }
-    .copy-button:hover {
-      background-color: #4059b5;
-    }
   </style>
-  <script src="script.js"></script>
 </head>
 <body>
+  <svg id="theme-toggle" class="theme-toggle" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path id="theme-icon" d="M12 2a10 10 0 100 20 10 10 0 000-20z" fill="#000"/>
+  </svg>
+  
   <img src="logo.png" alt="Logo" class="logo" onclick="window.location.href='/'">
   <div class="search-container">
     <input type="text" id="search-bar" class="search-bar" placeholder="Search...">
-    <svg id="search-icon" class="search-icon" data-tooltip="Search (typed in flashtag)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-      <path d="M10 2a8 8 0 105.293 14.707l5 5a1 1 0 001.414-1.414l-5-5A8 8 0 0010 2zm0 2a6 6 0 110 12 6 6 0 010-12z"/>
-    </svg>
-    <svg id="ai-icon" class="ai-icon" data-tooltip="Search with FlashAI" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-      <path d="M13 2v8h8l-8-8zm-2 0h-8v8h8v-8zm0 10h-8v8h8v-8zm2 0v8h8v-8h-8z"/>
-    </svg>
   </div>
-  <div id="suggestions" class="suggestions"></div>
   <footer>
     <p>Search all of your favorite sites from one place.</p>
     <p>Set this page as your browser's search engine!</p>
   </footer>
+  
+  <script>
+    const toggleButton = document.getElementById('theme-toggle');
+    const themeIcon = document.getElementById('theme-icon');
+    
+    function applyTheme(isDark) {
+      document.body.classList.toggle('dark-mode', isDark);
+      themeIcon.setAttribute('fill', isDark ? '#fff' : '#000');
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    }
+    
+    function toggleTheme() {
+      applyTheme(!document.body.classList.contains('dark-mode'));
+    }
+    
+    toggleButton.addEventListener('click', toggleTheme);
+    applyTheme(window.matchMedia('(prefers-color-scheme: dark)').matches || localStorage.getItem('theme') === 'dark');
+  </script>
 </body>
 </html>
