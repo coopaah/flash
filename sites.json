@@ -278,5 +278,10 @@
       "title": "Trulia",
       "site": "https://www.trulia.com/for_sale/",
       "alias": ["tr", "trulia"]
+    },
+    {   
+        "title": "WolframAlpha",
+        "site": "https://www.wolframalpha.com/input?i=",
+        "alias": ["wa", "wolf"]
     }
 ]
