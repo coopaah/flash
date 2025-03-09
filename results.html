@@ -280,41 +280,45 @@
       }
     });
 
-    function highlightText(text) {
-      return text.replace(/__(.*?)__/g, '<span class="highlight">$1</span>');
-    }
-
-    function typeText(element, text, delay = 100) {
+    function typeText(element, text, delay = 69) {
       const words = text.split(' ');
       let index = 0;
       element.innerHTML = '';
       function type() {
-        if (index < words.length) {
-          const wordSpan = document.createElement('span');
-          wordSpan.textContent = words[index] + ' ';
-          wordSpan.style.opacity = 0;
-          element.appendChild(wordSpan);
-          fadeIn(wordSpan);
-          index++;
-          setTimeout(type, delay);
-        } else {
-          element.innerHTML = highlightText(element.innerHTML);
-        }
+      if (index < words.length) {
+        const wordSpan = document.createElement('span');
+        wordSpan.textContent = words[index] + ' ';
+        wordSpan.style.opacity = 0;
+        element.appendChild(wordSpan);
+        fadeIn(wordSpan, () => {
+          if (index === words.length - 1) {
+            element.innerHTML = highlightText(element.innerHTML);
+          }
+        });
+        index++;
+        setTimeout(type, delay);
       }
-      type();
-    }
+  }
+  type();
+}
 
-    function fadeIn(element) {
-      let opacity = 0;
-      function increase() {
-        opacity += 0.05;
-        if (opacity <= 1) {
-          element.style.opacity = opacity;
-          requestAnimationFrame(increase);
-        }
-      }
-      increase();
+function fadeIn(element, callback) {
+  let opacity = 0;
+  function increase() {
+    opacity += 0.1;
+    if (opacity <= 1) {
+      element.style.opacity = opacity;
+      requestAnimationFrame(increase);
+    } else if (callback) {
+      callback();
     }
+  }
+  increase();
+}
+
+function highlightText(text) {
+  return text.replace(/__(.*?)__/g, '<span class="highlight">$1</span>');
+}
   </script>
 </body>
 </html>
