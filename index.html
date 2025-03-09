@@ -1,249 +1,186 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Flash Search</title>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap"
-    rel="stylesheet"
-  />
-  <style>
-    :root {
-      --primary-color: #5271ff;
-      --secondary-color: #006621;
-      --bg-color: #f8f9fa;
-      --card-bg: #fff;
-      --text-color: #333;
-      --muted-text: #555;
-      --input-bg: #f1f3f5;
-    }
-    
-    * {
-      box-sizing: border-box;
-    }
-    
-    body {
-      font-family: 'Roboto', sans-serif;
-      background-color: var(--bg-color);
-      margin: 0;
-      padding: 0;
-      height: 100vh;
-    }
-    
-    /* Header will transition between small/centered and expanded at the top */
-    .header {
-      position: fixed;
-      left: 0;
-      width: 100%;
-      display: flex;
-      align-items: center;
-      transition: all 0.5s ease;
-      z-index: 1000;
-    }
-    
-    /* Centered state: small with minimal padding and transparent background */
-    .header.centered {
-      top: 50%;
-      transform: translateY(-50%);
-      padding: 10px;
-      background: transparent;
-      box-shadow: none;
-      justify-content: center;
-    }
-    
-    /* Top state: full width with extra horizontal padding, background, and shadow */
-    .header.top {
-      top: 0;
-      transform: translateY(0);
-      padding: 20px 40px;
-      background: var(--card-bg);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-      justify-content: flex-start;
-    }
-    
-    .logo {
-      width: 150px;
-      cursor: pointer;
-    }
-    
-    .search-container {
-      flex-grow: 1;
-      display: flex;
-      align-items: center;
-      margin-left: 20px;
-      position: relative;
-    }
-    
-    .search-bar {
-      width: 100%;
-      padding: 12px 16px;
-      font-size: 16px;
-      border: none;
-      border-radius: 50px;
-      background-color: var(--input-bg);
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-      transition: box-shadow 0.3s;
-    }
-    
-    .search-bar:focus {
-      outline: none;
-      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
-    }
-    
-    .search-icon,
-    .ai-icon {
-      width: 32px;
-      height: 32px;
-      margin-left: 10px;
-      cursor: pointer;
-      fill: var(--primary-color);
-      transition: transform 0.3s;
-    }
-    
-    .search-icon:hover,
-    .ai-icon:hover {
-      transform: scale(1.1);
-    }
-    
-    .search-info {
-      font-size: 14px;
-      color: var(--muted-text);
-      margin-left: 10px;
-      display: none;
-    }
-    
-    .suggestions-container {
-      position: absolute;
-      top: calc(100% + 8px);
-      left: 0;
-      right: 0;
-      background-color: var(--card-bg);
-      border-radius: 8px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      z-index: 999;
-      display: none;
-      max-height: 200px;
-      overflow-y: auto;
-    }
-    
-    .suggestion {
-      padding: 10px 15px;
-      cursor: pointer;
-      font-size: 14px;
-      color: var(--text-color);
-    }
-    
-    .suggestion:hover {
-      background-color: var(--primary-color);
-      color: white;
-    }
-    
-    /* Footer with link to /flashtags */
-    .footer {
-      position: fixed;
-      bottom: 20px;
-      width: 100%;
-      text-align: center;
-      font-size: 14px;
-      color: var(--primary-color);
-    }
-    
-    .footer a {
-      text-decoration: none;
-      color: var(--primary-color);
-    }
-    
-    .footer a:hover {
-      text-decoration: underline;
-    }
-  </style>
-</head>
-<body>
-  <!-- Header: initially small and centered -->
-  <div class="header centered" id="header">
-    <img
-      src="logo.png"
-      alt="Logo"
-      class="logo"
-      onclick="window.location.href='/'"
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Flash Search</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap"
+      rel="stylesheet"
     />
-    <div class="search-container">
-      <input
-        type="text"
-        id="search-bar"
-        class="search-bar"
-        placeholder="Search..."
+    <style>
+      :root {
+        --primary-color: #5271ff;
+        --secondary-color: #006621;
+        --bg-color: #f8f9fa;
+        --card-bg: #fff;
+        --text-color: #333;
+        --muted-text: #555;
+        --input-bg: #f1f3f5;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Roboto", sans-serif;
+        background-color: var(--bg-color);
+        margin: 0;
+        padding: 0;
+        height: 100vh;
+        position: relative;
+      }
+
+      .header {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        transition: transform 0.5s ease, top 0.5s ease, padding 0.5s ease,
+          box-shadow 0.5s ease, background 0.5s ease;
+        z-index: 1000;
+      }
+
+      .header.centered {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: auto;
+        padding: 20px;
+        box-shadow: none;
+        background: transparent;
+      }
+
+      .header.top {
+        position: sticky;
+        top: 0;
+        transform: translate(0, 0);
+        width: 100%;
+        padding: 20px 40px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        background: var(--card-bg);
+      }
+
+      .logo {
+        width: 150px;
+        cursor: pointer;
+        transition: transform 0.5s ease;
+      }
+
+      .search-container {
+        flex-grow: 1;
+        display: flex;
+        align-items: center;
+        margin-left: 20px;
+        position: relative;
+        transition: all 0.5s ease;
+      }
+
+      .search-bar {
+        width: 100%;
+        padding: 12px 16px;
+        font-size: 16px;
+        border: none;
+        border-radius: 50px;
+        background-color: var(--input-bg);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        transition: box-shadow 0.3s, transform 0.5s ease;
+      }
+
+      .search-bar:focus {
+        outline: none;
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+      }
+
+      .search-icon,
+      .ai-icon {
+        width: 32px;
+        height: 32px;
+        margin-left: 10px;
+        cursor: pointer;
+        fill: var(--primary-color);
+        transition: transform 0.3s;
+      }
+
+      .search-icon:hover,
+      .ai-icon:hover {
+        transform: scale(1.1);
+      }
+
+      .search-info {
+        font-size: 14px;
+        color: var(--muted-text);
+        margin-left: 10px;
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header centered" id="header">
+      <img
+        src="logo.png"
+        alt="Logo"
+        class="logo"
+        onclick="window.location.href='/'"
       />
-      <svg id="search-icon" class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-        <path d="M10 2a8 8 0 105.293 14.707l5 5a1 1 0 001.414-1.414l-5-5A8 8 0 0010 2zm0 2a6 6 0 110 12 6 6 0 010-12z"/>
-      </svg>
-      <!-- Redesigned AI icon: a circle with central node and link lines -->
-      <svg id="ai-icon" class="ai-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-        <circle cx="12" cy="12" r="10" fill="none" stroke="var(--primary-color)" stroke-width="2"></circle>
-        <circle cx="12" cy="12" r="3" fill="var(--primary-color)"></circle>
-        <line x1="12" y1="2" x2="12" y2="6" stroke="var(--primary-color)" stroke-width="2"></line>
-        <line x1="12" y1="18" x2="12" y2="22" stroke="var(--primary-color)" stroke-width="2"></line>
-        <line x1="2" y1="12" x2="6" y2="12" stroke="var(--primary-color)" stroke-width="2"></line>
-        <line x1="18" y1="12" x2="22" y2="12" stroke="var(--primary-color)" stroke-width="2"></line>
-        <line x1="4.93" y1="4.93" x2="7.76" y2="7.76" stroke="var(--primary-color)" stroke-width="2"></line>
-        <line x1="16.24" y1="16.24" x2="19.07" y2="19.07" stroke="var(--primary-color)" stroke-width="2"></line>
-        <line x1="4.93" y1="19.07" x2="7.76" y2="16.24" stroke="var(--primary-color)" stroke-width="2"></line>
-        <line x1="16.24" y1="7.76" x2="19.07" y2="4.93" stroke="var(--primary-color)" stroke-width="2"></line>
-      </svg>
-      <div id="site-info" class="search-info"></div>
+      <div class="search-container">
+        <input
+          type="text"
+          id="search-bar"
+          class="search-bar"
+          placeholder="Search..."
+        />
+        <svg
+          id="search-icon"
+          class="search-icon"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+        >
+          <path
+            d="M10 2a8 8 0 105.293 14.707l5 5a1 1 0 001.414-1.414l-5-5A8 8 0 0010 2zm0 2a6 6 0 110 12 6 6 0 010-12z"
+          />
+        </svg>
+        <svg
+          id="ai-icon"
+          class="ai-icon"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+        >
+          <path d="M13 2v8h8l-8-8zm-2 0h-8v8h8v-8zm0 10h-8v8h8v-8zm2 0v8h8v-8h-8z" />
+        </svg>
+      </div>
     </div>
-  </div>
-  
-  <div class="suggestions-container" id="suggestions"></div>
-  
-  <!-- Footer with a link to "/flashtags" -->
-  <footer class="footer">
-    <a href="/flashtags">how to use flashtags</a>
-  </footer>
-  
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const searchBar = document.getElementById("search-bar");
-      const header = document.getElementById("header");
-      const searchIcon = document.getElementById("search-icon");
-      const aiIcon = document.getElementById("ai-icon");
-      let typingTimer;
-      const idleDelay = 2000;
-      
-      function moveHeaderUp() {
-        if (header.classList.contains("centered")) {
-          header.classList.remove("centered");
-          header.classList.add("top");
-        }
-        clearTimeout(typingTimer);
-        typingTimer = setTimeout(() => {
-          if (!searchBar.value.trim() && document.activeElement !== searchBar) {
-            revertHeader();
-          }
-        }, idleDelay);
-      }
-      
-      function revertHeader() {
-        if (header.classList.contains("top") && !searchBar.value.trim()) {
-          header.classList.remove("top");
-          header.classList.add("centered");
-        }
-      }
-      
-      searchBar.addEventListener("focus", moveHeaderUp);
-      searchBar.addEventListener("input", moveHeaderUp);
 
-      searchBar.addEventListener("blur", () => {
-        setTimeout(() => {
-          if (!searchBar.value.trim()) {
-            revertHeader();
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const searchBar = document.getElementById("search-bar");
+        const header = document.getElementById("header");
+
+        function moveHeaderUp() {
+          if (header.classList.contains("centered")) {
+            header.classList.remove("centered");
+            header.classList.add("top");
           }
-        }, 100);
+        }
+
+        function revertHeader() {
+          if (header.classList.contains("top") && !searchBar.value.trim()) {
+            header.classList.remove("top");
+            header.classList.add("centered");
+          }
+        }
+
+        searchBar.addEventListener("focus", moveHeaderUp);
+        searchBar.addEventListener("input", moveHeaderUp);
+
+        searchBar.addEventListener("blur", () => {
+          setTimeout(() => {
+            revertHeader();
+          }, 100);
+        });
       });
-      
-      </script>
-
-  <script src="/script.js"></script>
-</body>
+    </script>
+    <script src="script.js"></script>
+  </body>
 </html>
