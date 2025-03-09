@@ -31,28 +31,28 @@
       height: 100vh;
     }
     
-    /* Header: full width & fixed positioning */
+    /* Header will transition between small/centered and expanded at the top */
     .header {
       position: fixed;
       left: 0;
       width: 100%;
       display: flex;
       align-items: center;
-      transition: top 0.5s ease, transform 0.5s ease, padding 0.5s ease, box-shadow 0.5s ease, background 0.5s ease, justify-content 0.5s ease;
+      transition: all 0.5s ease;
       z-index: 1000;
     }
     
-    /* Centered state: header appears in the middle of the page with transparent background */
+    /* Centered state: small with minimal padding and transparent background */
     .header.centered {
       top: 50%;
       transform: translateY(-50%);
-      padding: 20px;
+      padding: 10px;
       background: transparent;
       box-shadow: none;
       justify-content: center;
     }
     
-    /* Top header state: header moves up, expands horizontally, and gets a background & shadow */
+    /* Top state: full width with extra horizontal padding, background, and shadow */
     .header.top {
       top: 0;
       transform: translateY(0);
@@ -82,7 +82,7 @@
       border: none;
       border-radius: 50px;
       background-color: var(--input-bg);
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
       transition: box-shadow 0.3s;
     }
     
@@ -139,7 +139,7 @@
       color: white;
     }
     
-    /* Footer contains the link to /flashtags */
+    /* Footer with link to /flashtags */
     .footer {
       position: fixed;
       bottom: 20px;
@@ -160,17 +160,25 @@
   </style>
 </head>
 <body>
-  <!-- Header starts with the "centered" class -->
+  <!-- Header: initially small and centered -->
   <div class="header centered" id="header">
-    <img src="logo.png" alt="Logo" class="logo" onclick="window.location.href='/'" />
+    <img
+      src="logo.png"
+      alt="Logo"
+      class="logo"
+      onclick="window.location.href='/'"
+    />
     <div class="search-container">
-      <input type="text" id="search-bar" class="search-bar" placeholder="Search..." />
+      <input
+        type="text"
+        id="search-bar"
+        class="search-bar"
+        placeholder="Search..."
+      />
       <svg id="search-icon" class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-        <path
-          d="M10 2a8 8 0 105.293 14.707l5 5a1 1 0 001.414-1.414l-5-5A8 8 0 0010 2zm0 2a6 6 0 110 12 6 6 0 010-12z"
-        />
+        <path d="M10 2a8 8 0 105.293 14.707l5 5a1 1 0 001.414-1.414l-5-5A8 8 0 0010 2zm0 2a6 6 0 110 12 6 6 0 010-12z"/>
       </svg>
-      <!-- Redesigned AI icon: a circle with lines representing connections -->
+      <!-- Redesigned AI icon: a circle with central node and link lines -->
       <svg id="ai-icon" class="ai-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
         <circle cx="12" cy="12" r="10" fill="none" stroke="var(--primary-color)" stroke-width="2"></circle>
         <circle cx="12" cy="12" r="3" fill="var(--primary-color)"></circle>
@@ -186,28 +194,56 @@
       <div id="site-info" class="search-info"></div>
     </div>
   </div>
-
+  
   <div class="suggestions-container" id="suggestions"></div>
-
+  
+  <!-- Footer with a link to "/flashtags" -->
   <footer class="footer">
-    <a href="/flashtags">How to use Flashtags</a>
+    <a href="/flashtags">how to use flashtags</a>
   </footer>
-  <script src="/script.js"></script>
+  
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const searchBar = document.getElementById("search-bar");
       const header = document.getElementById("header");
-
+      const searchIcon = document.getElementById("search-icon");
+      const aiIcon = document.getElementById("ai-icon");
+      let typingTimer;
+      const idleDelay = 2000;
+      
       function moveHeaderUp() {
         if (header.classList.contains("centered")) {
           header.classList.remove("centered");
           header.classList.add("top");
         }
+        clearTimeout(typingTimer);
+        typingTimer = setTimeout(() => {
+          if (!searchBar.value.trim() && document.activeElement !== searchBar) {
+            revertHeader();
+          }
+        }, idleDelay);
       }
-
+      
+      function revertHeader() {
+        if (header.classList.contains("top") && !searchBar.value.trim()) {
+          header.classList.remove("top");
+          header.classList.add("centered");
+        }
+      }
+      
       searchBar.addEventListener("focus", moveHeaderUp);
       searchBar.addEventListener("input", moveHeaderUp);
-    });
-  </script>
+
+      searchBar.addEventListener("blur", () => {
+        setTimeout(() => {
+          if (!searchBar.value.trim()) {
+            revertHeader();
+          }
+        }, 100);
+      });
+      
+      </script>
+
+  <script src="/script.js"></script>
 </body>
 </html>
