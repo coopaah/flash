@@ -281,17 +281,37 @@
       }
     });
 
+    function wrapWords(node) {
+      if (node.nodeType === Node.TEXT_NODE) {
+        const words = node.textContent.split(/(\s+)/);
+        const frag = document.createDocumentFragment();
+        words.forEach(word => {
+          if (word.trim() === "") {
+            frag.appendChild(document.createTextNode(word));
+          } else {
+            const span = document.createElement('span');
+            span.textContent = word;
+            span.style.opacity = 0;
+            frag.appendChild(span);
+          }
+        });
+        node.parentNode.replaceChild(frag, node);
+      } else if (node.nodeType === Node.ELEMENT_NODE) {
+        Array.from(node.childNodes).forEach(child => {
+          wrapWords(child);
+        });
+      }
+    }
+
     function fadeInWords(element) {
-      const words = element.innerHTML.split(' ');
-      element.innerHTML = '';
-      words.forEach((word, index) => {
-        const wordSpan = document.createElement('span');
-        wordSpan.innerHTML = word + ' ';
-        wordSpan.style.opacity = 0;
-        wordSpan.style.transition = `opacity 0.5s ease ${index * 0.1}s`;
-        element.appendChild(wordSpan);
+      Array.from(element.childNodes).forEach(child => {
+        wrapWords(child);
+      });
+      const spans = element.querySelectorAll('span');
+      spans.forEach((span, index) => {
+        span.style.transition = `opacity 0.5s ease ${index * 0.1}s`;
         setTimeout(() => {
-          wordSpan.style.opacity = 1;
+          span.style.opacity = 1;
         }, index * 100);
       });
     }
