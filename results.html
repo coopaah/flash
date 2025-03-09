@@ -78,8 +78,7 @@
       margin-bottom: 20px;
       font-size: 16px;
       color: #333;
-      opacity: 0;
-      animation: fadeIn 1s forwards;
+      position: relative;
     }
     .result {
       margin-bottom: 20px;
@@ -114,7 +113,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      height: 100vh;
+      height: 100%;
       width: 100%;
       position: absolute;
       top: 0;
@@ -171,11 +170,12 @@
     </div>
   </div>
   <div class="results-container">
-    <div id="ai-summary" class="ai-summary"></div>
+    <div id="ai-summary" class="ai-summary">
+      <div class="loading" id="loading">
+        <div class="spinner"></div>
+      </div>
+    </div>
     <div id="results"></div>
-  </div>
-  <div class="loading" id="loading">
-    <div class="spinner"></div>
   </div>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -284,12 +284,17 @@
       return text.replace(/__(.*?)__/g, '<span class="highlight">$1</span>');
     }
 
-    function typeText(element, text, delay = 50) {
+    function typeText(element, text, delay = 100) {
+      const words = text.split(' ');
       let index = 0;
       element.innerHTML = '';
       function type() {
-        if (index < text.length) {
-          element.innerHTML += text.charAt(index);
+        if (index < words.length) {
+          const wordSpan = document.createElement('span');
+          wordSpan.textContent = words[index] + ' ';
+          wordSpan.style.opacity = 0;
+          element.appendChild(wordSpan);
+          fadeIn(wordSpan);
           index++;
           setTimeout(type, delay);
         } else {
@@ -297,6 +302,18 @@
         }
       }
       type();
+    }
+
+    function fadeIn(element) {
+      let opacity = 0;
+      function increase() {
+        opacity += 0.05;
+        if (opacity <= 1) {
+          element.style.opacity = opacity;
+          requestAnimationFrame(increase);
+        }
+      }
+      increase();
     }
   </script>
 </body>
