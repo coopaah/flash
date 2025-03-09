@@ -4,7 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Flash Search</title>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap"
+    rel="stylesheet"
+  />
   <style>
     :root {
       --primary-color: #5271ff;
@@ -26,38 +29,37 @@
       margin: 0;
       padding: 0;
       height: 100vh;
-      position: relative;
     }
     
+    /* Header: full width & fixed positioning */
     .header {
+      position: fixed;
+      left: 0;
       width: 100%;
       display: flex;
       align-items: center;
-      padding: 20px 40px;
-      background: var(--card-bg);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-      transition: transform 0.5s ease, top 0.5s ease, padding 0.5s ease, box-shadow 0.5s ease;
+      transition: top 0.5s ease, transform 0.5s ease, padding 0.5s ease, box-shadow 0.5s ease, background 0.5s ease, justify-content 0.5s ease;
       z-index: 1000;
     }
     
+    /* Centered state: header appears in the middle of the page with transparent background */
     .header.centered {
-      position: absolute;
       top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: auto;
+      transform: translateY(-50%);
       padding: 20px;
+      background: transparent;
       box-shadow: none;
+      justify-content: center;
     }
     
-    /* The "top" style positions the header at the top of the page */
+    /* Top header state: header moves up, expands horizontally, and gets a background & shadow */
     .header.top {
-      position: sticky;
       top: 0;
-      transform: translate(0, 0);
-      width: 100%;
+      transform: translateY(0);
       padding: 20px 40px;
+      background: var(--card-bg);
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      justify-content: flex-start;
     }
     
     .logo {
@@ -136,9 +138,29 @@
       background-color: var(--primary-color);
       color: white;
     }
+    
+    /* Footer contains the link to /flashtags */
+    .footer {
+      position: fixed;
+      bottom: 20px;
+      width: 100%;
+      text-align: center;
+      font-size: 14px;
+      color: var(--primary-color);
+    }
+    
+    .footer a {
+      text-decoration: none;
+      color: var(--primary-color);
+    }
+    
+    .footer a:hover {
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
+  <!-- Header starts with the "centered" class -->
   <div class="header centered" id="header">
     <img src="logo.png" alt="Logo" class="logo" onclick="window.location.href='/'" />
     <div class="search-container">
@@ -148,38 +170,44 @@
           d="M10 2a8 8 0 105.293 14.707l5 5a1 1 0 001.414-1.414l-5-5A8 8 0 0010 2zm0 2a6 6 0 110 12 6 6 0 010-12z"
         />
       </svg>
+      <!-- Redesigned AI icon: a circle with lines representing connections -->
       <svg id="ai-icon" class="ai-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-        <path d="M13 2v8h8l-8-8zm-2 0h-8v8h8v-8zm0 10h-8v8h8v-8zm2 0v8h8v-8h-8z" />
+        <circle cx="12" cy="12" r="10" fill="none" stroke="var(--primary-color)" stroke-width="2"></circle>
+        <circle cx="12" cy="12" r="3" fill="var(--primary-color)"></circle>
+        <line x1="12" y1="2" x2="12" y2="6" stroke="var(--primary-color)" stroke-width="2"></line>
+        <line x1="12" y1="18" x2="12" y2="22" stroke="var(--primary-color)" stroke-width="2"></line>
+        <line x1="2" y1="12" x2="6" y2="12" stroke="var(--primary-color)" stroke-width="2"></line>
+        <line x1="18" y1="12" x2="22" y2="12" stroke="var(--primary-color)" stroke-width="2"></line>
+        <line x1="4.93" y1="4.93" x2="7.76" y2="7.76" stroke="var(--primary-color)" stroke-width="2"></line>
+        <line x1="16.24" y1="16.24" x2="19.07" y2="19.07" stroke="var(--primary-color)" stroke-width="2"></line>
+        <line x1="4.93" y1="19.07" x2="7.76" y2="16.24" stroke="var(--primary-color)" stroke-width="2"></line>
+        <line x1="16.24" y1="7.76" x2="19.07" y2="4.93" stroke="var(--primary-color)" stroke-width="2"></line>
       </svg>
       <div id="site-info" class="search-info"></div>
     </div>
   </div>
-  
-  <div class="suggestions-container" id="suggestions"></div>
-  
-  <script>
-    const searchBar = document.getElementById('search-bar');
-    const header = document.getElementById('header');
 
-    function moveHeaderUp() {
-      if (header.classList.contains('centered')) {
-        header.classList.remove('centered');
-        header.classList.add('top');
+  <div class="suggestions-container" id="suggestions"></div>
+
+  <footer class="footer">
+    <a href="/flashtags">How to use Flashtags</a>
+  </footer>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const searchBar = document.getElementById("search-bar");
+      const header = document.getElementById("header");
+
+      function moveHeaderUp() {
+        if (header.classList.contains("centered")) {
+          header.classList.remove("centered");
+          header.classList.add("top");
+        }
       }
-    }
-    
-    searchBar.addEventListener('focus', moveHeaderUp);
-    searchBar.addEventListener('input', moveHeaderUp);
-    
-   (Optional) If you want to animate back to the center when nothing is typed and the search field loses focus:
-   searchBar.addEventListener('blur', () => {
-      if (searchBar.value.trim() === '') {
-       header.classList.remove('top');
-       header.classList.add('centered');
-     }
+
+      searchBar.addEventListener("focus", moveHeaderUp);
+      searchBar.addEventListener("input", moveHeaderUp);
     });
   </script>
-  
-  <script src="script.js"></script>
 </body>
 </html>
