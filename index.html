@@ -91,7 +91,8 @@
       box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
     }
 
-    .search-icon {
+    .search-icon,
+    .ai-search-icon {
       width: 32px;
       height: 32px;
       margin-left: 10px;
@@ -100,7 +101,8 @@
       transition: transform 0.3s;
     }
 
-    .search-icon:hover {
+    .search-icon:hover,
+    .ai-search-icon:hover {
       transform: scale(1.1);
     }
 
@@ -126,8 +128,11 @@
   <div class="search-container">
     <input type="text" id="search-bar" class="search-bar" placeholder="Search..." />
     <svg id="search-icon" class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-      <path
-        d="M10 2a8 8 0 105.293 14.707l5 5a1 1 0 001.414-1.414l-5-5A8 8 0=" />
+      <path d="M10 2a8 8 0 105.293 14.707l5 5a1 1 0 001.414-1.414l-5-5A8 8 0=" />
+    </svg>
+    <!-- AI Search Icon -->
+    <svg id="ai-search-icon" class="ai-search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+      <path d="M12 4C6.48 4 2 8.48 2 12s4.48 8 10 8 10-4.48 10-8-4.48-8-10-8zm1 13h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
     </svg>
   </div>
 
@@ -148,6 +153,25 @@
 
       applyTheme(window.matchMedia('(prefers-color-scheme: dark)').matches || localStorage.getItem('theme') === 'dark');
     });
+  </script>
+
+  <!-- Include script.js -->
+  <script src="script.js"></script>
+
+  <!-- Register service worker -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker
+          .register('/service-worker.js')
+          .then(registration => {
+            console.log('Service Worker registered with scope:', registration.scope);
+          })
+          .catch(error => {
+            console.log('Service Worker registration failed:', error);
+          });
+      });
+    }
   </script>
 </body>
 </html>
