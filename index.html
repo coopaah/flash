@@ -27,18 +27,17 @@
       padding: 0;
       display: flex;
       flex-direction: column;
+      justify-content: flex-start;
       align-items: center;
-      justify-content: center;
       height: 100vh;
-      overflow: hidden;
-      transition: all 0.3s ease;
+      color: var(--text-color);
     }
 
     .logo {
-      width: 150px;
-      cursor: pointer;
-      transition: transform 0.3s ease;
-      margin-bottom: 20px;
+      transition: transform 0.4s ease, opacity 0.4s ease;
+      position: absolute;
+      top: 40%;
+      transform: translate(-50%, -50%);
     }
 
     .search-container {
@@ -46,154 +45,109 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 100%;
-      max-width: 600px;
-      transition: all 0.3s ease;
+      transition: top 0.4s ease;
     }
 
-    .search-bar {
-      width: 100%;
-      padding: 16px 20px;
-      font-size: 16px;
-      border: none;
-      border-radius: 50px;
+    .search-container input {
+      width: 300px;
+      padding: 15px;
+      font-size: 18px;
+      border: 2px solid #ccc;
+      border-radius: 30px;
       background-color: var(--input-bg);
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-      transition: box-shadow 0.3s ease, transform 0.3s ease;
+      transition: width 0.3s ease;
     }
 
-    .search-bar:focus {
-      outline: none;
-      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+    .search-container input:focus {
+      border-color: var(--primary-color);
     }
 
-    .search-icon,
-    .ai-icon {
-      width: 32px;
-      height: 32px;
-      margin-left: 10px;
-      cursor: pointer;
-      fill: var(--primary-color);
-      transition: transform 0.3s ease;
+    .search-container input.filled {
+      width: 400px;
     }
 
-    .search-icon:hover,
-    .ai-icon:hover {
-      transform: scale(1.1);
-    }
-
-    /* Smooth transition for centering the search bar and logo */
-    .move-up {
-      position: relative;
-      top: -120px; /* Adjust the value for smooth transition */
-      transition: all 0.3s ease;
-    }
-
-    .results-container {
-      width: 90%;
-      max-width: 800px;
-      padding: 20px;
-      margin-top: 30px;
-    }
-
-    .loading {
+    .ai-button {
       display: flex;
       align-items: center;
       justify-content: center;
-      height: 100%;
-      width: 100%;
-      position: absolute;
-      top: 0;
-      left: 0;
-      background: rgba(255, 255, 255, 0.8);
-    }
-
-    .spinner {
-      width: 50px;
-      height: 50px;
-      border: 6px solid rgba(0, 0, 0, 0.1);
-      border-top-color: var(--primary-color);
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-      0% {
-        transform: rotate(0deg);
-      }
-      100% {
-        transform: rotate(360deg);
-      }
-    }
-
-    /* Button styling */
-    .btn {
-      margin-top: 20px;
-      padding: 10px 20px;
-      font-size: 16px;
+      margin-top: 15px;
+      padding: 10px;
       background-color: var(--primary-color);
-      color: #fff;
       border: none;
-      border-radius: 30px;
+      border-radius: 50%;
       cursor: pointer;
       transition: background-color 0.3s ease;
     }
 
-    .btn:hover {
-      background-color: #4059ff;
+    .ai-button:hover {
+      background-color: #3653d6;
     }
 
-    /* AI Button with better design */
     .ai-icon {
-      width: 36px;
-      height: 36px;
+      width: 24px;
+      height: 24px;
+      fill: white;
     }
 
-    .ai-icon path {
-      fill: var(--primary-color);
+    .footer {
+      position: absolute;
+      bottom: 10px;
+      font-size: 14px;
+      color: var(--muted-text);
     }
 
+    .footer a {
+      color: var(--primary-color);
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+
+    .footer a:hover {
+      color: #3653d6;
+    }
   </style>
 </head>
 <body>
+
+  <div class="logo">
+    <img src="your-logo.png" alt="Logo" />
+  </div>
+
   <div class="search-container">
-    <img src="logo.png" alt="Logo" class="logo" onclick="window.location.href='/'" />
-    <input type="text" id="search-bar" class="search-bar" placeholder="Search..." />
-    <div>
-      <!-- Updated AI search button icon -->
-      <svg class="ai-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-        <path d="M12 3C6.48 3 3 6.48 3 12s3.48 9 9 9 9-3.48 9-9-3.48-9-9-9zm-1 13h-2v-2h2v2zm0-4h-2V7h2v5z" />
-      </svg>
-      <span>AI Search</span>
-    </div>
-    <button class="btn" onclick="window.location.href='/flashtags/index.html'">How to Use Flashtags</button>
+    <input type="text" id="searchBar" placeholder="Search..." oninput="handleInputChange()" />
+    <button class="ai-button" id="aiSearchButton" onclick="performSearch()">
+      <svg class="ai-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 13h-6.2c-.2 0-.4.2-.4.4s.2.4.4.4H20v6.2c0 .2.2.4.4.4s.4-.2.4-.4V13c0-.2-.2-.4-.4-.4s-.4.2-.4.4v6.2zM12 4c2.2 0 4 1.8 4 4s-1.8 4-4 4-4-1.8-4-4 1.8-4 4-4zm0-2C7.6 2 4 5.6 4 10s3.6 8 8 8 8-3.6 8-8-3.6-8-8-8z"/></svg>
+    </button>
   </div>
-  
-  <div class="results-container">
-    <div id="ai-summary" class="ai-summary">
-      <div class="loading" id="loading">
-        <div class="spinner"></div>
-      </div>
-    </div>
-    <div id="results"></div>
+
+  <div class="footer">
+    <a href="/flashtags/index.html">How to use Flashtags</a>
   </div>
-  
+
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const searchBar = document.getElementById('search-bar');
-      const searchContainer = document.querySelector('.search-container');
-      
-      searchBar.addEventListener('input', () => {
-        if (searchBar.value.trim()) {
-          searchContainer.classList.add('move-up');
-        } else {
-          searchContainer.classList.remove('move-up');
-        }
-      });
-    });
+    function handleInputChange() {
+      const searchBar = document.getElementById("searchBar");
+      const logo = document.querySelector(".logo");
+      const searchContainer = document.querySelector(".search-container");
+
+      // Center elements if input is empty
+      if (searchBar.value === "") {
+        logo.style.top = "40%";
+        searchContainer.style.top = "40%";
+        searchBar.classList.remove("filled");
+      } else {
+        // Transition elements to top as the user types
+        logo.style.top = "10%";
+        searchContainer.style.top = "10%";
+        searchBar.classList.add("filled");
+      }
+    }
+
+    function performSearch() {
+      // Implement your search logic here
+      alert("Performing search!");
+    }
   </script>
+
 </body>
 </html>
