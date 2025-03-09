@@ -1,5 +1,10 @@
 [
     {
+        "title": "FlashAI",
+        "site": "https://flashtags.tech/results?f=",
+        "alias": ["ai"]
+      },
+    {
       "title": "YouTube",
       "site": "https://www.youtube.com/search?q=",
       "alias": ["yt"]
