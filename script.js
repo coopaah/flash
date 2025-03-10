@@ -42,6 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 100);
   });
 
+
   // Search functionality
   function debounce(func, timeout = 150) {
     let timer;
