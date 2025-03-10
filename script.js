@@ -4,46 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const searchIcon = document.getElementById('search-icon');
   const aiIcon = document.getElementById('ai-icon');
   const siteInfo = document.getElementById('site-info');
-  const header = document.getElementById('header');
 
-  // Toast notifications
-  function showToast(message, type = 'success') {
-    const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    toast.textContent = message;
-    document.body.appendChild(toast);
-
-    setTimeout(() => {
-      toast.remove();
-    }, 3000);
-  }
-
-  // Header behavior
-  function moveHeaderUp() {
-    if (header.classList.contains('centered')) {
-      header.classList.remove('centered');
-      header.classList.add('top');
-    }
-  }
-
-  function revertHeader() {
-    if (header.classList.contains('top') && !searchBar.value.trim()) {
-      header.classList.remove('top');
-      header.classList.add('centered');
-    }
-  }
-
-  searchBar.addEventListener('focus', moveHeaderUp);
-  searchBar.addEventListener('input', moveHeaderUp);
-
-  searchBar.addEventListener('blur', () => {
-    setTimeout(() => {
-      revertHeader();
-    }, 100);
-  });
-
-
-  // Search functionality
   function debounce(func, timeout = 150) {
     let timer;
     return (...args) => {
@@ -53,40 +14,26 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   fetch('/sites.json')
-    .then(response => {
-      if (!response.ok) throw new Error('Failed to load sites');
-      return response.json();
-    })
+    .then(response => response.json())
     .then(sites => {
-      // Perform search
       const performSearch = (query, useAI = false) => {
         query = query.trim();
-        if (!query) {
-          showToast('Please enter a search term', 'error');
-          return;
-        }
+        if (!query) return;
 
         const [searchTerm, alias] = query.split(/ !(.*)/).slice(0, 2);
-
+        
         if (alias) {
           const site = sites.find(s => s.alias.includes(alias));
           if (site) {
             window.location.href = `${site.site}${encodeURIComponent(searchTerm)}`;
             return;
-          } else {
-            showToast(`Flashtag "${alias}" not found`, 'error');
-            return;
           }
         }
 
-        if (useAI) {
-          window.location.href = `/results?f=${encodeURIComponent(query)}&ai=true`;
-        } else {
-          window.location.href = `/results?f=${encodeURIComponent(query)}`;
-        }
+        window.location.href = `/results?f=${encodeURIComponent(query)}${useAI ? '&ai=true' : ''}`;
       };
 
-      // Event listeners
+      // Event handlers
       const handleSearch = (useAI = false) => {
         performSearch(searchBar.value, useAI);
       };
@@ -113,9 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
               .map(s => `<div class="suggestion">${s}</div>`)
               .join('');
           })
-          .catch(error => {
-            console.error('Error fetching suggestions:', error);
-          });
+          .catch(console.error);
       });
 
       searchBar?.addEventListener('input', updateSuggestions);
@@ -137,6 +82,6 @@ document.addEventListener('DOMContentLoaded', () => {
     })
     .catch(error => {
       console.error('Error loading sites:', error);
-      showToast('Failed to load search providers', 'error');
+      siteInfo.textContent = 'Error loading search providers';
     });
 });
