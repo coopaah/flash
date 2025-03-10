@@ -33,11 +33,13 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         }
       };
+
       const urlParams = new URLSearchParams(window.location.search);
       const queryParam = urlParams.get('f');
-      if (queryParam) {
+      if (queryParam && !window.location.pathname.includes('/results')) {
         performSearch(queryParam);
       }
+
       // Event handlers
       const handleSearch = (useAI = false) => {
         performSearch(searchBar.value, useAI);
