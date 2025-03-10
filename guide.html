@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flashtag Guide - Flash</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="style.css" rel="stylesheet" />
+</head>
+<body>
+  <div class="header">
+    <img src="logo.png" alt="Logo" class="logo" onclick="window.location.href='/'" />
+    <div class="search-container">
+      <input type="text" id="search-bar" class="search-bar" placeholder="Search flashtags..." />
+      <svg class="search-icon" viewBox="0 0 24 24">
+        <path d="M10 2a8 8 0 105.293 14.707l5 5a1 1 0 001.414-1.414l-5-5A8 8 0 0010 2zm0 2a6 6 0 110 12 6 6 0 010-12z" />
+      </svg>
+    </div>
+  </div>
+
+  <div class="guide-container">
+    <h1>Flashtag Guide</h1>
+    <div id="flashtag-list"></div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const searchBar = document.getElementById('search-bar');
+      const flashtagList = document.getElementById('flashtag-list');
+
+      function showToast(message, type = 'success') {
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+          toast.remove();
+        }, 3000);
+      }
+
+      function renderFlashtags(filter = '') {
+        fetch('/sites.json')
+          .then(response => response.json())
+          .then(sites => {
+            flashtagList.innerHTML = sites
+              .filter(site => 
+                site.title.toLowerCase().includes(filter.toLowerCase()) ||
+                site.alias.some(alias => alias.includes(filter))
+              )
+              .map(site => `
+                <div class="flashtag-card">
+                  <h3>${site.title}</h3>
+                  <div class="aliases">
+                    ${site.alias.map(a => `<span class="alias">!${a}</span>`).join('')}
+                  </div>
+                  <p>${site.description || 'No description available'}</p>
+                </div>
+              `)
+              .join('');
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            showToast('Failed to load flashtags', 'error');
+          });
+      }
+
+      searchBar?.addEventListener('input', (e) => {
+        renderFlashtags(e.target.value);
+      });
+
+      // Initial render
+      renderFlashtags();
+    });
+  </script>
+
+  <style>
+    .guide-container {
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 20px;
+    }
+
+    .flashtag-card {
+      background: var(--card-bg);
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .aliases {
+      margin: 10px 0;
+    }
+
+    .alias {
+      display: inline-block;
+      background: var(--primary-color);
+      color: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+      margin-right: 8px;
+      font-size: 14px;
+    }
+  </style>
+</body>
+</html>
