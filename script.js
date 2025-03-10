@@ -5,6 +5,17 @@ document.addEventListener('DOMContentLoaded', () => {
   const aiIcon = document.getElementById('ai-icon');
   const siteInfo = document.getElementById('site-info');
 
+  function showToast(message, type = 'success') {
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+      toast.remove();
+    }, 3000);
+  }
+
   function debounce(func, timeout = 150) {
     let timer;
     return (...args) => {
@@ -14,7 +25,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   fetch('/sites.json')
-    .then(response => response.json())
+    .then(response => {
+      if (!response.ok) throw new Error('Network response was not ok');
+      return response.json();
+    })
     .then(sites => {
       const performSearch = (query, useAI = false) => {
         query = query.trim();
@@ -81,7 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
       searchBar?.addEventListener('input', checkFlashtag);
     })
     .catch(error => {
-      console.error('Error loading sites:', error);
-      siteInfo.textContent = 'Error loading search providers';
+      console.error('Error:', error);
+      showToast('Failed to load search providers', 'error');
     });
 });
