@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Search Results - Flash</title>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
   <style>
     :root {
       --primary-color: #6366f1;
@@ -123,63 +123,59 @@
       overflow: hidden;
     }
 
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 12px 24px;
+      border-radius: 25px;
+      color: white;
+      font-size: 14px;
+      z-index: 10000;
+      animation: toastIn 0.3s ease;
+    }
 
-/* Toast styles */
-.toast {
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  padding: 12px 24px;
-  border-radius: 25px;
-  color: white;
-  font-size: 14px;
-  z-index: 10000;
-  animation: toastIn 0.3s ease;
-}
+    .toast.error {
+      background-color: var(--error-color);
+    }
 
-.toast.error {
-  background-color: var(--error-color);
-}
+    .toast.success {
+      background-color: var(--success-color);
+    }
 
-.toast.success {
-  background-color: var(--success-color);
-}
+    @keyframes toastIn {
+      from { opacity: 0; transform: translate(-50%, 20px); }
+      to { opacity: 1; transform: translate(-50%, 0); }
+    }
 
-@keyframes toastIn {
-  from { opacity: 0; transform: translate(-50%, 20px); }
-  to { opacity: 1; transform: translate(-50%, 0); }
-}
+    .sparkle-icon {
+      width: 20px;
+      height: 20px;
+      fill: var(--primary-color);
+      margin-right: 8px;
+    }
 
-/* Sparkle icon */
-.sparkle-icon {
-  width: 20px;
-  height: 20px;
-  fill: var(--primary-color);
-  margin-right: 8px;
-}
+    .ai-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 16px;
+    }
 
+    .ai-header h3 {
+      margin: 0;
+      font-size: 18px;
+      color: var(--primary-color);
+    }
 
-.ai-header {
-  display: flex;
-  align-items: center;
-  margin-bottom: 16px;
-}
-
-.ai-header h3 {
-  margin: 0;
-  font-size: 18px;
-  color: var(--primary-color);
-}
-
-.ai-footer {
-  margin-top: 16px;
-  padding-top: 12px;
-  border-top: 1px solid rgba(0,0,0,0.1);
-  font-size: 12px;
-  color: var(--muted-text);
-  text-align: center;
-}
+    .ai-footer {
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(0,0,0,0.1);
+      font-size: 12px;
+      color: var(--muted-text);
+      text-align: center;
+    }
     
     .result {
       margin-bottom: 20px;
@@ -255,15 +251,15 @@
 </head>
 <body>
   <div class="header">
-    <img src="logo.png" alt="Logo" class="logo" onclick="window.location.href='/'" />
+    <img src="logo.png" alt="Logo" class="logo" onclick="window.location.href='/'">
     <div class="search-container">
-      <input type="text" id="search-bar" class="search-bar" placeholder="Search..." />
+      <input type="text" id="search-bar" class="search-bar" placeholder="Search...">
       <svg id="search-icon" class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-        <path d="M10 2a8 8 0 105.293 14.707l5 5a1 1 0 001.414-1.414l-5-5A8 8 0 0010 2zm0 2a6 6 0 110 12 6 6 0 010-12z" />
+        <path d="M10 2a8 8 0 105.293 14.707l5 5a1 1 0 001.414-1.414l-5-5A8 8 0 0010 2zm0 2a6 6 0 110 12 6 6 0 010-12z"/>
       </svg>
-        <svg id="ai-icon" class="ai-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-          <path d="M12 2c-.55 0-1 .45-1 1v3.59l-2.29-2.3c-.39-.39-1.02-.39-1.41 0-.39.39-.39 1.02 0 1.41L9.59 8H6c-.55 0-1 .45-1 1s.45 1 1 1h3.59l-2.29 2.29c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0L11 10.41V14c0 .55.45 1 1 1s1-.45 1-1v-3.59l2.29 2.29c.39.39 1.02.39 1.41 0 .39-.39.39-1.02 0-1.41L14.41 10H18c.55 0 1-.45 1-1s-.45-1-1-1h-3.59l2.29-2.29c.39-.39.39-1.02 0-1.41-.39-.39-1.02-.39-1.41 0L13 6.59V3c0-.55-.45-1-1-1z"/>
-        </svg>
+      <svg id="ai-icon" class="ai-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <path d="M12 2c-.55 0-1 .45-1 1v3.59l-2.29-2.3c-.39-.39-1.02-.39-1.41 0-.39.39-.39 1.02 0 1.41L9.59 8H6c-.55 0-1 .45-1 1s.45 1 1 1h3.59l-2.29 2.29c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0L11 10.41V14c0 .55.45 1 1 1s1-.45 1-1v-3.59l2.29 2.29c.39.39 1.02.39 1.41 0 .39-.39.39-1.02 0-1.41L14.41 10H18c.55 0 1-.45 1-1s-.45-1-1-1h-3.59l2.29-2.29c.39-.39.39-1.02 0-1.41-.39-.39-1.02-.39-1.41 0L13 6.59V3c0-.55-.45-1-1-1z"/>
+      </svg>
     </div>
   </div>
   <div class="results-container">
@@ -281,123 +277,120 @@
   </div>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-  const urlParams = new URLSearchParams(window.location.search);
-  const query = urlParams.get('f');
-  const aiMode = urlParams.get('ai') === 'true';
+      const urlParams = new URLSearchParams(window.location.search);
+      const query = urlParams.get('f');
+      const aiMode = urlParams.get('ai') === 'true';
 
-  // Initialize search bar
-  const searchBar = document.getElementById('search-bar');
-  const searchIcon = document.getElementById('search-icon');
-  const aiIcon = document.getElementById('ai-icon');
-  const loadingElement = document.getElementById('loading');
-  const aiSummaryContent = document.getElementById('ai-summary-content');
-  
-  if (searchBar && query) {
-    searchBar.value = decodeURIComponent(query);
-  }
+      // Initialize search bar
+      const searchBar = document.getElementById('search-bar');
+      const searchIcon = document.getElementById('search-icon');
+      const aiIcon = document.getElementById('ai-icon');
+      const loadingElement = document.getElementById('loading');
+      const aiSummaryContent = document.getElementById('ai-summary-content');
+      const resultsElement = document.getElementById('results');
 
-  // Search execution logic
-  const performSearch = (useAI = false) => {
-    const query = searchBar.value.trim();
-    console.log("Performing search with query:", query); // Add this line
-    if (!query) return;
-    
-    if (useAI) {
-      window.location.href = `/results?f=${encodeURIComponent(query)}&ai=true`;
-    } else {
-      window.location.href = `/results?f=${encodeURIComponent(query)}`;
-    }
-  };
+      if (searchBar && query) {
+        searchBar.value = decodeURIComponent(query);
+      }
 
-  // Event listeners
-  searchBar?.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') performSearch();
-  });
+      // Search execution logic
+      const performSearch = (useAI = false) => {
+        const query = searchBar.value.trim();
+        if (!query) return;
 
-  searchIcon?.addEventListener('click', () => performSearch());
-  aiIcon?.addEventListener('click', () => performSearch(true));
-
-  // Load results
-  if (query) {
-    
-    const apiUrl = aiMode 
-      ? `https://api.coopr.tech:8148/flashtag-ai/query?f=${encodeURIComponent(query)}`
-      : `https://api.coopr.tech:8148/search?q=${encodeURIComponent(query)}`;
-
-    fetch(apiUrl)
-      .then(response => response.json())
-      .then(data => {
-        loadingElement.style.display = 'none';
-        const aiSummaryElement = document.getElementById('ai-summary');
-        const resultsElement = document.getElementById('results');
-
-        // Handle AI summary
-        if (data.ai_summary_answer) {
-          aiSummaryContent.innerHTML = highlightText(data.ai_summary_answer);
-          fadeInWords(aiSummaryContent);
+        if (useAI) {
+          window.location.href = `/results?f=${encodeURIComponent(query)}&ai=true`;
         } else {
-          aiSummaryElement.style.display = 'none';
+          window.location.href = `/results?f=${encodeURIComponent(query)}`;
         }
+      };
 
-        // Handle regular results
-        resultsElement.innerHTML = '';
-        if (data.results?.length > 0) {
-          data.results.forEach((result, index) => {
-            const resultElement = document.createElement('div');
-            resultElement.className = 'result';
-            resultElement.style.animationDelay = `${index * 0.1}s`;
-            
-            resultElement.innerHTML = `
-              <a href="${result.result_url}" class="result-title">${result.result_title}</a>
-              <div class="result-url">${new URL(result.result_url).hostname}</div>
-              <div class="result-description">${result.result_og_description || ''}</div>
-            `;
-            
-            resultsElement.appendChild(resultElement);
+      // Event listeners
+      searchBar?.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') performSearch();
+      });
+
+      searchIcon?.addEventListener('click', () => performSearch());
+      aiIcon?.addEventListener('click', () => performSearch(true));
+
+      // Load results
+      if (query) {
+        const apiUrl = aiMode 
+          ? `https://api.coopr.tech:8148/flashtag-ai/query?f=${encodeURIComponent(query)}`
+          : `https://api.coopr.tech:8148/search?q=${encodeURIComponent(query)}`;
+
+        fetch(apiUrl)
+          .then(response => response.json())
+          .then(data => {
+            loadingElement.style.display = 'none';
+
+            // Handle AI summary
+            if (data.ai_summary_answer) {
+              aiSummaryContent.innerHTML = highlightText(data.ai_summary_answer);
+              fadeInWords(aiSummaryContent);
+            } else {
+              document.getElementById('ai-summary').style.display = 'none';
+            }
+
+            // Handle regular results
+            resultsElement.innerHTML = '';
+            if (data.results?.length > 0) {
+              data.results.forEach((result, index) => {
+                const resultElement = document.createElement('div');
+                resultElement.className = 'result';
+                resultElement.style.animationDelay = `${index * 0.1}s`;
+                
+                resultElement.innerHTML = `
+                  <a href="${result.result_url}" class="result-title">${result.result_title}</a>
+                  <div class="result-url">${new URL(result.result_url).hostname}</div>
+                  <div class="result-description">${result.result_og_description || ''}</div>
+                `;
+                
+                resultsElement.appendChild(resultElement);
+              });
+            } else {
+              resultsElement.innerHTML = '<div class="result">No results found</div>';
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            resultsElement.innerHTML = '<div class="result">Error loading results</div>';
+          })
+          .finally(() => {
+            loadingElement.style.display = 'none';
           });
-        } else {
-          resultsElement.innerHTML = '<div class="result">No results found</div>';
+      }
+
+      // Text animation functions
+      function wrapWords(node) {
+        if (node.nodeType === Node.TEXT_NODE) {
+          const words = node.textContent.split(/(\s+)/);
+          const frag = document.createDocumentFragment();
+          words.forEach(word => {
+            const span = document.createElement('span');
+            span.style.opacity = '0';
+            span.textContent = word;
+            frag.appendChild(span);
+          });
+          node.parentNode.replaceChild(frag, node);
+        } else if (node.nodeType === Node.ELEMENT_NODE) {
+          Array.from(node.childNodes).forEach(wrapWords);
         }
-      })
-      .catch(error => {
-        console.error('Error:', error);
-        resultsElement.innerHTML = '<div class="result">Error loading results</div>';
-      })
-      .finally(() => {
-        loadingElement.style.display = 'none';
-      });
-  }
+      }
 
-  // Text animation functions
-  function wrapWords(node) {
-    if (node.nodeType === Node.TEXT_NODE) {
-      const words = node.textContent.split(/(\s+)/);
-      const frag = document.createDocumentFragment();
-      words.forEach(word => {
-        const span = document.createElement('span');
-        span.style.opacity = '0';
-        span.textContent = word;
-        frag.appendChild(span);
-      });
-      node.parentNode.replaceChild(frag, node);
-    } else if (node.nodeType === Node.ELEMENT_NODE) {
-      Array.from(node.childNodes).forEach(wrapWords);
-    }
-  }
+      function fadeInWords(element) {
+        Array.from(element.childNodes).forEach(wrapWords);
+        const spans = element.querySelectorAll('span');
+        spans.forEach((span, index) => {
+          span.style.transition = `opacity 0.2s ease ${index * 0.05}s`;
+          span.style.opacity = '1';
+        });
+      }
 
-  function fadeInWords(element) {
-    Array.from(element.childNodes).forEach(wrapWords);
-    const spans = element.querySelectorAll('span');
-    spans.forEach((span, index) => {
-      span.style.transition = `opacity 0.2s ease ${index * 0.05}s`;
-      span.style.opacity = '1';
+      function highlightText(text) {
+        return text.replace(/__(.*?)__/g, '<span class="highlight">$1</span>');
+      }
     });
-  }
-
-  function highlightText(text) {
-    return text.replace(/__(.*?)__/g, '<span class="highlight">$1</span>');
-  }
-});
   </script>
   <script src="/script.js"></script>
 </body>
