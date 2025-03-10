@@ -281,123 +281,124 @@
   </div>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      const urlParams = new URLSearchParams(window.location.search);
-      const query = urlParams.get('f');
-      const aiMode = urlParams.get('ai') === 'true';
+  const urlParams = new URLSearchParams(window.location.search);
+  const query = urlParams.get('f');
+  const aiMode = urlParams.get('ai') === 'true';
 
-      // Initialize search bar
-      const searchBar = document.getElementById('search-bar');
-      const searchIcon = document.getElementById('search-icon');
-      const aiIcon = document.getElementById('ai-icon');
-      const loadingElement = document.getElementById('loading');
-      const aiSummaryContent = document.getElementById('ai-summary-content');
-      
-      if (searchBar && query) {
-        searchBar.value = decodeURIComponent(query);
-      }
+  // Initialize search bar
+  const searchBar = document.getElementById('search-bar');
+  const searchIcon = document.getElementById('search-icon');
+  const aiIcon = document.getElementById('ai-icon');
+  const loadingElement = document.getElementById('loading');
+  const aiSummaryContent = document.getElementById('ai-summary-content');
+  
+  if (searchBar && query) {
+    searchBar.value = decodeURIComponent(query);
+  }
 
-      // Search execution logic
-      const performSearch = (useAI = false) => {
-        const query = searchBar.value.trim();
-        if (!query) return;
-        
-        if (useAI) {
-          window.location.href = `/results?f=${encodeURIComponent(query)}&ai=true`;
+  // Search execution logic
+  const performSearch = (useAI = false) => {
+    const query = searchBar.value.trim();
+    console.log("Performing search with query:", query); // Add this line
+    if (!query) return;
+    
+    if (useAI) {
+      window.location.href = `/results?f=${encodeURIComponent(query)}&ai=true`;
+    } else {
+      window.location.href = `/results?f=${encodeURIComponent(query)}`;
+    }
+  };
+
+  // Event listeners
+  searchBar?.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') performSearch();
+  });
+
+  searchIcon?.addEventListener('click', () => performSearch());
+  aiIcon?.addEventListener('click', () => performSearch(true));
+
+  // Load results
+  if (query) {
+    loadingElement.style.display = 'flex';
+    
+    const apiUrl = aiMode 
+      ? `https://api.coopr.tech:8148/flashtag-ai/query?f=${encodeURIComponent(query)}`
+      : `https://api.coopr.tech:8148/search?q=${encodeURIComponent(query)}`;
+
+    fetch(apiUrl)
+      .then(response => response.json())
+      .then(data => {
+        loadingElement.style.display = 'none';
+        const aiSummaryElement = document.getElementById('ai-summary');
+        const resultsElement = document.getElementById('results');
+
+        // Handle AI summary
+        if (data.ai_summary_answer) {
+          aiSummaryContent.innerHTML = highlightText(data.ai_summary_answer);
+          fadeInWords(aiSummaryContent);
         } else {
-          window.location.href = `/results?f=${encodeURIComponent(query)}`;
+          aiSummaryElement.style.display = 'none';
         }
-      };
 
-      // Event listeners
-      searchBar?.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') performSearch();
+        // Handle regular results
+        resultsElement.innerHTML = '';
+        if (data.results?.length > 0) {
+          data.results.forEach((result, index) => {
+            const resultElement = document.createElement('div');
+            resultElement.className = 'result';
+            resultElement.style.animationDelay = `${index * 0.1}s`;
+            
+            resultElement.innerHTML = `
+              <a href="${result.result_url}" class="result-title">${result.result_title}</a>
+              <div class="result-url">${new URL(result.result_url).hostname}</div>
+              <div class="result-description">${result.result_og_description || ''}</div>
+            `;
+            
+            resultsElement.appendChild(resultElement);
+          });
+        } else {
+          resultsElement.innerHTML = '<div class="result">No results found</div>';
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        resultsElement.innerHTML = '<div class="result">Error loading results</div>';
+      })
+      .finally(() => {
+        loadingElement.style.display = 'none';
       });
+  }
 
-      searchIcon?.addEventListener('click', () => performSearch());
-      aiIcon?.addEventListener('click', () => performSearch(true));
+  // Text animation functions
+  function wrapWords(node) {
+    if (node.nodeType === Node.TEXT_NODE) {
+      const words = node.textContent.split(/(\s+)/);
+      const frag = document.createDocumentFragment();
+      words.forEach(word => {
+        const span = document.createElement('span');
+        span.style.opacity = '0';
+        span.textContent = word;
+        frag.appendChild(span);
+      });
+      node.parentNode.replaceChild(frag, node);
+    } else if (node.nodeType === Node.ELEMENT_NODE) {
+      Array.from(node.childNodes).forEach(wrapWords);
+    }
+  }
 
-      // Load results
-      if (query) {
-        loadingElement.style.display = 'flex';
-        
-        const apiUrl = aiMode 
-          ? `https://api.coopr.tech:8148/flashtag-ai/query?f=${encodeURIComponent(query)}`
-          : `https://api.coopr.tech:8148/search?q=${encodeURIComponent(query)}`;
-
-        fetch(apiUrl)
-          .then(response => response.json())
-          .then(data => {
-            loadingElement.style.display = 'none';
-            const aiSummaryElement = document.getElementById('ai-summary');
-            const resultsElement = document.getElementById('results');
-
-            // Handle AI summary
-            if (data.ai_summary_answer) {
-              aiSummaryContent.innerHTML = highlightText(data.ai_summary_answer);
-              fadeInWords(aiSummaryContent);
-            } else {
-              aiSummaryElement.style.display = 'none';
-            }
-
-            // Handle regular results
-            resultsElement.innerHTML = '';
-            if (data.results?.length > 0) {
-              data.results.forEach((result, index) => {
-                const resultElement = document.createElement('div');
-                resultElement.className = 'result';
-                resultElement.style.animationDelay = `${index * 0.1}s`;
-                
-                resultElement.innerHTML = `
-                  <a href="${result.result_url}" class="result-title">${result.result_title}</a>
-                  <div class="result-url">${new URL(result.result_url).hostname}</div>
-                  <div class="result-description">${result.result_og_description || ''}</div>
-                `;
-                
-                resultsElement.appendChild(resultElement);
-              });
-            } else {
-              resultsElement.innerHTML = '<div class="result">No results found</div>';
-            }
-          })
-          .catch(error => {
-            console.error('Error:', error);
-            resultsElement.innerHTML = '<div class="result">Error loading results</div>';
-          })
-          .finally(() => {
-            loadingElement.style.display = 'none';
-          });
-      }
-
-      // Text animation functions
-      function wrapWords(node) {
-        if (node.nodeType === Node.TEXT_NODE) {
-          const words = node.textContent.split(/(\s+)/);
-          const frag = document.createDocumentFragment();
-          words.forEach(word => {
-            const span = document.createElement('span');
-            span.style.opacity = '0';
-            span.textContent = word;
-            frag.appendChild(span);
-          });
-          node.parentNode.replaceChild(frag, node);
-        } else if (node.nodeType === Node.ELEMENT_NODE) {
-          Array.from(node.childNodes).forEach(wrapWords);
-        }
-      }
-
-      function fadeInWords(element) {
-        Array.from(element.childNodes).forEach(wrapWords);
-        const spans = element.querySelectorAll('span');
-        spans.forEach((span, index) => {
-          span.style.transition = `opacity 0.2s ease ${index * 0.05}s`;
-          span.style.opacity = '1';
-        });
-      }
-
-      function highlightText(text) {
-        return text.replace(/__(.*?)__/g, '<span class="highlight">$1</span>');
-      }
+  function fadeInWords(element) {
+    Array.from(element.childNodes).forEach(wrapWords);
+    const spans = element.querySelectorAll('span');
+    spans.forEach((span, index) => {
+      span.style.transition = `opacity 0.2s ease ${index * 0.05}s`;
+      span.style.opacity = '1';
     });
+  }
+
+  function highlightText(text) {
+    return text.replace(/__(.*?)__/g, '<span class="highlight">$1</span>');
+  }
+});
   </script>
   <script src="/script.js"></script>
 </body>
