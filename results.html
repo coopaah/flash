@@ -268,6 +268,34 @@
         stroke-dashoffset: 0;
       }
     }
+
+    .swirly-animation {
+  width: 32px;
+  height: 32px;
+  margin-left: 12px;
+  cursor: pointer;
+}
+
+.deep-searching {
+  margin-left: 15px;
+  font-weight: 500;
+  color: var(--primary-color);
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px;
+}
   </style>
 </head>
 <body>
@@ -295,10 +323,52 @@
       <div class="ai-footer">AI-generated, for reference only.</div>
     </div>
     <div id="results"></div>
-    <div class="loading" id="loading">
-      <div class="spinner"></div>
-      <div class="deep-searching">Deep Searching...</div>
-    </div>
+   <!-- Replace the existing loading div with this -->
+<div class="loading" id="loading">
+    <svg class="swirly-animation" width="50" height="50" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="loading-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#6366f1" />
+          <stop offset="100%" stop-color="#059669" />
+        </linearGradient>
+      </defs>
+      <path d="M50,10 C70,10 85,25 85,45 C85,65 70,80 50,80 C30,80 15,65 15,45 C15,25 30,10 50,10 Z" 
+            fill="none" 
+            stroke="url(#loading-gradient)" 
+            stroke-width="3" 
+            stroke-dasharray="251" 
+            stroke-dashoffset="0">
+        <animate attributeName="stroke-dashoffset" 
+                 values="251;0;251" 
+                 dur="3s" 
+                 repeatCount="indefinite" />
+        <animateTransform attributeName="transform" 
+                          type="rotate" 
+                          from="0 50 50" 
+                          to="360 50 50" 
+                          dur="8s" 
+                          repeatCount="indefinite" />
+      </path>
+      <path d="M50,20 C65,20 75,30 75,45 C75,60 65,70 50,70 C35,70 25,60 25,45 C25,30 35,20 50,20 Z" 
+            fill="none" 
+            stroke="url(#loading-gradient)" 
+            stroke-width="2" 
+            stroke-dasharray="157" 
+            stroke-dashoffset="0">
+        <animate attributeName="stroke-dashoffset" 
+                 values="0;157;0" 
+                 dur="4s" 
+                 repeatCount="indefinite" />
+        <animateTransform attributeName="transform" 
+                          type="rotate" 
+                          from="360 50 50" 
+                          to="0 50 50" 
+                          dur="6s" 
+                          repeatCount="indefinite" />
+      </path>
+    </svg>
+    <div class="deep-searching">Deep Searching...</div>
+  </div>
   </div>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
