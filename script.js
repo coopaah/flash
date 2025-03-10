@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const siteInfo = document.getElementById('site-info');
   const header = document.getElementById('header');
 
+  // Header behavior
   function moveHeaderUp() {
     if (header.classList.contains('centered')) {
       header.classList.remove('centered');
@@ -29,17 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 100);
   });
 
-  function showToast(message, type = 'success') {
-    const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    toast.textContent = message;
-    document.body.appendChild(toast);
-    
-    setTimeout(() => {
-      toast.remove();
-    }, 3000);
-  }
-
+  // Search functionality
   function debounce(func, timeout = 150) {
     let timer;
     return (...args) => {
@@ -50,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   fetch('/sites.json')
     .then(response => {
-      if (!response.ok) throw new Error('Network response was not ok');
+      if (!response.ok) throw new Error('Failed to load sites');
       return response.json();
     })
     .then(sites => {
@@ -59,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!query) return;
 
         const [searchTerm, alias] = query.split(/ !(.*)/).slice(0, 2);
-        
+
         if (alias) {
           const site = sites.find(s => s.alias.includes(alias));
           if (site) {
@@ -68,10 +59,14 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         }
 
-        window.location.href = `/results?f=${encodeURIComponent(query)}${useAI ? '&ai=true' : ''}`;
+        if (useAI) {
+          window.location.href = `/results?f=${encodeURIComponent(query)}&ai=true`;
+        } else {
+          window.location.href = `/results?f=${encodeURIComponent(query)}`;
+        }
       };
 
-      // Event handlers
+      // Event listeners
       const handleSearch = (useAI = false) => {
         performSearch(searchBar.value, useAI);
       };
@@ -123,3 +118,15 @@ document.addEventListener('DOMContentLoaded', () => {
       showToast('Failed to load search providers', 'error');
     });
 });
+
+// Toast notifications
+function showToast(message, type = 'success') {
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.textContent = message;
+  document.body.appendChild(toast);
+
+  setTimeout(() => {
+    toast.remove();
+  }, 3000);
+}
