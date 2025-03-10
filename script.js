@@ -17,22 +17,27 @@ document.addEventListener('DOMContentLoaded', () => {
     .then(response => response.json())
     .then(sites => {
       const performSearch = (query, useAI = false) => {
-        query = query.trim();
-        if (!query) return;
-
-        const [searchTerm, alias] = query.split(/ !(.*)/).slice(0, 2);
-        
-        if (alias) {
-          const site = sites.find(s => s.alias.includes(alias));
-          if (site) {
-            window.location.href = `${site.site}${encodeURIComponent(searchTerm)}`;
-            return;
+        if (useAI) {
+          window.location.href = `/results?f=${encodeURIComponent(query)}&ai=true`;
+        } else {
+          const [searchTerm, alias] = query.split(' !');
+          if (alias) {
+            const site = sites.find(s => s.alias.includes(alias));
+            if (site) {
+              window.location.href = site.site + encodeURIComponent(searchTerm);
+            } else {
+              window.location.href = `/results?f=${encodeURIComponent(query)}&ai=true`;
+            }
+          } else {
+            window.location.href = `/results?f=${encodeURIComponent(query)}&ai=true`;
           }
         }
-
-        window.location.href = `/results?f=${encodeURIComponent(query)}${useAI ? '&ai=true' : ''}`;
       };
-
+      const urlParams = new URLSearchParams(window.location.search);
+      const queryParam = urlParams.get('f');
+      if (queryParam) {
+        performSearch(queryParam);
+      }
       // Event handlers
       const handleSearch = (useAI = false) => {
         performSearch(searchBar.value, useAI);
