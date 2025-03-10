@@ -6,6 +6,18 @@ document.addEventListener('DOMContentLoaded', () => {
   const siteInfo = document.getElementById('site-info');
   const header = document.getElementById('header');
 
+  // Toast notifications
+  function showToast(message, type = 'success') {
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+      toast.remove();
+    }, 3000);
+  }
+
   // Header behavior
   function moveHeaderUp() {
     if (header.classList.contains('centered')) {
@@ -45,9 +57,13 @@ document.addEventListener('DOMContentLoaded', () => {
       return response.json();
     })
     .then(sites => {
+      // Perform search
       const performSearch = (query, useAI = false) => {
         query = query.trim();
-        if (!query) return;
+        if (!query) {
+          showToast('Please enter a search term', 'error');
+          return;
+        }
 
         const [searchTerm, alias] = query.split(/ !(.*)/).slice(0, 2);
 
@@ -55,6 +71,9 @@ document.addEventListener('DOMContentLoaded', () => {
           const site = sites.find(s => s.alias.includes(alias));
           if (site) {
             window.location.href = `${site.site}${encodeURIComponent(searchTerm)}`;
+            return;
+          } else {
+            showToast(`Flashtag "${alias}" not found`, 'error');
             return;
           }
         }
@@ -93,7 +112,9 @@ document.addEventListener('DOMContentLoaded', () => {
               .map(s => `<div class="suggestion">${s}</div>`)
               .join('');
           })
-          .catch(console.error);
+          .catch(error => {
+            console.error('Error fetching suggestions:', error);
+          });
       });
 
       searchBar?.addEventListener('input', updateSuggestions);
@@ -114,19 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
       searchBar?.addEventListener('input', checkFlashtag);
     })
     .catch(error => {
-      console.error('Error:', error);
+      console.error('Error loading sites:', error);
       showToast('Failed to load search providers', 'error');
     });
 });
-
-// Toast notifications
-function showToast(message, type = 'success') {
-  const toast = document.createElement('div');
-  toast.className = `toast ${type}`;
-  toast.textContent = message;
-  document.body.appendChild(toast);
-
-  setTimeout(() => {
-    toast.remove();
-  }, 3000);
-}
