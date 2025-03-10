@@ -132,6 +132,88 @@ body {
   text-align: center;
 }
 
+/* Homepage Specific Styles */
+body.homepage {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--bg-color);
+}
+
+.header.centered {
+  position: relative;
+  top: auto;
+  left: auto;
+  transform: none;
+  width: 100%;
+  max-width: 600px;
+  padding: 2rem;
+  background: transparent;
+  box-shadow: none;
+}
+
+.header.centered .search-container {
+  justify-content: center;
+}
+
+.header.centered .search-bar {
+  width: 300px;
+  padding: 0.75rem 1.25rem;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.header.centered .search-info {
+  opacity: 0;
+  margin-left: 0;
+}
+
+.header.top {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  padding: 1rem 2rem;
+  background: var(--card-bg);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.header.top .search-bar {
+  width: 600px;
+  padding: 0.75rem 1.5rem;
+}
+
+.header.top .search-info {
+  opacity: 1;
+  margin-left: 0.5rem;
+}
+
+/* Flashtag Guide Button */
+.flashtag-guide {
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.flashtag-guide button {
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 25px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.flashtag-guide button:hover {
+  background: var(--secondary-color);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
 .result {
   background: var(--card-bg);
   padding: 1rem;
