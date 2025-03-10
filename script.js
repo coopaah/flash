@@ -4,6 +4,30 @@ document.addEventListener('DOMContentLoaded', () => {
   const searchIcon = document.getElementById('search-icon');
   const aiIcon = document.getElementById('ai-icon');
   const siteInfo = document.getElementById('site-info');
+  const header = document.getElementById('header');
+
+  function moveHeaderUp() {
+    if (header.classList.contains('centered')) {
+      header.classList.remove('centered');
+      header.classList.add('top');
+    }
+  }
+
+  function revertHeader() {
+    if (header.classList.contains('top') && !searchBar.value.trim()) {
+      header.classList.remove('top');
+      header.classList.add('centered');
+    }
+  }
+
+  searchBar.addEventListener('focus', moveHeaderUp);
+  searchBar.addEventListener('input', moveHeaderUp);
+
+  searchBar.addEventListener('blur', () => {
+    setTimeout(() => {
+      revertHeader();
+    }, 100);
+  });
 
   function showToast(message, type = 'success') {
     const toast = document.createElement('div');
