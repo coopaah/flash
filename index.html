@@ -166,6 +166,34 @@
         background: var(--bg-color);
         transform: translateX(8px);
       }
+
+      .footer {
+        position: absolute;
+        bottom: 20px;
+        width: 100%;
+        text-align: center;
+      }
+
+      .footer a {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-size: 14px;
+      }
+
+      .account-settings {
+        position: absolute;
+        top: 20px;
+        right: 40px;
+        display: flex;
+        align-items: center;
+      }
+
+      .account-settings a {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-size: 14px;
+        margin-left: 20px;
+      }
     </style>
   </head>
   <body>
@@ -178,10 +206,19 @@
         <svg id="search-icon" class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
           <path d="M10 2a8 8 0 105.293 14.707l5 5a1 1 0 001.414-1.414l-5-5A8 8 0 0010 2zm0 2a6 6 0 110 12 6 6 0 010-12z" />
         </svg>
-        <svg id="ai-icon" class="ai-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-          <path d="M12 2c-.55 0-1 .45-1 1v3.59l-2.29-2.3c-.39-.39-1.02-.39-1.41 0-.39.39-.39 1.02 0 1.41L9.59 8H6c-.55 0-1 .45-1 1s.45 1 1 1h3.59l-2.29 2.29c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0L11 10.41V14c0 .55.45 1 1 1s1-.45 1-1v-3.59l2.29 2.29c.39.39 1.02.39 1.41 0 .39-.39.39-1.02 0-1.41L14.41 10H18c.55 0 1-.45 1-1s-.45-1-1-1h-3.59l2.29-2.29c.39-.39.39-1.02 0-1.41-.39-.39-1.02-.39-1.41 0L13 6.59V3c0-.55-.45-1-1-1z"/>
+        <svg id="ai-icon" class="ai-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50">
+          <path d="M25 5a20 20 0 1 1-20 20A20 20 0 0 1 25 5"/>
         </svg>
       </div>
+    </div>
+
+    <div class="account-settings">
+      <a href="/account">Account</a>
+      <a href="/settings">Settings</a>
+    </div>
+
+    <div class="footer">
+      <a href="/guide">How to use Flashtags</a>
     </div>
 
     <script src="script.js"></script>
