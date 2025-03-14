@@ -225,10 +225,10 @@
     </style>
   </head>
   <body>
-    <div id="installing-notification" style="display:none; position: fixed; bottom: 20px; right: 20px; width: 300px; background-color: #6366f1; color: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); z-index: 9999;">
-      <div>Installing the service worker...</div>
-      <div id="installing-progress" style="height: 8px; background-color: #059669; border-radius: 4px; margin-top: 10px; width: 0%; transition: width 1s;"></div>
-    </div>
+<div id="installing-notification" style="display: none; position: fixed; bottom: 20px; right: 20px; width: 300px; background-color: var(--primary-color); color: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); z-index: 9999;">
+  <div>Installing updates...</div>
+  <div id="installing-progress" style="height: 8px; background-color: var(--secondary-color); border-radius: 4px; margin-top: 10px; width: 0%; transition: width 1s;"></div>
+</div>
     <div class="header centered" id="header">
       <img src="logo.png" alt="Logo" class="logo" onclick="window.location.href='/'" />
       <div class="search-container">
