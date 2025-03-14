@@ -8,7 +8,9 @@ const urlsToCache = [
   '/script.js',
   '/sites.json',
   '/logo.png',
-  '/js-fk.ts'
+  '/js-fk.ts',
+  '/guide',
+  '/style.css'
 ];
 
 self.addEventListener('install', event => {
