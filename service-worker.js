@@ -2,6 +2,8 @@ const CACHE_NAME = 'flash-cache-v1';
 const urlsToCache = [
   '/',
   '/index.html',
+  '/results.html',
+  '/results',
   '/offline.html',
   '/script.js',
   '/sites.json',
