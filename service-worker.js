@@ -12,10 +12,16 @@ const urlsToCache = [
 ];
 
 self.addEventListener('install', event => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
         return cache.addAll(urlsToCache);
+      })
+      .then(() => {
+        self.clients.matchAll().then(clients => {
+          clients.forEach(client => client.postMessage({ type: 'INSTALL_COMPLETE' }));
+        });
       })
   );
 });
