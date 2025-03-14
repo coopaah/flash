@@ -22,6 +22,12 @@ if ('serviceWorker' in navigator) {
     });
   }
 
+  navigator.serviceWorker.addEventListener('message', event => {
+  if (event.data.type === 'INSTALL_COMPLETE') {
+    overlay.style.display = 'none';
+  }
+});
+
 
   
   function debounce(func, timeout = 150) {
