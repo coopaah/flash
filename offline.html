@@ -3,42 +3,72 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Flash - Offline</title>
+  <title>Offline - Flash</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --primary-color: #6366f1;
+      --secondary-color: #059669;
+      --bg-color: #ffffff;
+      --card-bg: #f8fafc;
+      --text-color: #1e293b;
+      --muted-text: #64748b;
+      --input-bg: #ffffff;
+      --transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+    
     body {
+      font-family: 'Roboto', sans-serif;
+      background-color: var(--bg-color);
+      margin: 0;
+      padding: 0;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       height: 100vh;
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background-color: #ffffff;
       text-align: center;
     }
-    .logo {
+
+    .offline-container {
+      background: var(--card-bg);
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+    }
+    
+    .offline-title {
+      font-size: 24px;
+      color: var(--primary-color);
       margin-bottom: 20px;
-      animation: fadeIn 1s ease-in-out;
     }
-    .message {
-      font-size: 18px;
-      color: #333;
+
+    .offline-message {
+      font-size: 16px;
+      color: var(--text-color);
+      margin-bottom: 20px;
     }
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-      }
-      to {
-        opacity: 1;
-      }
+
+    .offline-icon {
+      font-size: 48px;
+      color: var(--secondary-color);
+      margin-bottom: 20px;
     }
   </style>
 </head>
 <body>
-  <img src="logo.png" alt="Logo" class="logo">
-  <div class="message">
-    <p>It looks like you're offline.</p>
-    <p>Please check your internet connection and try again.</p>
+  <div class="offline-container">
+    <div class="offline-icon">📶</div>
+    <div class="offline-title">You are offline</div>
+    <div class="offline-message">It seems you have lost your internet connection. Please check your connection and try again.</div>
   </div>
 </body>
 </html>
