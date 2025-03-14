@@ -7,8 +7,7 @@ const urlsToCache = [
   '/offline.html',
   '/script.js',
   '/sites.json',
-  '/logo.png',
-  'https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap'
+  '/logo.png'
 ];
 
 self.addEventListener('install', event => {
