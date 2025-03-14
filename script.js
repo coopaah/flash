@@ -5,31 +5,40 @@ document.addEventListener('DOMContentLoaded', () => {
   const aiIcon = document.getElementById('ai-icon');
   const siteInfo = document.getElementById('site-info');
 
-
-if ('serviceWorker' in navigator) {
-    const overlay = document.getElementById('installing-overlay');
+  if ('serviceWorker' in navigator) {
+    const notification = document.getElementById('installing-notification');
+    const progressBar = document.getElementById('installing-progress');
     window.addEventListener('load', () => {
-      overlay.style.display = 'flex';
+      notification.style.display = 'block';
+      let progress = 0;
+      const interval = setInterval(() => {
+        progress = Math.min(progress + 10, 100);
+        progressBar.style.width = `${progress}%`;
+      }, 100);
+
       navigator.serviceWorker.register('/service-worker.js')
         .then(registration => {
           console.log('ServiceWorker registration successful with scope: ', registration.scope);
-          overlay.style.display = 'none';
+          clearInterval(interval);
+          progressBar.style.width = '100%';
+          setTimeout(() => {
+            notification.style.display = 'none';
+          }, 1000); // Show for an extra second
         })
         .catch(error => {
           console.log('ServiceWorker registration failed: ', error);
-          overlay.style.display = 'none';
+          clearInterval(interval);
+          notification.style.display = 'none';
         });
     });
   }
 
   navigator.serviceWorker.addEventListener('message', event => {
-  if (event.data.type === 'INSTALL_COMPLETE') {
-    overlay.style.display = 'none';
-  }
-});
+    if (event.data.type === 'INSTALL_COMPLETE') {
+      notification.style.display = 'none';
+    }
+  });
 
-
-  
   function debounce(func, timeout = 150) {
     let timer;
     return (...args) => {
