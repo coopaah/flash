@@ -37,6 +37,37 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       }
     });
+
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      window.location.reload();
+    });
+
+    navigator.serviceWorker.getRegistration().then(registration => {
+      registration.onupdatefound = () => {
+        const installingWorker = registration.installing;
+        installingWorker.onstatechange = () => {
+          if (installingWorker.state === 'installed') {
+            if (navigator.serviceWorker.controller) {
+              showUpdateNotification();
+            }
+          }
+        };
+      };
+    });
+
+    function showUpdateNotification() {
+      const updateNotification = document.getElementById('update-notification');
+      updateNotification.style.display = 'block';
+    }
+
+    document.getElementById('update-button').addEventListener('click', () => {
+      const updateNotification = document.getElementById('update-notification');
+      updateNotification.style.display = 'none';
+      if (navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage({ type: 'SKIP_WAITING' });
+        window.location.reload();
+      }
+    });
   }
 
   navigator.serviceWorker.addEventListener('message', event => {
@@ -131,4 +162,4 @@ document.addEventListener('DOMContentLoaded', () => {
       console.error('Error loading sites:', error);
       siteInfo.textContent = 'Error loading search providers';
     });
- ▋
+});
