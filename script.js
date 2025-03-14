@@ -5,6 +5,20 @@ document.addEventListener('DOMContentLoaded', () => {
   const aiIcon = document.getElementById('ai-icon');
   const siteInfo = document.getElementById('site-info');
 
+
+  if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js')
+      .then(registration => {
+        console.log('ServiceWorker registration successful with scope: ', registration.scope);
+      })
+      .catch(error => {
+        console.log('ServiceWorker registration failed: ', error);
+      });
+  });
+}
+
+  
   function debounce(func, timeout = 150) {
     let timer;
     return (...args) => {
