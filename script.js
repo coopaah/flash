@@ -39,11 +39,11 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-  navigator.serviceWorker.addEventListener('message', event => {
-    if (event.data.type === 'INSTALL_COMPLETE') {
-      notification.style.display = 'none';
-    }
-  });
+navigator.serviceWorker.addEventListener('message', event => {
+  if (event.data.type === 'INSTALL_COMPLETE') {
+    notification.style.display = 'none';
+  }
+});
 
   function debounce(func, timeout = 150) {
     let timer;
