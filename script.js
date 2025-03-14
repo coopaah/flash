@@ -6,17 +6,22 @@ document.addEventListener('DOMContentLoaded', () => {
   const siteInfo = document.getElementById('site-info');
 
 
-  if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/service-worker.js')
-      .then(registration => {
-        console.log('ServiceWorker registration successful with scope: ', registration.scope);
-      })
-      .catch(error => {
-        console.log('ServiceWorker registration failed: ', error);
-      });
-  });
-}
+if ('serviceWorker' in navigator) {
+    const overlay = document.getElementById('installing-overlay');
+    window.addEventListener('load', () => {
+      overlay.style.display = 'flex';
+      navigator.serviceWorker.register('/service-worker.js')
+        .then(registration => {
+          console.log('ServiceWorker registration successful with scope: ', registration.scope);
+          overlay.style.display = 'none';
+        })
+        .catch(error => {
+          console.log('ServiceWorker registration failed: ', error);
+          overlay.style.display = 'none';
+        });
+    });
+  }
+
 
   
   function debounce(func, timeout = 150) {
