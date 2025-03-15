@@ -233,13 +233,6 @@
       left: 0;
       background: rgba(255, 255, 255, 0.9);
     }
-
-        .location-text {
-      font-size: 18px;
-      color: var(--primary-color);
-      margin: 20px 0;
-      text-align: center;
-    }
     
     .spinner {
       width: 50px;
@@ -306,8 +299,6 @@
   </style>
 </head>
 <body>
-
-  <div id="user-location" class="location-text"></div>
   <div id="installing-notification" style="display: none; position: fixed; bottom: 20px; right: 20px; width: 300px; background-color: var(--primary-color); color: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); z-index: 9999;">
   <div>Installing updates...</div>
   <div id="installing-progress" style="height: 8px; background-color: var(--secondary-color); border-radius: 4px; margin-top: 10px; width: 0%; transition: width 1s;"></div>
@@ -342,6 +333,7 @@
       <div class="ai-footer">AI-generated, for reference only. - I'm still working on this feature, but check out the other results!</div>
     </div>
     <div id="results"></div>
+   <!-- Replace the existing loading div with this -->
 <div class="loading" id="loading">
     <svg class="swirly-animation" width="50" height="50" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
       <defs>
@@ -393,35 +385,32 @@
       const urlParams = new URLSearchParams(window.location.search);
       const query = urlParams.get('f');
       const aiMode = urlParams.get('ai') === 'true';
-      const userLocation = JSON.parse(decodeURIComponent(urlParams.get('user_location')));
 
+      // Initialize search bar
       const searchBar = document.getElementById('search-bar');
       const searchIcon = document.getElementById('search-icon');
       const aiIcon = document.getElementById('ai-icon');
       const loadingElement = document.getElementById('loading');
       const aiSummaryContent = document.getElementById('ai-summary-content');
       const resultsElement = document.getElementById('results');
-      const userLocationElement = document.getElementById('user-location');
-
-      userLocationElement.textContent = `Results for ${userLocation.city}, ${userLocation.region}`;
 
       if (searchBar && query) {
         searchBar.value = decodeURIComponent(query);
       }
 
+      // Search execution logic
       const performSearch = (useAI = false) => {
         const query = searchBar.value.trim();
         if (!query) return;
 
-        const userLocationParam = encodeURIComponent(JSON.stringify(userLocation));
-
         if (useAI) {
-          window.location.href = `/results?f=${encodeURIComponent(query)}&ai=true&user_location=${userLocationParam}`;
+          window.location.href = `/results?f=${encodeURIComponent(query)}&ai=true`;
         } else {
-          window.location.href = `/results?f=${encodeURIComponent(query)}&user_location=${userLocationParam}`;
+          window.location.href = `/results?f=${encodeURIComponent(query)}`;
         }
       };
 
+      // Event listeners
       searchBar?.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') performSearch();
       });
@@ -429,6 +418,7 @@
       searchIcon?.addEventListener('click', () => performSearch());
       aiIcon?.addEventListener('click', () => performSearch(true));
 
+      // Load results
       if (query) {
         const apiUrl = aiMode 
           ? `https://api.coopr.tech:8148/flashtag-ai/query?f=${encodeURIComponent(query)}`
@@ -439,6 +429,7 @@
           .then(data => {
             loadingElement.style.display = 'none';
 
+            // Handle AI summary
             if (data.ai_summary_answer) {
               aiSummaryContent.innerHTML = highlightText(data.ai_summary_answer);
               fadeInWords(aiSummaryContent);
@@ -446,19 +437,20 @@
               document.getElementById('ai-summary').style.display = 'none';
             }
 
+            // Handle regular results
             resultsElement.innerHTML = '';
             if (data.results?.length > 0) {
               data.results.forEach((result, index) => {
                 const resultElement = document.createElement('div');
                 resultElement.className = 'result';
                 resultElement.style.animationDelay = `${index * 0.1}s`;
-
+                
                 resultElement.innerHTML = `
                   <a href="${result.result_url}" class="result-title">${result.result_title}</a>
                   <div class="result-url">${new URL(result.result_url).hostname}</div>
                   <div class="result-description">${result.result_og_description || ''}</div>
                 `;
-
+                
                 resultsElement.appendChild(resultElement);
               });
             } else {
@@ -468,9 +460,13 @@
           .catch(error => {
             console.error('Error:', error);
             resultsElement.innerHTML = '<div class="result">Error loading results</div>';
+          })
+          .finally(() => {
+            loadingElement.style.display = 'none';
           });
       }
 
+      // Text animation functions
       function wrapWords(node) {
         if (node.nodeType === Node.TEXT_NODE) {
           const words = node.textContent.split(/(\s+)/);
