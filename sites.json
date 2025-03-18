@@ -32,7 +32,7 @@
     {
       "title": "Twitter",
       "site": "https://twitter.com/search?q=",
-      "alias": ["tw", "twitter"]
+      "alias": ["tw", "twitter", "x"]
     },
     {
       "title": "Bing",
