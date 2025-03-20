@@ -42,18 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
       window.location.reload();
     });
 
-    navigator.serviceWorker.getRegistration().then(registration => {
-      registration.onupdatefound = () => {
-        const installingWorker = registration.installing;
-        installingWorker.onstatechange = () => {
-          if (installingWorker.state === 'installed') {
-            if (navigator.serviceWorker.controller) {
-              showUpdateNotification();
-            }
-          }
-        };
-      };
-    });
+    
 
     function showUpdateNotification() {
       const updateNotification = document.getElementById('update-notification');
