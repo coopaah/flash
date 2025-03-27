@@ -299,16 +299,6 @@
   </style>
 </head>
 <body>
-  <div id="installing-notification" style="display: none; position: fixed; bottom: 20px; right: 20px; width: 300px; background-color: var(--primary-color); color: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); z-index: 9999;">
-  <div>Installing updates...</div>
-  <div id="installing-progress" style="height: 8px; background-color: var(--secondary-color); border-radius: 4px; margin-top: 10px; width: 0%; transition: width 1s;"></div>
-</div>
-    <div id="update-notification" style="display:none; position: fixed; bottom: 20px; right: 20px; width: 300px; background-color: var(--primary-color); color: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); z-index: 9999;">
-  <div>A new update is available.</div>
-  <button id="update-button" style="margin-top: 10px; padding: 10px; background-color: var(--secondary-color); color: white; border: none; border-radius: 4px; cursor: pointer;">
-    Update
-  </button>
-</div>
   <div class="header">
     <img src="logo.png" alt="Logo" class="logo" onclick="window.location.href='/'">
     <div class="search-container">
@@ -330,173 +320,97 @@
         <h3>FlashAI</h3>
       </div>
       <div id="ai-summary-content"></div>
-      <div class="ai-footer">AI-generated, for reference only. - I'm still working on this feature, but check out the other results!</div>
+      <div class="ai-footer">AI-generated, for reference only.</div>
     </div>
     <div id="results"></div>
-   <!-- Replace the existing loading div with this -->
-<div class="loading" id="loading">
-    <svg class="swirly-animation" width="50" height="50" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <linearGradient id="loading-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stop-color="#6366f1" />
-          <stop offset="100%" stop-color="#059669" />
-        </linearGradient>
-      </defs>
-      <path d="M50,10 C70,10 85,25 85,45 C85,65 70,80 50,80 C30,80 15,65 15,45 C15,25 30,10 50,10 Z" 
-            fill="none" 
-            stroke="url(#loading-gradient)" 
-            stroke-width="3" 
-            stroke-dasharray="251" 
-            stroke-dashoffset="0">
-        <animate attributeName="stroke-dashoffset" 
-                 values="251;0;251" 
-                 dur="3s" 
-                 repeatCount="indefinite" />
-        <animateTransform attributeName="transform" 
-                          type="rotate" 
-                          from="0 50 50" 
-                          to="360 50 50" 
-                          dur="8s" 
-                          repeatCount="indefinite" />
-      </path>
-      <path d="M50,20 C65,20 75,30 75,45 C75,60 65,70 50,70 C35,70 25,60 25,45 C25,30 35,20 50,20 Z" 
-            fill="none" 
-            stroke="url(#loading-gradient)" 
-            stroke-width="2" 
-            stroke-dasharray="157" 
-            stroke-dashoffset="0">
-        <animate attributeName="stroke-dashoffset" 
-                 values="0;157;0" 
-                 dur="4s" 
-                 repeatCount="indefinite" />
-        <animateTransform attributeName="transform" 
-                          type="rotate" 
-                          from="360 50 50" 
-                          to="0 50 50" 
-                          dur="6s" 
-                          repeatCount="indefinite" />
-      </path>
-    </svg>
-    <div class="deep-searching">Deep Searching...</div>
+    <div class="loading" id="loading">
+      <svg class="swirly-animation" width="50" height="50" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="loading-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#6366f1" />
+            <stop offset="100%" stop-color="#059669" />
+          </linearGradient>
+        </defs>
+        <path d="M50,10 C70,10 85,25 85,45 C85,65 70,80 50,80 C30,80 15,65 15,45 C15,25 30,10 50,10 Z" 
+              fill="none" 
+              stroke="url(#loading-gradient)" 
+              stroke-width="3" 
+              stroke-dasharray="251" 
+              stroke-dashoffset="0">
+          <animate attributeName="stroke-dashoffset" 
+                   values="251;0;251" 
+                   dur="3s" 
+                   repeatCount="indefinite" />
+          <animateTransform attributeName="transform" 
+                            type="rotate" 
+                            from="0 50 50" 
+                            to="360 50 50" 
+                            dur="8s" 
+                            repeatCount="indefinite" />
+        </path>
+        <path d="M50,20 C65,20 75,30 75,45 C75,60 65,70 50,70 C35,70 25,60 25,45 C25,30 35,20 50,20 Z" 
+              fill="none" 
+              stroke="url(#loading-gradient)" 
+              stroke-width="2" 
+              stroke-dasharray="157" 
+              stroke-dashoffset="0">
+          <animate attributeName="stroke-dashoffset" 
+                   values="0;157;0" 
+                   dur="4s" 
+                   repeatCount="indefinite" />
+          <animateTransform attributeName="transform" 
+                            type="rotate" 
+                            from="360 50 50" 
+                            to="0 50 50" 
+                            dur="6s" 
+                            repeatCount="indefinite" />
+        </path>
+      </svg>
+      <div class="deep-searching">Deep Searching...</div>
+    </div>
   </div>
-  </div>
+
+  <script src="/script.js"></script>
+  
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const urlParams = new URLSearchParams(window.location.search);
       const query = urlParams.get('f');
-      const aiMode = urlParams.get('ai') === 'true';
-
-      // Initialize search bar
+      
       const searchBar = document.getElementById('search-bar');
-      const searchIcon = document.getElementById('search-icon');
-      const aiIcon = document.getElementById('ai-icon');
-      const loadingElement = document.getElementById('loading');
-      const aiSummaryContent = document.getElementById('ai-summary-content');
-      const resultsElement = document.getElementById('results');
-
       if (searchBar && query) {
         searchBar.value = decodeURIComponent(query);
       }
-
-      // Search execution logic
-      const performSearch = (useAI = false) => {
-        const query = searchBar.value.trim();
-        if (!query) return;
-
-        if (useAI) {
-          window.location.href = `/results?f=${encodeURIComponent(query)}&ai=true`;
-        } else {
-          window.location.href = `/results?f=${encodeURIComponent(query)}`;
-        }
+      
+      window.highlightText = function(text) {
+        return text.replace(/__(.*?)__/g, '<span class="highlight">$1</span>');
       };
-
-      // Event listeners
-      searchBar?.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') performSearch();
-      });
-
-      searchIcon?.addEventListener('click', () => performSearch());
-      aiIcon?.addEventListener('click', () => performSearch(true));
-
-      // Load results
-      if (query) {
-        const apiUrl = aiMode 
-          ? `https://api.coopr.tech:8148/flashtag-ai/query?f=${encodeURIComponent(query)}`
-          : `https://api.coopr.tech:8148/search?q=${encodeURIComponent(query)}`;
-
-        fetch(apiUrl)
-          .then(response => response.json())
-          .then(data => {
-            loadingElement.style.display = 'none';
-
-            // Handle AI summary
-            if (data.ai_summary_answer) {
-              aiSummaryContent.innerHTML = highlightText(data.ai_summary_answer);
-              fadeInWords(aiSummaryContent);
-            } else {
-              document.getElementById('ai-summary').style.display = 'none';
-            }
-
-            // Handle regular results
-            resultsElement.innerHTML = '';
-            if (data.results?.length > 0) {
-              data.results.forEach((result, index) => {
-                const resultElement = document.createElement('div');
-                resultElement.className = 'result';
-                resultElement.style.animationDelay = `${index * 0.1}s`;
-                
-                resultElement.innerHTML = `
-                  <a href="${result.result_url}" class="result-title">${result.result_title}</a>
-                  <div class="result-url">${new URL(result.result_url).hostname}</div>
-                  <div class="result-description">${result.result_og_description || ''}</div>
-                `;
-                
-                resultsElement.appendChild(resultElement);
-              });
-            } else {
-              resultsElement.innerHTML = '<div class="result">No results found</div>';
-            }
-          })
-          .catch(error => {
-            console.error('Error:', error);
-            resultsElement.innerHTML = '<div class="result">Error loading results</div>';
-          })
-          .finally(() => {
-            loadingElement.style.display = 'none';
-          });
-      }
-
-      // Text animation functions
-      function wrapWords(node) {
-        if (node.nodeType === Node.TEXT_NODE) {
-          const words = node.textContent.split(/(\s+)/);
-          const frag = document.createDocumentFragment();
-          words.forEach(word => {
-            const span = document.createElement('span');
-            span.style.opacity = '0';
-            span.textContent = word;
-            frag.appendChild(span);
-          });
-          node.parentNode.replaceChild(frag, node);
-        } else if (node.nodeType === Node.ELEMENT_NODE) {
-          Array.from(node.childNodes).forEach(wrapWords);
-        }
-      }
-
-      function fadeInWords(element) {
+      
+      window.fadeInWords = function(element) {
+        const wrapWords = (node) => {
+          if (node.nodeType === Node.TEXT_NODE) {
+            const words = node.textContent.split(/(\s+)/);
+            const frag = document.createDocumentFragment();
+            words.forEach(word => {
+              const span = document.createElement('span');
+              span.style.opacity = '0';
+              span.textContent = word;
+              frag.appendChild(span);
+            });
+            node.parentNode.replaceChild(frag, node);
+          } else if (node.nodeType === Node.ELEMENT_NODE) {
+            Array.from(node.childNodes).forEach(wrapWords);
+          }
+        };
+        
         Array.from(element.childNodes).forEach(wrapWords);
         const spans = element.querySelectorAll('span');
         spans.forEach((span, index) => {
           span.style.transition = `opacity 0.2s ease ${index * 0.05}s`;
           span.style.opacity = '1';
         });
-      }
-
-      function highlightText(text) {
-        return text.replace(/__(.*?)__/g, '<span class="highlight">$1</span>');
-      }
+      };
     });
   </script>
-  <script src="/script.js"></script>
 </body>
 </html>
