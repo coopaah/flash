@@ -1,3 +1,4 @@
+public/_index.html
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -195,97 +196,54 @@
         margin-left: 20px;
       }
 
-      .swirly-animation {
-  width: 32px;
-  height: 32px;
-  margin-left: 12px;
-  cursor: pointer;
-}
-
-.deep-searching {
-  margin-left: 15px;
-  font-weight: 500;
-  color: var(--primary-color);
-  animation: pulse 1.5s infinite;
-}
-
-@keyframes pulse {
-  0% { opacity: 0.6; }
-  50% { opacity: 1; }
-  100% { opacity: 0.6; }
-}
-
-.loading {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 30px;
-}
+      .site-info-tooltip {
+        display: inline-flex;
+        align-items: center;
+        background-color: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 6px 10px;
+        font-size: 14px;
+        position: absolute;
+        top: 100%;
+        left: 24px;
+        margin-top: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        z-index: 100;
+        opacity: 0;
+        transform: translateY(-5px);
+        pointer-events: none;
+        transition: opacity 0.3s ease, transform 0.3s ease;
+      }
+      
+      .site-info-tooltip.visible {
+        opacity: 1;
+        transform: translateY(0);
+        pointer-events: auto;
+      }
+      
+      .favicon-img {
+        width: 16px;
+        height: 16px;
+        margin-right: 8px;
+        vertical-align: middle;
+      }
     </style>
   </head>
   <body>
-<div id="installing-notification" style="display: none; position: fixed; bottom: 20px; right: 20px; width: 300px; background-color: var(--primary-color); color: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); z-index: 9999;">
-  <div>Installing updates...</div>
-  <div id="installing-progress" style="height: 8px; background-color: var(--secondary-color); border-radius: 4px; margin-top: 10px; width: 0%; transition: width 1s;"></div>
-</div>
-    <div id="update-notification" style="display:none; position: fixed; bottom: 20px; right: 20px; width: 300px; background-color: var(--primary-color); color: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); z-index: 9999;">
-  <div>A new update is available.</div>
-  <button id="update-button" style="margin-top: 10px; padding: 10px; background-color: var(--secondary-color); color: white; border: none; border-radius: 4px; cursor: pointer;">
-    Update
-  </button>
-</div>
     <div class="header centered" id="header">
       <img src="logo.png" alt="Logo" class="logo" onclick="window.location.href='/'" />
       <div class="search-container">
         <input type="text" id="search-bar" class="search-bar" placeholder="Search..." />
-        <span id="site-info" class="search-info"></span>
+        <div id="site-info-tooltip" class="site-info-tooltip"></div>
         <div id="suggestions" class="suggestions"></div>
         <svg id="search-icon" class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
           <path d="M10 2a8 8 0 105.293 14.707l5 5a1 1 0 001.414-1.414l-5-5A8 8 0 0010 2zm0 2a6 6 0 110 12 6 6 0 010-12z" />
         </svg>
-        <svg id="ai-icon" class="swirly-animation" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stop-color="#6366f1" />
-                <stop offset="100%" stop-color="#059669" />
-              </linearGradient>
-            </defs>
-            <path d="M50,10 C70,10 85,25 85,45 C85,65 70,80 50,80 C30,80 15,65 15,45 C15,25 30,10 50,10 Z" 
-                  fill="none" 
-                  stroke="url(#gradient)" 
-                  stroke-width="3" 
-                  stroke-dasharray="251" 
-                  stroke-dashoffset="0">
-              <animate attributeName="stroke-dashoffset" 
-                       values="251;0;251" 
-                       dur="3s" 
-                       repeatCount="indefinite" />
-              <animateTransform attributeName="transform" 
-                                type="rotate" 
-                                from="0 50 50" 
-                                to="360 50 50" 
-                                dur="8s" 
-                                repeatCount="indefinite" />
-            </path>
-            <path d="M50,20 C65,20 75,30 75,45 C75,60 65,70 50,70 C35,70 25,60 25,45 C25,30 35,20 50,20 Z" 
-                  fill="none" 
-                  stroke="url(#gradient)" 
-                  stroke-width="2" 
-                  stroke-dasharray="157" 
-                  stroke-dashoffset="0">
-              <animate attributeName="stroke-dashoffset" 
-                       values="0;157;0" 
-                       dur="4s" 
-                       repeatCount="indefinite" />
-              <animateTransform attributeName="transform" 
-                                type="rotate" 
-                                from="360 50 50" 
-                                to="0 50 50" 
-                                dur="6s" 
-                                repeatCount="indefinite" />
-            </path>
-          </svg>
+        <!-- New AI Icon SVG -->
+        <svg id="ai-icon" class="ai-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+        </svg>
       </div>
     </div>
 
