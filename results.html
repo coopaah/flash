@@ -92,7 +92,8 @@
       margin-left: 12px;
       cursor: pointer;
       fill: var(--primary-color);
-      transition: transform 0.2s var(--transition-timing);
+      transition: transform 0.2s var(--transition-timing),
+                  opacity 0.2s ease;
     }
     
     .search-icon:hover,
@@ -204,27 +205,33 @@
       color: var(--primary-color);
       text-decoration: none;
       font-weight: 500;
+      transition: color 0.2s ease;
+    }
+    
+    .result-title:hover {
+      text-decoration: underline;
     }
     
     .result-url {
       font-size: 14px;
-      color: var(--muted-text);
-      margin: 8px 0;
+      color: var(--secondary-color);
+      margin-top: 6px;
       display: flex;
       align-items: center;
     }
     
     .result-description {
       font-size: 15px;
-      color: var(--text-color);
+      color: var(--muted-text);
+      margin-top: 10px;
       line-height: 1.5;
     }
     
     .highlight {
-      background-color: rgba(99, 102, 241, 0.1);
+      background: linear-gradient(120deg, #6366f166, #6366f100 80%);
       color: var(--primary-color);
-      font-weight: 500;
-      padding: 2px 0;
+      padding: 2px 6px;
+      border-radius: 6px;
     }
     
     .loading {
@@ -286,35 +293,28 @@
       100% { opacity: 0.6; }
     }
 
-    .loading {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 30px;
-    }
-    
     /* Thinking section styles */
     .thinking-toggle {
       display: flex;
       align-items: center;
       background: transparent;
       border: none;
-      color: var(--muted-text);
+      color: var(--primary-color);
       font-size: 14px;
       cursor: pointer;
-      padding: 0;
-      transition: color 0.2s ease;
+      padding: 6px 12px;
+      border-radius: 16px;
+      transition: background-color 0.2s ease;
     }
     
     .thinking-toggle:hover {
-      color: var(--primary-color);
+      background-color: rgba(99, 102, 241, 0.1);
     }
     
     .thinking-toggle svg {
       width: 16px;
       height: 16px;
-      margin-left: 4px;
+      margin-right: 6px;
       transition: transform 0.3s ease;
     }
     
@@ -326,48 +326,46 @@
       max-height: 0;
       overflow: hidden;
       transition: max-height 0.5s ease;
-      background-color: rgba(243, 244, 246, 0.5);
-      border-radius: 8px;
       margin-top: 0;
-      border: 1px solid transparent;
-      opacity: 0;
+      background: #f8fafc;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 14px;
+      line-height: 1.5;
+      color: #4b5563;
+      padding: 0 12px;
     }
     
     .thinking-container.visible {
-      max-height: 400px;
-      margin-top: 16px;
-      padding: 12px 16px;
-      border-color: #e5e7eb;
+      max-height: 300px;
+      margin-top: 12px;
+      margin-bottom: 16px;
       overflow-y: auto;
-      opacity: 1;
+      padding: 12px;
     }
     
     .thinking-item {
-      font-size: 14px;
-      color: var(--muted-text);
-      padding-bottom: 8px;
-      margin-bottom: 8px;
-      border-bottom: 1px solid rgba(0,0,0,0.05);
+      margin-bottom: 4px;
+      padding-left: 8px;
+      border-left: 2px solid #d1d5db;
     }
     
     .thinking-item:last-child {
-      border-bottom: none;
       margin-bottom: 0;
-      padding-bottom: 0;
     }
     
     /* Refined queries styles */
     .refined-queries {
       margin-top: 16px;
-      padding-top: 16px;
-      border-top: 1px solid rgba(0,0,0,0.1);
+      padding: 16px 0;
+      border-top: 1px dashed #e2e8f0;
     }
     
     .refined-queries h4 {
       margin: 0 0 12px 0;
-      font-size: 15px;
+      font-size: 16px;
       color: var(--muted-text);
-      font-weight: normal;
+      font-weight: 500;
     }
     
     .query-chips {
@@ -377,19 +375,20 @@
     }
     
     .query-chip {
-      background-color: #f3f4f6;
-      border: 1px solid #e5e7eb;
-      border-radius: 16px;
-      padding: 6px 12px;
+      padding: 8px 16px;
+      background-color: #f1f5f9;
+      border-radius: 50px;
       font-size: 14px;
       color: var(--text-color);
       cursor: pointer;
       transition: all 0.2s ease;
+      border: 1px solid #e2e8f0;
     }
     
     .query-chip:hover {
-      background-color: #e5e7eb;
+      background-color: #e2e8f0;
       transform: translateY(-2px);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     }
 
     /* Markdown support */
@@ -403,13 +402,6 @@
     
     .ai-summary-content del {
       text-decoration: line-through;
-    }
-    
-    .favicon-img {
-      width: 16px;
-      height: 16px;
-      margin-right: 8px;
-      vertical-align: middle;
     }
     
     /* Site info tooltip */
@@ -437,6 +429,13 @@
       opacity: 1;
       transform: translateY(0);
       pointer-events: auto;
+    }
+    
+    .favicon-img {
+      width: 16px;
+      height: 16px;
+      margin-right: 8px;
+      vertical-align: middle;
     }
     
     .suggestions {
@@ -477,8 +476,9 @@
       <svg id="search-icon" class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
         <path d="M10 2a8 8 0 105.293 14.707l5 5a1 1 0 001.414-1.414l-5-5A8 8 0 0010 2zm0 2a6 6 0 110 12 6 6 0 010-12z" />
       </svg>
+      <!-- New AI Icon SVG -->
       <svg id="ai-icon" class="ai-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-        <path d="M12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2zm0 2a8 8 0 100 16 8 8 0 000-16zm-4 7a1 1 0 011-1h6a1 1 0 110 2H9a1 1 0 01-1-1zm0 3a1 1 0 011-1h6a1 1 0 110 2H9a1 1 0 01-1-1z" />
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
       </svg>
     </div>
   </div>
@@ -489,23 +489,24 @@
           <svg class="sparkle-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
             <path d="M10 2L12 6L16 4L14 8L18 10L14 12L16 16L12 14L10 18L8 14L4 16L6 12L2 10L6 8L4 4L8 6L10 2Z" />
           </svg>
-          <h3>AI Summary</h3>
+          <h3>FlashAI</h3>
         </div>
         <button id="thinking-toggle" class="thinking-toggle">
-          Show thinking
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-            <path d="M7 10l5 5 5-5H7z" />
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
           </svg>
+          <span>Show thinking</span>
         </button>
       </div>
-      <div id="ai-summary-content" class="ai-summary-content"></div>
       <div id="thinking-container" class="thinking-container">
         <div id="thinking-content"></div>
       </div>
+      <div id="ai-summary-content" class="ai-summary-content"></div>
       <div id="refined-queries" class="refined-queries" style="display: none;">
-        <h4>Try a more specific search:</h4>
+        <h4>Try refining your search:</h4>
         <div id="query-chips" class="query-chips"></div>
       </div>
+      <div class="ai-footer">AI-generated, for reference only.</div>
     </div>
     <div id="results"></div>
     <div class="loading" id="loading">
@@ -551,10 +552,49 @@
                             repeatCount="indefinite" />
         </path>
       </svg>
-      <div class="deep-searching">Processing your request...</div>
+      <div class="deep-searching">Deep Searching...</div>
     </div>
   </div>
 
   <script src="/script.js"></script>
+  
+  <!-- Only add minimal initialization for legacy support -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Toggle thinking section
+      const thinkingToggle = document.getElementById('thinking-toggle');
+      const thinkingContainer = document.getElementById('thinking-container');
+      
+      if (thinkingToggle && thinkingContainer) {
+        thinkingToggle.addEventListener('click', () => {
+          thinkingContainer.classList.toggle('visible');
+          thinkingToggle.classList.toggle('open');
+          
+          // Update text content
+          const spanEl = thinkingToggle.querySelector('span');
+          if (spanEl) {
+            spanEl.textContent = thinkingContainer.classList.contains('visible') 
+              ? 'Hide thinking' 
+              : 'Show thinking';
+          }
+        });
+      }
+      
+      // Support for non-streaming version (legacy support)
+      const urlParams = new URLSearchParams(window.location.search);
+      const query = urlParams.get('f');
+      
+      // Set the search bar value
+      const searchBar = document.getElementById('search-bar');
+      if (searchBar && query) {
+        searchBar.value = decodeURIComponent(query);
+      }
+      
+      // Legacy highlighting function (used by older code path)
+      window.highlightText = function(text) {
+        return text.replace(/__(.*?)__/g, '<span class="highlight">$1</span>');
+      };
+    });
+  </script>
 </body>
 </html>
