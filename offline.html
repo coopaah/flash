@@ -4,71 +4,179 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Offline - Flash</title>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --primary-color: #6366f1;
-      --secondary-color: #059669;
-      --bg-color: #ffffff;
-      --card-bg: #f8fafc;
-      --text-color: #1e293b;
-      --muted-text: #64748b;
-      --input-bg: #ffffff;
-      --transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    
-    * {
-      box-sizing: border-box;
-    }
-
-    html {
-      scroll-behavior: smooth;
-    }
-    
     body {
-      font-family: 'Roboto', sans-serif;
-      background-color: var(--bg-color);
-      margin: 0;
-      padding: 0;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       height: 100vh;
+      margin: 0;
+      font-family: 'Roboto', sans-serif;
+      background-color: #f5f5f5;
       text-align: center;
+      padding: 20px;
     }
-
-    .offline-container {
-      background: var(--card-bg);
-      padding: 40px;
-      border-radius: 12px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+    .logo {
+      margin-bottom: 20px;
+      animation: fadeIn 1s ease-in-out;
+      max-width: 150px;
     }
-    
-    .offline-title {
-      font-size: 24px;
-      color: var(--primary-color);
+    .message {
+      font-size: 18px;
+      color: #333;
+      margin-bottom: 30px;
+    }
+    .flashtag-section {
+      background-color: white;
+      border-radius: 8px;
+      padding: 20px;
+      width: 100%;
+      max-width: 500px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .search-container {
+      display: flex;
       margin-bottom: 20px;
     }
-
-    .offline-message {
+    .search-bar {
+      flex-grow: 1;
+      padding: 12px 16px;
       font-size: 16px;
-      color: var(--text-color);
+      border: 1px solid #e2e8f0;
+      border-radius: 50px 0 0 50px;
+      outline: none;
+    }
+    .search-button {
+      background-color: #6366f1;
+      color: white;
+      border: none;
+      border-radius: 0 50px 50px 0;
+      padding: 0 20px;
+      cursor: pointer;
+    }
+    .flashtag-title {
+      font-size: 16px;
+      font-weight: 500;
+      margin-bottom: 10px;
+      color: #555;
+    }
+    .tags-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
       margin-bottom: 20px;
     }
-
-    .offline-icon {
-      font-size: 48px;
-      color: var(--secondary-color);
-      margin-bottom: 20px;
+    .tag {
+      background-color: #f0f0f0;
+      padding: 6px 12px;
+      border-radius: 50px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+    .tag:hover {
+      background-color: #e0e0e0;
+    }
+    .info {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 0;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
   </style>
 </head>
 <body>
-  <div class="offline-container">
-    <div class="offline-icon">📶</div>
-    <div class="offline-title">You are offline</div>
-    <div class="offline-message">It seems you have lost your internet connection. Please check your connection and try again.</div>
+  <img src="logo.png" alt="Flash Search Logo" class="logo">
+  <div class="message">
+    <p>You're currently offline</p>
+    <p>But you can still use Flashtags!</p>
   </div>
+  
+  <div class="flashtag-section">
+    <div class="search-container">
+      <input type="text" id="offlineSearchBar" class="search-bar" placeholder="Try a flashtag search...">
+      <button id="searchButton" class="search-button">Go</button>
+    </div>
+    
+    <div class="flashtag-title">Popular Flashtags:</div>
+    <div class="tags-container" id="popularTags">
+      <!-- Tags will be loaded from cached sites.json -->
+    </div>
+    
+    <p class="info">Type your search followed by a tag (e.g., "weather forecast !g" for Google)</p>
+  </div>
+
+  <script>
+    // Load flashtags from cache when offline
+    document.addEventListener('DOMContentLoaded', async () => {
+      const searchBar = document.getElementById('offlineSearchBar');
+      const searchButton = document.getElementById('searchButton');
+      const tagsContainer = document.getElementById('popularTags');
+      
+      try {
+        // Try to load sites.json from cache
+        const cache = await caches.open('flash-cache-v2');
+        const sitesResponse = await cache.match('/sites.json');
+        
+        if (sitesResponse) {
+          const sites = await sitesResponse.json();
+          
+          // Add most popular tags to the UI
+          const popularSites = ['Google', 'YouTube', 'Twitter', 'Reddit', 'GitHub', 'Wikipedia'];
+          
+          popularSites.forEach(siteName => {
+            const site = sites.find(s => s.title === siteName);
+            if (site && site.alias && site.alias.length > 0) {
+              const tag = document.createElement('div');
+              tag.className = 'tag';
+              tag.textContent = `!${site.alias[0]}`;
+              tag.addEventListener('click', () => {
+                const currentText = searchBar.value.trim();
+                const baseQuery = currentText.split(' !')[0].trim();
+                searchBar.value = baseQuery ? `${baseQuery} !${site.alias[0]}` : `search !${site.alias[0]}`;
+                searchBar.focus();
+              });
+              tagsContainer.appendChild(tag);
+            }
+          });
+          
+          // Setup search functionality
+          const handleSearch = () => {
+            const query = searchBar.value.trim();
+            if (!query) return;
+            
+            const [searchTerm, tag] = query.split(' !');
+            
+            if (tag) {
+              const site = sites.find(s => s.alias.includes(tag));
+              if (site) {
+                // Redirect to the site with the search term
+                window.location.href = site.site + encodeURIComponent(searchTerm);
+                return;
+              }
+            }
+            
+            // If no valid flashtag, store the query for when we're back online
+            localStorage.setItem('pendingSearch', query);
+            alert('This search will run when you are back online.');
+          };
+          
+          searchButton.addEventListener('click', handleSearch);
+          searchBar.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleSearch();
+          });
+        } else {
+          tagsContainer.innerHTML = '<p>No cached sites available</p>';
+        }
+      } catch (error) {
+        console.error('Error loading cached sites:', error);
+        tagsContainer.innerHTML = '<p>Could not load tags</p>';
+      }
+    });
+  </script>
 </body>
 </html>
