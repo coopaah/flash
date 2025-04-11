@@ -19,11 +19,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const aiSummaryContent = document.getElementById('ai-summary-content');
     const loadingElement = document.getElementById('loading');
     const aiSummaryElement = document.getElementById('ai-summary');
+    const thinkingContent = document.getElementById('thinking-content');
+    const refinedQueries = document.getElementById('refined-queries');
+    const queryChips = document.getElementById('query-chips');
     
     if (!resultsElement || !aiSummaryContent) return;
     
     // Clear existing content
     aiSummaryContent.innerHTML = '';
+    if (thinkingContent) thinkingContent.innerHTML = '';
+    if (queryChips) queryChips.innerHTML = '';
+    if (refinedQueries) refinedQueries.style.display = 'none';
     
     // Show loading state
     if (loadingElement) loadingElement.style.display = 'flex';
@@ -35,13 +41,58 @@ document.addEventListener('DOMContentLoaded', () => {
       // Stream processing state
       let summaryText = '';
       let hasResults = false;
-      let lastProcessedLength = 0;
-      let wordBuffer = [];
+      let newWords = [];
+      let animationQueue = [];
+      let isProcessing = false;
+      let allThoughts = [];
+      
+      // Function to process animation queue
+      const processAnimationQueue = () => {
+        if (isProcessing || animationQueue.length === 0) return;
+        
+        isProcessing = true;
+        const nextChunk = animationQueue.shift();
+        
+        // Process highlights using __ markers for the entire text
+        const processedText = highlightText(summaryText);
+        
+        // Update the content
+        aiSummaryContent.innerHTML = processedText;
+        
+        // Animate the new words
+        animateWords(aiSummaryContent, nextChunk);
+        
+        // Continue processing the queue after a short delay
+        setTimeout(() => {
+          isProcessing = false;
+          if (animationQueue.length > 0) {
+            processAnimationQueue();
+          }
+        }, 50);
+      };
       
       // Handle the streamed data
       eventSource.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
+          
+          // Handle refined queries
+          if (data.type === 'refined_queries' && data.queries && data.queries.length > 0) {
+            if (refinedQueries && queryChips) {
+              refinedQueries.style.display = 'block';
+              data.queries.forEach(query => {
+                const chip = document.createElement('div');
+                chip.className = 'query-chip';
+                chip.textContent = query;
+                chip.addEventListener('click', () => {
+                  // Set search bar to this query and trigger a new search
+                  if (searchBar) searchBar.value = query;
+                  window.handleStreamingResponse(query);
+                });
+                queryChips.appendChild(chip);
+              });
+            }
+          }
           
           // Handle search results
           if (data.type === 'results' && data.results) {
@@ -64,6 +115,32 @@ document.addEventListener('DOMContentLoaded', () => {
             });
           }
           
+          // Handle thinking process
+          if (data.type === 'thinking' && data.thought) {
+            if (thinkingContent) {
+              const thoughtElement = document.createElement('div');
+              thoughtElement.className = 'thinking-item';
+              thoughtElement.textContent = data.thought;
+              thinkingContent.appendChild(thoughtElement);
+              allThoughts.push(data.thought);
+            }
+          }
+          
+          // Handle thinking complete (full thoughts)
+          if (data.type === 'thinking_complete' && data.thoughts) {
+            if (thinkingContent) {
+              // Replace with complete thoughts for better formatting
+              thinkingContent.innerHTML = '';
+              data.thoughts.forEach(thought => {
+                const thoughtElement = document.createElement('div');
+                thoughtElement.className = 'thinking-item';
+                thoughtElement.textContent = thought;
+                thinkingContent.appendChild(thoughtElement);
+              });
+              allThoughts = data.thoughts;
+            }
+          }
+          
           // Handle streamed content
           if (data.type === 'content' && data.text) {
             // Show AI summary div if this is first content
@@ -75,34 +152,21 @@ document.addEventListener('DOMContentLoaded', () => {
             const newText = data.text;
             summaryText += newText;
             
-            // Process the new content word by word for animation
-            const newWords = newText.split(/\s+/);
-            wordBuffer = [...wordBuffer, ...newWords];
-            
-            // Only process a few words at a time to create a smooth typing effect
-            const wordsToProcess = Math.min(3, wordBuffer.length);
-            if (wordsToProcess > 0) {
-              const processedWords = wordBuffer.splice(0, wordsToProcess);
-              
-              // Process highlights using __ markers for the entire text
-              const processedText = highlightText(summaryText);
-              
-              // Update the content
-              aiSummaryContent.innerHTML = processedText;
-              
-              // Animate only the newly added words
-              animateNewWords(aiSummaryContent, processedWords);
+            // Split the new text into words and add to animation queue
+            const words = newText.split(/\s+/).filter(word => word.trim().length > 0);
+            if (words.length > 0) {
+              animationQueue.push(words);
+              if (!isProcessing) {
+                processAnimationQueue();
+              }
             }
           }
           
           // End of stream
           if (data.type === 'end') {
-            // Process any remaining words in buffer
-            if (wordBuffer.length > 0) {
-              const processedText = highlightText(summaryText);
-              aiSummaryContent.innerHTML = processedText;
-              animateNewWords(aiSummaryContent, wordBuffer);
-              wordBuffer = [];
+            // Process any remaining words in queue
+            if (!isProcessing && animationQueue.length > 0) {
+              processAnimationQueue();
             }
             eventSource.close();
           }
@@ -115,19 +179,24 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (e) {
           console.error('Error parsing server event:', e);
           // If JSON parsing fails, try to handle it as plain text
-          if (event.data) {
+          if (event.data && typeof event.data === 'string') {
+            console.log('Received non-JSON data:', event.data);
             if (summaryText === '') {
               if (aiSummaryElement) aiSummaryElement.style.display = 'block';
             }
             
-            // Add the raw text after sanitizing it
-            const sanitizedText = event.data
-              .replace(/^data:\s+/, '')
-              .replace(/\{.*\}/, ''); // Remove any JSON-like structures
-              
-            if (sanitizedText.trim()) {
-              summaryText += sanitizedText;
-              aiSummaryContent.innerHTML = highlightText(summaryText);
+            try {
+              // Try to extract content from the raw string
+              const contentMatch = event.data.match(/data: (.+)/);
+              if (contentMatch && contentMatch[1]) {
+                const cleanedText = contentMatch[1].replace(/^\s*{\s*".*?":\s*"(.*?)"\s*}\s*$/, '$1');
+                if (cleanedText) {
+                  summaryText += cleanedText;
+                  aiSummaryContent.innerHTML = highlightText(summaryText);
+                }
+              }
+            } catch (parseError) {
+              console.error('Error parsing data content:', parseError);
             }
           }
         }
@@ -155,63 +224,36 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
   
-  // Improved word animation function
-  function animateNewWords(element, newWords) {
-    // Find all text nodes that aren't inside highlight spans
-    const textNodes = [];
-    const findTextNodes = (node) => {
-      if (node.nodeType === Node.TEXT_NODE) {
-        textNodes.push(node);
-      } else if (node.nodeType === Node.ELEMENT_NODE) {
-        if (!node.classList.contains('highlight')) {
-          for (let i = 0; i < node.childNodes.length; i++) {
-            findTextNodes(node.childNodes[i]);
-          }
-        }
-      }
-    };
+  // Optimized word animation function
+  function animateWords(element, newWords) {
+    if (!newWords || newWords.length === 0) return;
     
-    // Get the last text node (which would contain our new words)
-    findTextNodes(element);
-    if (textNodes.length === 0) return;
+    // Create a new span for each word with staggered animation
+    const container = document.createElement('span');
+    container.className = 'animated-word-container';
     
-    const lastTextNode = textNodes[textNodes.length - 1];
-    
-    // Split the text into words
-    const text = lastTextNode.textContent;
-    const words = text.split(/(\s+)/);
-    
-    // Create a document fragment to hold our split words
-    const fragment = document.createDocumentFragment();
-    
-    words.forEach((word, index) => {
-      const span = document.createElement('span');
-      span.textContent = word;
+    newWords.forEach((word, index) => {
+      const wordSpan = document.createElement('span');
+      wordSpan.textContent = word + ' ';
+      wordSpan.className = 'animated-word';
+      wordSpan.style.opacity = '0';
+      wordSpan.style.transition = `opacity 0.2s ease ${index * 0.05}s`;
+      container.appendChild(wordSpan);
       
-      // Check if this is one of our new words to animate
-      // We check from the end since new words are appended
-      if (index >= words.length - newWords.length * 2) { // *2 because of spaces
-        span.style.opacity = '0';
-        span.classList.add('animated-word');
-        
-        // Stagger the animation
-        const wordsAlreadyAnimated = document.querySelectorAll('.animated-word').length;
-        const delay = 0.08 * (index % newWords.length);
-        span.style.transition = `opacity 0.25s ease ${delay}s`;
-        
-        // Start animation
-        setTimeout(() => {
-          span.style.opacity = '1';
-        }, 10);
-      }
-      
-      fragment.appendChild(span);
+      // Start the fade-in animation
+      setTimeout(() => {
+        wordSpan.style.opacity = '1';
+      }, 10);
     });
     
-    // Replace the text node with our fragment of spans
-    if (lastTextNode.parentNode) {
-      lastTextNode.parentNode.replaceChild(fragment, lastTextNode);
-    }
+    // Append the new words to the content
+    element.appendChild(container);
+    
+    // Replace underscores with highlight spans in the new content
+    const highlightedElements = element.querySelectorAll('.animated-word-container');
+    highlightedElements.forEach(el => {
+      el.innerHTML = el.innerHTML.replace(/__(.*?)__/g, '<span class="highlight">$1</span>');
+    });
   }
   
   // Text highlighting function
@@ -233,25 +275,52 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       };
 
+      const performFlashtagSearch = (query) => {
+        // Parse the query to check for flashtags
+        const [searchTerm, tag] = query.split(' !');
+        
+        if (tag) {
+          // Found a flashtag, try to match with a site
+          const site = sites.find(s => s.alias.includes(tag));
+          if (site) {
+            // Navigate to the target site with the search term
+            window.location.href = site.site + encodeURIComponent(searchTerm);
+            return true;
+          }
+        }
+        return false;
+      };
+
       const urlParams = new URLSearchParams(window.location.search);
       const queryParam = urlParams.get('f');
       
       // If we're on the results page and have a query param, trigger streaming
       if (queryParam && window.location.pathname === '/results') {
         if (searchBar) searchBar.value = decodeURIComponent(queryParam);
-        window.handleStreamingResponse(queryParam);
+        
+        // Check if it's a flashtag query first
+        if (!performFlashtagSearch(decodeURIComponent(queryParam))) {
+          window.handleStreamingResponse(queryParam);
+        }
       }
       
       // If we're on the home page with a query, redirect to results
       if (queryParam && window.location.pathname !== '/results') {
-        performSearch(queryParam);
+        // Check if it's a flashtag query first
+        if (!performFlashtagSearch(decodeURIComponent(queryParam))) {
+          performSearch(queryParam);
+        }
       }
 
       // Event handlers
       const handleSearch = (useAI = true) => {
         const query = searchBar?.value.trim();
         if (!query) return;
-        performSearch(query, useAI);
+        
+        // Check for flashtags first, otherwise perform normal search
+        if (!performFlashtagSearch(query)) {
+          performSearch(query, useAI);
+        }
       };
 
       searchBar?.addEventListener('keypress', (e) => {
@@ -269,7 +338,7 @@ document.addEventListener('DOMContentLoaded', () => {
           return;
         }
 
-        fetch(`https://api.coopr.tech:8148/suggestions?q=${encodeURIComponent(query)}`)
+        fetch(`https://api.coopr.tech:8148/flashtag-ai/autocomplete?q=${encodeURIComponent(query)}`)
           .then(response => response.json())
           .then(data => {
             if (suggestionsContainer) {
