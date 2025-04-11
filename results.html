@@ -1,3 +1,4 @@
+/coopaah/flash/public/results.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -159,7 +160,13 @@
     .ai-header {
       display: flex;
       align-items: center;
+      justify-content: space-between;
       margin-bottom: 16px;
+    }
+    
+    .ai-header-left {
+      display: flex;
+      align-items: center;
     }
 
     .ai-header h3 {
@@ -270,32 +277,128 @@
     }
 
     .swirly-animation {
-  width: 32px;
-  height: 32px;
-  margin-left: 12px;
-  cursor: pointer;
-}
+      width: 32px;
+      height: 32px;
+      margin-left: 12px;
+      cursor: pointer;
+    }
 
-.deep-searching {
-  margin-left: 15px;
-  font-weight: 500;
-  color: var(--primary-color);
-  animation: pulse 1.5s infinite;
-}
+    .deep-searching {
+      margin-left: 15px;
+      font-weight: 500;
+      color: var(--primary-color);
+      animation: pulse 1.5s infinite;
+    }
 
-@keyframes pulse {
-  0% { opacity: 0.6; }
-  50% { opacity: 1; }
-  100% { opacity: 0.6; }
-}
+    @keyframes pulse {
+      0% { opacity: 0.6; }
+      50% { opacity: 1; }
+      100% { opacity: 0.6; }
+    }
 
-.loading {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 30px;
-}
+    .loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 30px;
+    }
+    
+    /* New CSS for thinking section */
+    .thinking-toggle {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+      color: var(--primary-color);
+      font-size: 14px;
+      transition: all 0.2s ease;
+      padding: 6px 12px;
+      border-radius: 16px;
+    }
+    
+    .thinking-toggle:hover {
+      background-color: rgba(99, 102, 241, 0.1);
+    }
+    
+    .thinking-toggle svg {
+      width: 16px;
+      height: 16px;
+      margin-right: 6px;
+      transition: transform 0.3s ease;
+    }
+    
+    .thinking-toggle.open svg {
+      transform: rotate(180deg);
+    }
+    
+    .thinking-container {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.5s ease;
+      margin-top: 0;
+      background: #f8fafc;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 14px;
+      line-height: 1.5;
+      color: #4b5563;
+      padding: 0 12px;
+    }
+    
+    .thinking-container.visible {
+      max-height: 300px;
+      margin-top: 12px;
+      overflow-y: auto;
+      padding: 12px;
+    }
+    
+    .thinking-item {
+      margin-bottom: 4px;
+      padding-left: 8px;
+      border-left: 2px solid #d1d5db;
+    }
+    
+    .thinking-item:last-child {
+      margin-bottom: 0;
+    }
+    
+    /* Refined queries styles */
+    .refined-queries {
+      margin-top: 16px;
+      padding: 16px 0;
+      border-top: 1px dashed #e2e8f0;
+    }
+    
+    .refined-queries h4 {
+      margin: 0 0 12px 0;
+      font-size: 16px;
+      color: var(--muted-text);
+      font-weight: 500;
+    }
+    
+    .query-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    
+    .query-chip {
+      padding: 8px 16px;
+      background-color: #f1f5f9;
+      border-radius: 50px;
+      font-size: 14px;
+      color: var(--text-color);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: 1px solid #e2e8f0;
+    }
+    
+    .query-chip:hover {
+      background-color: #e2e8f0;
+      transform: translateY(-2px);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
   </style>
 </head>
 <body>
@@ -314,12 +417,27 @@
   <div class="results-container">
     <div id="ai-summary" class="ai-summary">
       <div class="ai-header">
-        <svg id="sparkle-icon" class="sparkle-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-          <path d="M12 2c-.55 0-1 .45-1 1v3.59l-2.29-2.3c-.39-.39-1.02-.39-1.41 0-.39.39-.39 1.02 0 1.41L9.59 8H6c-.55 0-1 .45-1 1s.45 1 1 1h3.59l-2.29 2.29c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0L11 10.41V14c0 .55.45 1 1 1s1-.45 1-1v-3.59l2.29 2.29c.39.39 1.02.39 1.41 0 .39-.39.39-1.02 0-1.41L14.41 10H18c.55 0 1-.45 1-1s-.45-1-1-1h-3.59l2.29-2.29c.39-.39.39-1.02 0-1.41-.39-.39-1.02-.39-1.41 0L13 6.59V3c0-.55-.45-1-1-1z"/>
-        </svg>
-        <h3>FlashAI</h3>
+        <div class="ai-header-left">
+          <svg id="sparkle-icon" class="sparkle-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M12 2c-.55 0-1 .45-1 1v3.59l-2.29-2.3c-.39-.39-1.02-.39-1.41 0-.39.39-.39 1.02 0 1.41L9.59 8H6c-.55 0-1 .45-1 1s.45 1 1 1h3.59l-2.29 2.29c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0L11 10.41V14c0 .55.45 1 1 1s1-.45 1-1v-3.59l2.29 2.29c.39.39 1.02.39 1.41 0 .39-.39.39-1.02 0-1.41L14.41 10H18c.55 0 1-.45 1-1s-.45-1-1-1h-3.59l2.29-2.29c.39-.39.39-1.02 0-1.41-.39-.39-1.02-.39-1.41 0L13 6.59V3c0-.55-.45-1-1-1z"/>
+          </svg>
+          <h3>FlashAI</h3>
+        </div>
+        <div id="thinking-toggle" class="thinking-toggle">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+          </svg>
+          <span>Show thinking</span>
+        </div>
+      </div>
+      <div id="thinking-container" class="thinking-container">
+        <div id="thinking-content"></div>
       </div>
       <div id="ai-summary-content"></div>
+      <div id="refined-queries" class="refined-queries" style="display: none;">
+        <h4>Try refining your search:</h4>
+        <div id="query-chips" class="query-chips"></div>
+      </div>
       <div class="ai-footer">AI-generated, for reference only.</div>
     </div>
     <div id="results"></div>
@@ -370,22 +488,47 @@
     </div>
   </div>
 
+  <!-- Load script.js first so its functions are available -->
   <script src="/script.js"></script>
   
+  <!-- Only add minimal initialization for legacy support -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
+      // Toggle thinking section
+      const thinkingToggle = document.getElementById('thinking-toggle');
+      const thinkingContainer = document.getElementById('thinking-container');
+      
+      if (thinkingToggle && thinkingContainer) {
+        thinkingToggle.addEventListener('click', () => {
+          thinkingContainer.classList.toggle('visible');
+          thinkingToggle.classList.toggle('open');
+          
+          // Update text content
+          const spanEl = thinkingToggle.querySelector('span');
+          if (spanEl) {
+            spanEl.textContent = thinkingContainer.classList.contains('visible') 
+              ? 'Hide thinking' 
+              : 'Show thinking';
+          }
+        });
+      }
+      
+      // Support for non-streaming version (legacy support)
       const urlParams = new URLSearchParams(window.location.search);
       const query = urlParams.get('f');
       
+      // Set the search bar value
       const searchBar = document.getElementById('search-bar');
       if (searchBar && query) {
         searchBar.value = decodeURIComponent(query);
       }
       
+      // Legacy highlighting function (used by older code path)
       window.highlightText = function(text) {
         return text.replace(/__(.*?)__/g, '<span class="highlight">$1</span>');
       };
       
+      // Legacy word animation function (used by older code path)
       window.fadeInWords = function(element) {
         const wrapWords = (node) => {
           if (node.nodeType === Node.TEXT_NODE) {
