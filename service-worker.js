@@ -3,12 +3,10 @@ const urlsToCache = [
   '/',
   '/index.html',
   '/offline.html',
-  '/style.css',
+  '/styles.css',
   '/script.js',
   '/sites.json',
-  '/logo.png',
-  '/results.html',
-  '/results',
+  '/logo.png'
 ];
 
 // Install event - cache essential files
@@ -45,11 +43,11 @@ const parseFlashtagFromUrl = async (url) => {
     
     if (!query) return null;
     
-    const parts = query.split(' !');
-    if (parts.length !== 2) return null;
+    // Check if query has a flashtag format (term !tag)
+    const match = query.match(/^(.*?)\s+!(\w+)$/);
+    if (!match) return null;
     
-    const [searchTerm, tag] = parts;
-    if (!tag) return null;
+    const [, searchTerm, tag] = match;
     
     // Get sites.json from cache to resolve the flashtag
     const cache = await caches.open(CACHE_NAME);
@@ -58,9 +56,9 @@ const parseFlashtagFromUrl = async (url) => {
     if (!sitesResponse) return null;
     
     const sitesJson = await sitesResponse.json();
-    const matchedSite = sitesJson.find(site => site.alias.includes(tag));
+    const matchedSite = sitesJson.find(site => site.alias && site.alias.includes(tag));
     
-    if (!matchedSite) return null;
+    if (!matchedSite || !matchedSite.site) return null;
     
     // Return the target URL
     return new URL(matchedSite.site + encodeURIComponent(searchTerm));
@@ -70,26 +68,33 @@ const parseFlashtagFromUrl = async (url) => {
   }
 };
 
-// Fetch event with flashtag support
+// Fetch event with enhanced flashtag support
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
   
   // Handle flashtag redirects even when offline
-  if (url.pathname === '/' && url.searchParams.has('f')) {
+  if ((url.pathname === '/' || url.pathname === '/index.html') && url.searchParams.has('f')) {
     event.respondWith(
       (async () => {
         try {
-          // Try network first
-          const networkResponse = await fetch(event.request);
-          return networkResponse;
-        } catch (error) {
-          console.log('Network request failed, checking for flashtag redirect...');
-          
-          // If network fails, check if this is a flashtag query
+          // Check if this is a flashtag query
           const redirectUrl = await parseFlashtagFromUrl(event.request.url);
           
           if (redirectUrl) {
             // If it's a valid flashtag, redirect to the target site
+            return Response.redirect(redirectUrl.toString(), 302);
+          }
+          
+          // If not a flashtag, try network first
+          const networkResponse = await fetch(event.request);
+          return networkResponse;
+        } catch (error) {
+          console.log('Network request failed, falling back to offline mode');
+          
+          // Try one more time to see if it's a flashtag
+          const redirectUrl = await parseFlashtagFromUrl(event.request.url);
+          
+          if (redirectUrl) {
             return Response.redirect(redirectUrl.toString(), 302);
           }
           
@@ -105,17 +110,23 @@ self.addEventListener('fetch', event => {
     event.respondWith(
       (async () => {
         try {
-          // Try network first
-          const networkResponse = await fetch(event.request);
-          return networkResponse;
-        } catch (error) {
-          console.log('Network request failed for results page, checking for flashtag...');
-          
-          // If network fails, check if this is a flashtag query
+          // Check for flashtag first
           const redirectUrl = await parseFlashtagFromUrl(event.request.url);
           
           if (redirectUrl) {
-            // If it's a valid flashtag, redirect to the target site
+            return Response.redirect(redirectUrl.toString(), 302);
+          }
+          
+          // If not a flashtag, try network first
+          const networkResponse = await fetch(event.request);
+          return networkResponse;
+        } catch (error) {
+          console.log('Network request failed for results page');
+          
+          // Check again for flashtag
+          const redirectUrl = await parseFlashtagFromUrl(event.request.url);
+          
+          if (redirectUrl) {
             return Response.redirect(redirectUrl.toString(), 302);
           }
           
@@ -126,6 +137,22 @@ self.addEventListener('fetch', event => {
       })()
     );
   } 
+  // For sites.json, always try cache first to ensure flashtags work offline
+  else if (url.pathname === '/sites.json') {
+    event.respondWith(
+      caches.match(event.request)
+        .then(response => {
+          return response || fetch(event.request)
+            .then(networkResponse => {
+              return caches.open(CACHE_NAME)
+                .then(cache => {
+                  cache.put(event.request, networkResponse.clone());
+                  return networkResponse;
+                });
+            });
+        })
+    );
+  }
   // Normal caching strategy for other requests
   else {
     event.respondWith(
@@ -139,8 +166,8 @@ self.addEventListener('fetch', event => {
           // Clone the request because it's a one-time use stream
           const fetchRequest = event.request.clone();
           
-          return fetch(fetchRequest).then(
-            response => {
+          return fetch(fetchRequest)
+            .then(response => {
               // Check if we received a valid response
               if (!response || response.status !== 200 || response.type !== 'basic') {
                 return response;
@@ -170,6 +197,38 @@ self.addEventListener('fetch', event => {
             });
           });
         })
+    );
+  }
+});
+
+// Cache favicon responses
+self.addEventListener('fetch', event => {
+  const url = new URL(event.request.url);
+  
+  // Check if this is a favicon request from our API
+  if (url.pathname.startsWith('/favicon/')) {
+    event.respondWith(
+      caches.open(CACHE_NAME).then(cache => {
+        return cache.match(event.request).then(cachedResponse => {
+          if (cachedResponse) {
+            return cachedResponse;
+          }
+          
+          return fetch(event.request).then(response => {
+            if (response && response.status === 200) {
+              cache.put(event.request, response.clone());
+            }
+            return response;
+          }).catch(() => {
+            // Return a transparent 1x1 pixel if network fails
+            return new Response(
+              new Blob([new Uint8Array([71, 73, 70, 56, 57, 97, 1, 0, 1, 0, 128, 0, 0, 0, 0, 0, 0, 0, 0, 33, 249, 4, 1, 0, 0, 0, 0, 44, 0, 0, 0, 0, 1, 0, 1, 0, 0, 2, 1, 68, 0, 59])], 
+              { type: 'image/gif' }), 
+              { status: 200, headers: { 'Content-Type': 'image/gif' } }
+            );
+          });
+        });
+      })
     );
   }
 });
