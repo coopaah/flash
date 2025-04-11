@@ -3,7 +3,7 @@ const urlsToCache = [
   '/',
   '/index.html',
   '/offline.html',
-  '/styles.css',
+  '/style.css',
   '/script.js',
   '/sites.json',
   '/logo.png'
