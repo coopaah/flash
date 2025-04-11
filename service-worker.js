@@ -6,7 +6,9 @@ const urlsToCache = [
   '/style.css',
   '/script.js',
   '/sites.json',
-  '/logo.png'
+  '/logo.png',
+  '/results.html',
+  '/results',
 ];
 
 // Install event - cache essential files
