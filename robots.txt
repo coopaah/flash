@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /results
+Disallow: /account
+Disallow: /settings
+
+Sitemap: https://flashtags.tech/sitemap.xml
