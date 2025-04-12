@@ -1,9 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!DOCTYPE html>
+<html lang="en">
+<head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Search Results - Flash</title>
+  <title>Flash Search</title>
+  <meta name="description" content="A powerful search engine designed for speed and efficiency. Search hundreds of sites in one place." />
+  <meta name="robots" content="noindex, follow" />
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://flashtags.tech/results" />
+  <meta property="og:title" content="Flash Search" />
+  <meta property="og:description" content="A powerful search engine designed for speed and efficiency. Search hundreds of sites in one place." />
+  <meta property="og:image" content="https://flashtags.tech/logo.png" />
+  
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:url" content="https://flashtags.tech/results" />
+  <meta name="twitter:title" content="Flash Search" />
+  <meta name="twitter:description" content="A powerful search engine designed for speed and efficiency. Search hundreds of sites in one place." />
+  <meta name="twitter:image" content="https://flashtags.tech/logo.png" />
+  
+  <!-- Canonical URL with search parameter -->
+  <link rel="canonical" href="https://flashtags.tech/" />
+  
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico" />
+  <link rel="apple-touch-icon" href="/logo.png" />
+  
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -588,6 +615,56 @@
       const searchBar = document.getElementById('search-bar');
       if (searchBar && query) {
         searchBar.value = decodeURIComponent(query);
+        
+        // Update page title with search query
+        const decodedQuery = decodeURIComponent(query);
+        document.title = `${decodedQuery} - Flash Search Results`;
+        
+        // Update meta tags for social sharing
+        const metaTags = {
+          'og:title': `${decodedQuery} - Flash Search Results`,
+          'twitter:title': `${decodedQuery} - Flash Search Results`,
+          'canonical': `https://flashtags.tech/results?f=${encodeURIComponent(query)}`
+        };
+        
+        // Set meta tags
+        for (const [name, content] of Object.entries(metaTags)) {
+          const selector = name === 'canonical' ? 
+            `link[rel="${name}"]` : 
+            `meta[property="${name}"], meta[name="${name}"]`;
+          
+          const element = document.querySelector(selector);
+          if (element) {
+            if (name === 'canonical') {
+              element.setAttribute('href', content);
+            } else {
+              element.setAttribute('content', content);
+            }
+          }
+        }
+        
+        // Update description with AI summary when available
+        const observer = new MutationObserver((mutations) => {
+          const aiSummaryContent = document.getElementById('ai-summary-content');
+          if (aiSummaryContent && aiSummaryContent.textContent.trim()) {
+            // Get first 150 characters of AI summary for description
+            const summaryText = aiSummaryContent.textContent.trim().substring(0, 150) + '...';
+            
+            // Update meta descriptions
+            document.querySelector('meta[name="description"]').setAttribute('content', summaryText);
+            document.querySelector('meta[property="og:description"]').setAttribute('content', summaryText);
+            document.querySelector('meta[name="twitter:description"]').setAttribute('content', summaryText);
+            
+            observer.disconnect();
+          }
+        });
+        
+        // Start observing the AI summary container
+        observer.observe(document.getElementById('ai-summary-content'), { 
+          childList: true, 
+          subtree: true, 
+          characterData: true 
+        });
       }
       
       // Legacy highlighting function (used by older code path)
