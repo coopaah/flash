@@ -266,7 +266,7 @@ document.addEventListener('DOMContentLoaded', () => {
           let faviconHtml = '';
           try {
             const domain = new URL(result.result_url).hostname;
-            faviconHtml = `<img class="favicon-img" src="/favicon/${encodeURIComponent(domain)}" alt="" />`;
+            faviconHtml = `<img class="favicon-img" src="https://api.coopr.tech:8148/favicon/${encodeURIComponent(domain)}" alt="" />`;
           } catch (err) {
             console.error('Error parsing URL for favicon:', err);
           }
