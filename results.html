@@ -917,7 +917,7 @@
         if (imageLoading) imageLoading.style.display = 'flex';
         
         // Fetch images for the current query
-        fetch(`/flashtag-ai/images?q=${encodeURIComponent(window.currentQuery)}`)
+        fetch(`https://api.coopr.tech:8148/flashtag-ai/images?q=${encodeURIComponent(window.currentQuery)}`)
           .then(response => response.json())
           .then(data => {
             if (imageLoading) imageLoading.style.display = 'none';
