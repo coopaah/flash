@@ -1,7 +1,5 @@
+/public/results.html
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -129,11 +127,48 @@
       opacity: 0.9;
     }
     
+    .nav-tabs {
+      display: flex;
+      margin-top: 20px;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 0 20px;
+    }
+    
+    .nav-tab {
+      padding: 12px 20px;
+      margin-right: 16px;
+      font-size: 15px;
+      color: var(--muted-text);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s ease;
+    }
+    
+    .nav-tab.active {
+      color: var(--primary-color);
+      border-bottom: 2px solid var(--primary-color);
+      font-weight: 500;
+    }
+    
+    .nav-tab:hover:not(.active) {
+      color: var(--text-color);
+      border-bottom-color: #e2e8f0;
+    }
+    
+    .tab-content {
+      display: none;
+      width: 100%;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
     .results-container {
       width: 90%;
       max-width: 800px;
       padding: 20px;
-      margin-top: 30px;
+      margin-top: 10px;
     }
     
     .ai-summary {
@@ -225,6 +260,35 @@
     .result:hover {
       transform: translateY(-4px);
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+    }
+    
+    /* Curated results styling */
+    .result.curated {
+      background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+      border: 1px solid #bae6fd;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .curated-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background-color: #0ea5e9;
+      color: white;
+      font-size: 12px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    
+    .curated-for {
+      margin-top: 8px;
+      font-size: 13px;
+      color: #0284c7;
+      font-style: italic;
     }
     
     .result-title {
@@ -478,6 +542,11 @@
       margin-top: 4px;
       max-height: 300px;
       overflow-y: auto;
+      display: none;
+    }
+    
+    .suggestions.visible {
+      display: block;
     }
     
     .suggestion {
@@ -491,6 +560,159 @@
     .suggestion:focus {
       background-color: #f8fafc;
     }
+
+    /* Image results styles */
+    .image-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 16px;
+      padding: 20px 0;
+    }
+    
+    .image-result {
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s ease;
+      cursor: pointer;
+      position: relative;
+      opacity: 0;
+      animation: fadeIn 0.5s var(--transition-timing) forwards;
+      animation-delay: calc(var(--animation-order) * 0.05s);
+    }
+    
+    .image-result:hover {
+      transform: scale(1.05);
+      z-index: 2;
+    }
+    
+    .image-thumb {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      object-fit: cover;
+      display: block;
+    }
+    
+    .image-info {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+      padding: 8px;
+      font-size: 12px;
+      transform: translateY(100%);
+      transition: transform 0.2s ease;
+    }
+    
+    .image-result:hover .image-info {
+      transform: translateY(0);
+    }
+    
+    .image-title {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin: 0;
+      font-weight: normal;
+    }
+    
+    .powered-by-google {
+      font-size: 12px;
+      color: var(--muted-text);
+      text-align: right;
+      margin-top: 8px;
+      padding-right: 16px;
+    }
+    
+    /* Image modal */
+    .image-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    
+    .image-modal.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    
+    .modal-content {
+      max-width: 90%;
+      max-height: 90%;
+      position: relative;
+    }
+    
+    .modal-image {
+      max-width: 100%;
+      max-height: 90vh;
+      display: block;
+      border-radius: 4px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+    
+    .modal-close {
+      position: absolute;
+      top: -40px;
+      right: 0;
+      background: none;
+      border: none;
+      color: white;
+      font-size: 24px;
+      cursor: pointer;
+    }
+    
+    .modal-caption {
+      position: absolute;
+      bottom: -40px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      color: white;
+      font-size: 14px;
+    }
+    
+    .curated-section-heading {
+      font-size: 18px;
+      color: var(--primary-color);
+      margin: 32px 0 16px 0;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #e5e7eb;
+      display: flex;
+      align-items: center;
+    }
+    
+    .curated-section-heading svg {
+      margin-right: 8px;
+      width: 20px;
+      height: 20px;
+    }
+    
+    @keyframes slide-in {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .curated-results-container {
+      animation: slide-in 0.5s var(--transition-timing) forwards;
+    }
   </style>
 </head>
 <body>
@@ -503,91 +725,139 @@
       <svg id="search-icon" class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
         <path d="M10 2a8 8 0 105.293 14.707l5 5a1 1 0 001.414-1.414l-5-5A8 8 0 0010 2zm0 2a6 6 0 110 12 6 6 0 010-12z" />
       </svg>
-      <!-- New AI Icon SVG -->
+      <!-- AI Icon SVG -->
       <svg id="ai-icon" class="ai-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
       </svg>
     </div>
   </div>
+  
+  <div class="nav-tabs">
+    <div id="tab-all" class="nav-tab active">All</div>
+    <div id="tab-images" class="nav-tab">Images</div>
+  </div>
+  
   <div class="results-container">
-    <div id="ai-summary" class="ai-summary">
-      <div class="ai-header">
-        <div class="ai-header-left">
-          <svg class="sparkle-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-            <path d="M10 2L12 6L16 4L14 8L18 10L14 12L16 16L12 14L10 18L8 14L4 16L6 12L2 10L6 8L4 4L8 6L10 2Z" />
-          </svg>
-          <h3>FlashAI</h3>
+    <div id="tab-content-all" class="tab-content active">
+      <div id="ai-summary" class="ai-summary">
+        <div class="ai-header">
+          <div class="ai-header-left">
+            <svg class="sparkle-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+              <path d="M10 2L12 6L16 4L14 8L18 10L14 12L16 16L12 14L10 18L8 14L4 16L6 12L2 10L6 8L4 4L8 6L10 2Z" />
+            </svg>
+            <h3>FlashAI</h3>
+          </div>
+          <button id="thinking-toggle" class="thinking-toggle">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+            </svg>
+            <span>Show thinking</span>
+          </button>
         </div>
-        <button id="thinking-toggle" class="thinking-toggle">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-          </svg>
-          <span>Show thinking</span>
-        </button>
+        <div id="thinking-container" class="thinking-container">
+          <div id="thinking-content"></div>
+        </div>
+        <div id="ai-summary-content" class="ai-summary-content"></div>
+        <div id="refined-queries" class="refined-queries" style="display: none;">
+          <h4>Try refining your search:</h4>
+          <div id="query-chips" class="query-chips"></div>
+        </div>
+        <div class="ai-footer">AI-generated, for reference only.</div>
       </div>
-      <div id="thinking-container" class="thinking-container">
-        <div id="thinking-content"></div>
+      <div id="results"></div>
+      <div id="curated-results"></div>
+      <div class="loading" id="loading">
+        <svg class="swirly-animation" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#6366f1" />
+              <stop offset="100%" stop-color="#059669" />
+            </linearGradient>
+          </defs>
+          <path d="M50,10 C70,10 85,25 85,45 C85,65 70,80 50,80 C30,80 15,65 15,45 C15,25 30,10 50,10 Z" 
+                fill="none" 
+                stroke="url(#gradient)" 
+                stroke-width="3" 
+                stroke-dasharray="251" 
+                stroke-dashoffset="0">
+            <animate attributeName="stroke-dashoffset" 
+                     values="251;0;251" 
+                     dur="3s" 
+                     repeatCount="indefinite" />
+            <animateTransform attributeName="transform" 
+                              type="rotate" 
+                              from="0 50 50" 
+                              to="360 50 50" 
+                              dur="8s" 
+                              repeatCount="indefinite" />
+          </path>
+          <path d="M50,20 C65,20 75,30 75,45 C75,60 65,70 50,70 C35,70 25,60 25,45 C25,30 35,20 50,20 Z" 
+                fill="none" 
+                stroke="url(#gradient)" 
+                stroke-width="2" 
+                stroke-dasharray="157" 
+                stroke-dashoffset="0">
+            <animate attributeName="stroke-dashoffset" 
+                     values="0;157;0" 
+                     dur="4s" 
+                     repeatCount="indefinite" />
+            <animateTransform attributeName="transform" 
+                              type="rotate" 
+                              from="360 50 50" 
+                              to="0 50 50" 
+                              dur="6s" 
+                              repeatCount="indefinite" />
+          </path>
+        </svg>
+        <div class="deep-searching">Deep Searching...</div>
       </div>
-      <div id="ai-summary-content" class="ai-summary-content"></div>
-      <div id="refined-queries" class="refined-queries" style="display: none;">
-        <h4>Try refining your search:</h4>
-        <div id="query-chips" class="query-chips"></div>
-      </div>
-      <div class="ai-footer">AI-generated, for reference only.</div>
     </div>
-    <div id="results"></div>
-    <div class="loading" id="loading">
-      <svg class="swirly-animation" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stop-color="#6366f1" />
-            <stop offset="100%" stop-color="#059669" />
-          </linearGradient>
-        </defs>
-        <path d="M50,10 C70,10 85,25 85,45 C85,65 70,80 50,80 C30,80 15,65 15,45 C15,25 30,10 50,10 Z" 
-              fill="none" 
-              stroke="url(#gradient)" 
-              stroke-width="3" 
-              stroke-dasharray="251" 
-              stroke-dashoffset="0">
-          <animate attributeName="stroke-dashoffset" 
-                   values="251;0;251" 
-                   dur="3s" 
-                   repeatCount="indefinite" />
-          <animateTransform attributeName="transform" 
-                            type="rotate" 
-                            from="0 50 50" 
-                            to="360 50 50" 
-                            dur="8s" 
-                            repeatCount="indefinite" />
-        </path>
-        <path d="M50,20 C65,20 75,30 75,45 C75,60 65,70 50,70 C35,70 25,60 25,45 C25,30 35,20 50,20 Z" 
-              fill="none" 
-              stroke="url(#gradient)" 
-              stroke-width="2" 
-              stroke-dasharray="157" 
-              stroke-dashoffset="0">
-          <animate attributeName="stroke-dashoffset" 
-                   values="0;157;0" 
-                   dur="4s" 
-                   repeatCount="indefinite" />
-          <animateTransform attributeName="transform" 
-                            type="rotate" 
-                            from="360 50 50" 
-                            to="0 50 50" 
-                            dur="6s" 
-                            repeatCount="indefinite" />
-        </path>
-      </svg>
-      <div class="deep-searching">Deep Searching...</div>
+    
+    <div id="tab-content-images" class="tab-content">
+      <div id="image-results" class="image-grid"></div>
+      <div class="powered-by-google">Images powered by Google</div>
+      <div class="loading" id="image-loading">
+        <div class="spinner"></div>
+        <div>Loading images...</div>
+      </div>
+    </div>
+  </div>
+  
+  <div id="image-modal" class="image-modal">
+    <div class="modal-content">
+      <button id="modal-close" class="modal-close">×</button>
+      <img id="modal-image" class="modal-image" src="" alt="">
+      <div id="modal-caption" class="modal-caption"></div>
     </div>
   </div>
 
   <script src="/script.js"></script>
   
-  <!-- Only add minimal initialization for legacy support -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
+      // Tab switching
+      const tabAll = document.getElementById('tab-all');
+      const tabImages = document.getElementById('tab-images');
+      const tabContentAll = document.getElementById('tab-content-all');
+      const tabContentImages = document.getElementById('tab-content-images');
+      
+      tabAll.addEventListener('click', () => {
+        tabAll.classList.add('active');
+        tabImages.classList.remove('active');
+        tabContentAll.classList.add('active');
+        tabContentImages.classList.remove('active');
+      });
+      
+      tabImages.addEventListener('click', () => {
+        tabImages.classList.add('active');
+        tabAll.classList.remove('active');
+        tabContentImages.classList.add('active');
+        tabContentAll.classList.remove('active');
+        
+        // Load images if they haven't been loaded yet
+        loadImagesTab();
+      });
+      
       // Toggle thinking section
       const thinkingToggle = document.getElementById('thinking-toggle');
       const thinkingContainer = document.getElementById('thinking-container');
@@ -607,64 +877,95 @@
         });
       }
       
+      // Image modal functionality
+      const imageModal = document.getElementById('image-modal');
+      const modalImage = document.getElementById('modal-image');
+      const modalCaption = document.getElementById('modal-caption');
+      const modalClose = document.getElementById('modal-close');
+      
+      function openImageModal(imageUrl, caption) {
+        modalImage.src = imageUrl;
+        modalCaption.textContent = caption || '';
+        imageModal.classList.add('visible');
+        document.body.style.overflow = 'hidden';
+      }
+      
+      function closeImageModal() {
+        imageModal.classList.remove('visible');
+        document.body.style.overflow = '';
+      }
+      
+      if (modalClose) {
+        modalClose.addEventListener('click', closeImageModal);
+      }
+      
+      if (imageModal) {
+        imageModal.addEventListener('click', (e) => {
+          if (e.target === imageModal) {
+            closeImageModal();
+          }
+        });
+      }
+      
+      // Function to load images tab content
+      function loadImagesTab() {
+        const imageResults = document.getElementById('image-results');
+        const imageLoading = document.getElementById('image-loading');
+        
+        // Skip if already loaded or no query
+        if (imageResults.children.length > 0 || !window.currentQuery) return;
+        
+        if (imageLoading) imageLoading.style.display = 'flex';
+        
+        // Fetch images for the current query
+        fetch(`/flashtag-ai/images?q=${encodeURIComponent(window.currentQuery)}`)
+          .then(response => response.json())
+          .then(data => {
+            if (imageLoading) imageLoading.style.display = 'none';
+            
+            if (data.images && data.images.length > 0) {
+              data.images.forEach((image, index) => {
+                const imageEl = document.createElement('div');
+                imageEl.className = 'image-result';
+                imageEl.style.setProperty('--animation-order', index);
+                
+                imageEl.innerHTML = `
+                  <img src="${image.thumbnail}" alt="${image.title}" class="image-thumb">
+                  <div class="image-info">
+                    <h4 class="image-title">${image.title}</h4>
+                  </div>
+                `;
+                
+                imageEl.addEventListener('click', () => {
+                  openImageModal(image.url, image.title);
+                });
+                
+                imageResults.appendChild(imageEl);
+              });
+            } else {
+              imageResults.innerHTML = '<p>No images found for this query.</p>';
+            }
+          })
+          .catch(error => {
+            console.error('Error loading images:', error);
+            if (imageLoading) imageLoading.style.display = 'none';
+            imageResults.innerHTML = '<p>Error loading images. Please try again.</p>';
+          });
+      }
+      
       // Support for non-streaming version (legacy support)
       const urlParams = new URLSearchParams(window.location.search);
       const query = urlParams.get('f');
       
-      // Set the search bar value
+      // Set the search bar value and track current query
       const searchBar = document.getElementById('search-bar');
       if (searchBar && query) {
         searchBar.value = decodeURIComponent(query);
+        window.currentQuery = decodeURIComponent(query);
         
         // Update page title with search query
         const decodedQuery = decodeURIComponent(query);
         document.title = `${decodedQuery} - Flash Search Results`;
-        
-        // Update meta tags for social sharing
-        const metaTags = {
-          'og:title': `${decodedQuery} - Flash Search Results`,
-          'twitter:title': `${decodedQuery} - Flash Search Results`,
-          'canonical': `https://flashtags.tech/results?f=${encodeURIComponent(query)}`
-        };
-        
-        // Set meta tags
-        for (const [name, content] of Object.entries(metaTags)) {
-          const selector = name === 'canonical' ? 
-            `link[rel="${name}"]` : 
-            `meta[property="${name}"], meta[name="${name}"]`;
-          
-          const element = document.querySelector(selector);
-          if (element) {
-            if (name === 'canonical') {
-              element.setAttribute('href', content);
-            } else {
-              element.setAttribute('content', content);
-            }
-          }
-        }
-        
-        // Update description with AI summary when available
-        const observer = new MutationObserver((mutations) => {
-          const aiSummaryContent = document.getElementById('ai-summary-content');
-          if (aiSummaryContent && aiSummaryContent.textContent.trim()) {
-            // Get first 150 characters of AI summary for description
-            const summaryText = aiSummaryContent.textContent.trim().substring(0, 150) + '...';
-            
-            // Update meta descriptions
-            document.querySelector('meta[name="description"]').setAttribute('content', summaryText);
-            document.querySelector('meta[property="og:description"]').setAttribute('content', summaryText);
-            document.querySelector('meta[name="twitter:description"]').setAttribute('content', summaryText);
-            
-            observer.disconnect();
-          }
-        });
-        
-        // Start observing the AI summary container
-        observer.observe(document.getElementById('ai-summary-content'), { 
-          childList: true, 
-          subtree: true, 
-          characterData: true 
-        });
       }
       
       // Legacy highlighting function (used by older code path)
