@@ -12,6 +12,29 @@ document.addEventListener('DOMContentLoaded', () => {
   // View state management
   let currentView = 'search'; // 'search' or 'images'
   
+  // Check for query parameter in URL on page load
+  function checkUrlQueryParam() {
+    // Check if we have a query in the URL (for direct searches via ?f=)
+    const urlParams = new URLSearchParams(window.location.search);
+    const queryParam = urlParams.get('f');
+    
+    if (queryParam && window.location.pathname === '/') {
+      // We're on the home page with a query param, perform immediate search
+      const query = decodeURIComponent(queryParam);
+      if (searchBar) searchBar.value = query;
+      
+      // Check if it has a flashtag
+      const flashtagMatch = query.match(/^(.*?)\s+!(\w+)$/);
+      if (flashtagMatch) {
+        // This is a flashtag search
+        handleFlashTagSearch(query, flashtagMatch);
+      } else {
+        // Normal search
+        performSearch(query);
+      }
+    }
+  }
+  
   function debounce(func, timeout = 150) {
     let timer;
     return (...args) => {
@@ -89,6 +112,12 @@ document.addEventListener('DOMContentLoaded', () => {
       suggestionsContainer.innerHTML = '';
     }
     
+    // Check for Flashtag format (query !tag)
+    const flashtagMatch = query.match(/^(.*?)\s+!(\w+)$/);
+    if (flashtagMatch) {
+      return handleFlashTagSearch(query, flashtagMatch);
+    }
+    
     // For image search
     if (view === 'images') {
       fetchAndDisplayImages(query);
@@ -108,6 +137,34 @@ document.addEventListener('DOMContentLoaded', () => {
       // Stream content
       handleStreamingResponse(query);
     }
+  };
+  
+  // Handle Flashtag searches
+  const handleFlashTagSearch = (query, match) => {
+    const searchTerm = match[1].trim();
+    const tag = match[2].toLowerCase();
+    
+    // Load sites.json to find matching tag
+    fetch('/sites.json')
+      .then(response => response.json())
+      .then(sites => {
+        const site = sites.find(s => s.alias && s.alias.includes(tag));
+        
+        if (site) {
+          // Redirect to the appropriate site with the search term
+          window.location.href = `${site.site}${encodeURIComponent(searchTerm)}`;
+        } else {
+          // If tag not found, perform regular search
+          const cleanQuery = query.replace(/\s+!\w+$/, '');
+          performSearch(cleanQuery);
+        }
+      })
+      .catch(error => {
+        console.error('Error loading sites:', error);
+        // Fall back to regular search if sites.json fails to load
+        const cleanQuery = query.replace(/\s+!\w+$/, '');
+        performSearch(cleanQuery);
+      });
   };
   
   // Handle AI streaming response
@@ -266,7 +323,7 @@ document.addEventListener('DOMContentLoaded', () => {
           let faviconHtml = '';
           try {
             const domain = new URL(result.result_url).hostname;
-            faviconHtml = `<img class="favicon-img" src="https://api.coopr.tech:8148/favicon/${encodeURIComponent(domain)}" alt="" />`;
+            faviconHtml = `<img class="favicon-img" src="/favicon/${encodeURIComponent(domain)}" alt="" />`;
           } catch (err) {
             console.error('Error parsing URL for favicon:', err);
           }
@@ -621,36 +678,40 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
     
+    // Look for flashtag pattern
+    const match = query.match(/^(.*?)\s+!(\w+)$/);
+    if (!match) {
+      siteInfoTooltip.classList.remove('visible');
+      return;
+    }
+
+    const tag = match[2].toLowerCase();
+    
     // Load sites for Flashtags
     fetch('/sites.json')
       .then(response => response.json())
       .then(sites => {
-        const match = query.match(/^(.*?)\s+!(\w+)$/);
-        if (match) {
-          const tag = match[2];
-          const site = sites.find(s => s.alias && s.alias.includes(tag));
-          
-          if (site && site.title) {
-            // Show the site info with favicon
-            let favicon = '';
-            try {
-              const domain = new URL(site.site).hostname;
-              favicon = `<img class="favicon-img" src="https://api.coopr.tech:8148/favicon/${encodeURIComponent(domain)}" alt="" />`;
-            } catch (err) {
-              console.error('Error parsing URL for favicon:', err);
-            }
-            
-            siteInfoTooltip.innerHTML = `${favicon}Searching on ${site.title}`;
-            siteInfoTooltip.classList.add('visible');
-          } else {
-            siteInfoTooltip.classList.remove('visible');
+        const site = sites.find(s => s.alias && s.alias.includes(tag));
+        
+        if (site && site.title) {
+          // Show the site info with favicon
+          let favicon = '';
+          try {
+            const domain = new URL(site.site).hostname;
+            favicon = `<img class="favicon-img" src="/favicon/${encodeURIComponent(domain)}" alt="" />`;
+          } catch (err) {
+            console.error('Error parsing URL for favicon:', err);
           }
+          
+          siteInfoTooltip.innerHTML = `${favicon}Searching on ${site.title}`;
+          siteInfoTooltip.classList.add('visible');
         } else {
           siteInfoTooltip.classList.remove('visible');
         }
       })
       .catch(error => {
         console.error('Error loading sites:', error);
+        siteInfoTooltip.classList.remove('visible');
       });
   }
   
@@ -698,6 +759,9 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Initialize the page
   function init() {
+    // First check if we have a query param in the URL
+    checkUrlQueryParam();
+    
     // If we're on the home page and the header is centered
     if (header && header.classList.contains('centered')) {
       // Set up the header animation on focus
@@ -717,6 +781,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const urlParams = new URLSearchParams(window.location.search);
       const queryParam = urlParams.get('f');
       const viewParam = urlParams.get('view') || 'search';
+      const isResearch = urlParams.get('research') === 'true';
       
       if (queryParam) {
         // Set the search bar value
@@ -726,10 +791,13 @@ document.addEventListener('DOMContentLoaded', () => {
         currentView = viewParam;
         updateTabSelection(currentView);
         
-        // Perform the search
+        // Perform the search only if this isn't a continued search from a previous page
+        // or if it's explicitly marked as a research (from clicking a search suggestion)
         if (currentView === 'images') {
           fetchAndDisplayImages(decodeURIComponent(queryParam));
-        } else {
+        } else if (!document.referrer.includes('/results') || isResearch) {
+          // Only perform the search if we didn't come from another results page
+          // or if we're explicitly requesting a new search
           handleStreamingResponse(decodeURIComponent(queryParam));
         }
       }
