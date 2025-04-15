@@ -323,7 +323,7 @@ document.addEventListener('DOMContentLoaded', () => {
           let faviconHtml = '';
           try {
             const domain = new URL(result.result_url).hostname;
-            faviconHtml = `<img class="favicon-img" src="/favicon/${encodeURIComponent(domain)}" alt="" />`;
+            faviconHtml = `<img class="favicon-img" src="https://api.coopr.tech:8148/favicon/${encodeURIComponent(domain)}" alt="" />`;
           } catch (err) {
             console.error('Error parsing URL for favicon:', err);
           }
@@ -694,7 +694,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const site = sites.find(s => s.alias && s.alias.includes(tag));
         
         if (site && site.title) {
-          // Show the site info with favicon
+          // Show the site info with 
           let favicon = '';
           try {
             const domain = new URL(site.site).hostname;
