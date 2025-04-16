@@ -1,3 +1,4 @@
+// script.js with follow-up conversation feature and fixes
 document.addEventListener('DOMContentLoaded', () => {
   const searchBar = document.getElementById('search-bar');
   const searchIcon = document.getElementById('search-icon');
@@ -11,6 +12,13 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // View state management
   let currentView = 'search'; // 'search' or 'images'
+  let currentResults = null; // Store current search results
+  let currentImageResults = null; // Store current image results
+  let conversationHistory = []; // Store conversation history
+  let followupCount = 0; // Track number of follow-ups for current search
+  const MAX_FOLLOWUPS = 3; // Maximum number of followups allowed per search
+  let hasLoadedImages = false; // Track if images have been loaded
+  let hasLoadedSearch = false; // Track if search results have been loaded
   
   // Check for query parameter in URL on page load
   function checkUrlQueryParam() {
@@ -18,19 +26,37 @@ document.addEventListener('DOMContentLoaded', () => {
     const urlParams = new URLSearchParams(window.location.search);
     const queryParam = urlParams.get('f');
     
-    if (queryParam && window.location.pathname === '/') {
+    if (queryParam) {
       // We're on the home page with a query param, perform immediate search
       const query = decodeURIComponent(queryParam);
       if (searchBar) searchBar.value = query;
+      
+      // Determine where to redirect
+      if (window.location.pathname === '/') {
+        // Redirect to results page
+        window.location.href = `/results?f=${encodeURIComponent(query)}`;
+        return;
+      }
       
       // Check if it has a flashtag
       const flashtagMatch = query.match(/^(.*?)\s+!(\w+)$/);
       if (flashtagMatch) {
         // This is a flashtag search
         handleFlashTagSearch(query, flashtagMatch);
-      } else {
-        // Normal search
-        performSearch(query);
+      } else if (window.location.pathname === '/results') {
+        // For results page, check view parameter
+        const viewParam = urlParams.get('view');
+        if (viewParam === 'images') {
+          updateTabSelection('images');
+          if (!hasLoadedImages) {
+            fetchAndDisplayImages(query);
+          }
+        } else {
+          updateTabSelection('search');
+          if (!hasLoadedSearch) {
+            performSearch(query);
+          }
+        }
       }
     }
   }
@@ -125,6 +151,10 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
     
+    // Reset conversation history for new search
+    conversationHistory = [];
+    followupCount = 0;
+    
     // For regular search
     if (window.location.pathname !== '/results') {
       window.location.href = `/results?f=${encodeURIComponent(query)}`;
@@ -134,8 +164,12 @@ document.addEventListener('DOMContentLoaded', () => {
       queryParams.set('f', query);
       window.history.pushState({}, '', `${window.location.pathname}?${queryParams}`);
       
-      // Stream content
-      handleStreamingResponse(query);
+      // Don't restream if we've already loaded this search
+      if (!hasLoadedSearch) {
+        // Stream content
+        handleStreamingResponse(query);
+        hasLoadedSearch = true;
+      }
     }
   };
   
@@ -168,7 +202,7 @@ document.addEventListener('DOMContentLoaded', () => {
   };
   
   // Handle AI streaming response
-  window.handleStreamingResponse = async (query) => {
+  window.handleStreamingResponse = async (query, isFollowup = false) => {
     const resultsElement = document.getElementById('results');
     const aiSummaryContent = document.getElementById('ai-summary-content');
     const loadingElement = document.getElementById('loading');
@@ -182,18 +216,26 @@ document.addEventListener('DOMContentLoaded', () => {
     // Clear existing content
     aiSummaryContent.innerHTML = '';
     if (thinkingContent) thinkingContent.innerHTML = '';
-    if (queryChips) queryChips.innerHTML = '';
-    if (refinedQueries) refinedQueries.style.display = 'none';
+    if (queryChips && !isFollowup) queryChips.innerHTML = '';
+    if (refinedQueries && !isFollowup) refinedQueries.style.display = 'none';
     
     // Show loading state
     if (loadingElement) loadingElement.style.display = 'flex';
     
-    // Clear existing results
-    resultsElement.innerHTML = '';
+    // Clear existing results only if this is a new search, not a followup
+    if (!isFollowup) {
+      resultsElement.innerHTML = '';
+    }
     
     try {
+      // Prepare conversation history for the API
+      let historyParam = '';
+      if (isFollowup && conversationHistory.length > 0) {
+        historyParam = `&history=${encodeURIComponent(JSON.stringify(conversationHistory))}`;
+      }
+      
       // Set up Server-Sent Events connection
-      const eventSource = new EventSource(`https://api.coopr.tech:8148/flashtag-ai/stream?f=${encodeURIComponent(query)}`);
+      const eventSource = new EventSource(`https://api.coopr.tech:8148/flashtag-ai/stream?f=${encodeURIComponent(query)}${historyParam}${isFollowup ? '&followup=true' : ''}`);
       
       // Stream processing state
       let summaryText = '';
@@ -203,6 +245,27 @@ document.addEventListener('DOMContentLoaded', () => {
       let isProcessing = false;
       let allThoughts = [];
       let curatedResults = [];
+      
+      // If this is a followup, add it to conversation UI
+      if (isFollowup) {
+        const followupQuestion = document.createElement('div');
+        followupQuestion.className = 'followup-question';
+        followupQuestion.innerHTML = `
+          <div class="user-query">
+            <strong>You:</strong> ${query}
+          </div>
+        `;
+        aiSummaryContent.appendChild(followupQuestion);
+        
+        // Add a response container
+        const followupResponse = document.createElement('div');
+        followupResponse.className = 'followup-response';
+        followupResponse.innerHTML = `<strong>AI:</strong> `;
+        aiSummaryContent.appendChild(followupResponse);
+        
+        // Update aiSummaryContent to be this response container for streaming
+        aiSummaryContent = followupResponse;
+      }
       
       // Process animation queue
       const processAnimationQueue = async () => {
@@ -309,6 +372,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const displayResults = (results, isCurated = false, curatedFor = '') => {
         if (!results || !resultsElement) return;
         
+        // Store results for tab switching
+        if (!isCurated && !isFollowup) {
+          currentResults = results;
+        }
+        
         results.forEach(result => {
           if (!result || !result.result_url) return;
           
@@ -323,7 +391,7 @@ document.addEventListener('DOMContentLoaded', () => {
           let faviconHtml = '';
           try {
             const domain = new URL(result.result_url).hostname;
-            faviconHtml = `<img class="favicon-img" src="https://api.coopr.tech:8148/favicon/${encodeURIComponent(domain)}" alt="" />`;
+            faviconHtml = `<img class="favicon-img" src="/favicon/${encodeURIComponent(domain)}" alt="" />`;
           } catch (err) {
             console.error('Error parsing URL for favicon:', err);
           }
@@ -367,7 +435,7 @@ document.addEventListener('DOMContentLoaded', () => {
           switch (data.type) {
             case 'results':
               // Initial search results
-              if (data.results && data.results.length > 0) {
+              if (data.results && data.results.length > 0 && !isFollowup) {
                 displayResults(data.results);
                 hasResults = true;
               }
@@ -394,8 +462,8 @@ document.addEventListener('DOMContentLoaded', () => {
               break;
               
             case 'curated_queries':
-              // AI-generated refined search queries
-              if (data.queries && data.queries.length > 0 && queryChips && refinedQueries) {
+              // AI-generated refined search queries (only for new searches, not followups)
+              if (!isFollowup && data.queries && data.queries.length > 0 && queryChips && refinedQueries) {
                 queryChips.innerHTML = '';
                 
                 data.queries.forEach(refinedQuery => {
@@ -413,8 +481,8 @@ document.addEventListener('DOMContentLoaded', () => {
               break;
               
             case 'curated_results':
-              // Store curated results to display them
-              if (data.results && data.results.length > 0) {
+              // Store curated results to display them (only for new searches, not followups)
+              if (!isFollowup && data.results && data.results.length > 0) {
                 curatedResults.push({
                   query: data.query,
                   results: data.results
@@ -426,21 +494,49 @@ document.addEventListener('DOMContentLoaded', () => {
               // End of stream, display curated results
               if (loadingElement) loadingElement.style.display = 'none';
               
-              // Display all curated results after a short delay
-              setTimeout(() => {
-                if (curatedResults.length > 0) {
-                  // Create a section header for curated results
-                  const curatedHeader = document.createElement('h3');
-                  curatedHeader.className = 'curated-results-header';
-                  curatedHeader.textContent = 'AI Curated Results';
-                  resultsElement.appendChild(curatedHeader);
+              // Display all curated results after a short delay (only for new searches)
+              if (!isFollowup) {
+                setTimeout(() => {
+                  if (curatedResults.length > 0) {
+                    // Create a section header for curated results
+                    const curatedHeader = document.createElement('h3');
+                    curatedHeader.className = 'curated-results-header';
+                    curatedHeader.textContent = 'AI Curated Results';
+                    resultsElement.appendChild(curatedHeader);
+                    
+                    // Display each set of curated results
+                    curatedResults.forEach(set => {
+                      displayResults(set.results, true, set.query);
+                    });
+                  }
+                }, 1000);
+              }
+              
+              // Add the finalized conversation to history
+              if (summaryText) {
+                conversationHistory.push({
+                  role: 'user',
+                  content: query
+                });
+                conversationHistory.push({
+                  role: 'assistant',
+                  content: summaryText
+                });
+                
+                // If this was a followup, increment the counter
+                if (isFollowup) {
+                  followupCount++;
                   
-                  // Display each set of curated results
-                  curatedResults.forEach(set => {
-                    displayResults(set.results, true, set.query);
-                  });
+                  // After response, show the followup UI if we haven't reached max
+                  if (followupCount < MAX_FOLLOWUPS) {
+                    // Show followup UI after a slight delay
+                    setTimeout(addFollowupUI, 500);
+                  }
+                } else {
+                  // For new searches, add followup UI
+                  setTimeout(addFollowupUI, 500);
                 }
-              }, 1000);
+              }
               
               eventSource.close();
               break;
@@ -478,6 +574,70 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
   
+  // Add followup UI
+  function addFollowupUI() {
+    const aiSummaryContent = document.getElementById('ai-summary-content');
+    if (!aiSummaryContent) return;
+    
+    // Check if we already have a followup container
+    let followupContainer = document.querySelector('.followup-container');
+    
+    if (!followupContainer) {
+      followupContainer = document.createElement('div');
+      followupContainer.className = 'followup-container';
+      
+      // Create the followup container with input and button
+      followupContainer.innerHTML = `
+        <div class="followup-header">Ask a follow-up question (${followupCount}/${MAX_FOLLOWUPS})</div>
+        <div class="followup-input-container">
+          <input type="text" class="followup-input" placeholder="Ask a follow-up question..." />
+          <button class="followup-button">Ask</button>
+        </div>
+      `;
+      
+      aiSummaryContent.appendChild(followupContainer);
+      
+      // Add event listeners
+      const followupInput = followupContainer.querySelector('.followup-input');
+      const followupButton = followupContainer.querySelector('.followup-button');
+      
+      followupInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          const followupQuery = followupInput.value.trim();
+          if (followupQuery) {
+            handleFollowup(followupQuery);
+            followupInput.value = '';
+            followupContainer.remove(); // Remove the container after submission
+          }
+        }
+      });
+      
+      followupButton.addEventListener('click', () => {
+        const followupQuery = followupInput.value.trim();
+        if (followupQuery) {
+          handleFollowup(followupQuery);
+          followupInput.value = '';
+          followupContainer.remove(); // Remove the container after submission
+        }
+      });
+      
+      // Focus the input
+      setTimeout(() => followupInput.focus(), 100);
+    } else {
+      // Update the header to show correct count
+      const header = followupContainer.querySelector('.followup-header');
+      if (header) {
+        header.textContent = `Ask a follow-up question (${followupCount}/${MAX_FOLLOWUPS})`;
+      }
+    }
+  }
+  
+  // Handle followup question
+  function handleFollowup(query) {
+    // Process the followup query
+    handleStreamingResponse(query, true);
+  }
+  
   // Fetch and display images
   async function fetchAndDisplayImages(query) {
     const resultsElement = document.getElementById('results');
@@ -485,6 +645,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const aiSummaryElement = document.getElementById('ai-summary');
     
     if (!resultsElement) return;
+    
+    // If we already have images for this query, just show them
+    if (currentImageResults && currentImageResults.query === query) {
+      if (loadingElement) loadingElement.style.display = 'none';
+      if (aiSummaryElement) aiSummaryElement.style.display = 'none';
+      
+      // Display the cached images
+      resultsElement.innerHTML = '';
+      displayImageResults(currentImageResults.images);
+      return;
+    }
     
     // Clear existing content and show loading state
     resultsElement.innerHTML = '';
@@ -497,48 +668,63 @@ document.addEventListener('DOMContentLoaded', () => {
       
       if (loadingElement) loadingElement.style.display = 'none';
       
-      if (data.images && data.images.length > 0) {
-        // Create image grid container
-        const imageGrid = document.createElement('div');
-        imageGrid.className = 'image-grid';
-        
-        // Add Google attribution
-        const attribution = document.createElement('div');
-        attribution.className = 'google-attribution';
-        attribution.innerHTML = 'Images powered by Google Images';
-        resultsElement.appendChild(attribution);
-        
-        // Add images to grid
-        data.images.forEach((image, index) => {
-          const imageCard = document.createElement('div');
-          imageCard.className = 'image-card';
-          imageCard.style.animationDelay = `${index * 50}ms`;
-          
-          imageCard.innerHTML = `
-            <div class="image-container">
-              <img src="${image.thumbnail}" alt="${image.title}" loading="lazy" />
-            </div>
-            <div class="image-title">${image.title}</div>
-            <div class="image-source">${image.source}</div>
-          `;
-          
-          // Add click handler to open full image
-          imageCard.addEventListener('click', () => {
-            openImageModal(image.url, image.title);
-          });
-          
-          imageGrid.appendChild(imageCard);
-        });
-        
-        resultsElement.appendChild(imageGrid);
-      } else {
-        resultsElement.innerHTML = '<div class="no-results">No images found for your query. Try a different search term.</div>';
-      }
+      // Cache the image results
+      currentImageResults = {
+        query: query,
+        images: data.images || []
+      };
+      
+      // Display images
+      displayImageResults(data.images || []);
       
     } catch (error) {
       console.error('Error fetching images:', error);
       if (loadingElement) loadingElement.style.display = 'none';
       resultsElement.innerHTML = '<div class="error-message">Sorry, there was an error loading images. Please try again later.</div>';
+    }
+  }
+  
+  // Display image results
+  function displayImageResults(images) {
+    const resultsElement = document.getElementById('results');
+    if (!resultsElement) return;
+    
+    if (images && images.length > 0) {
+      // Create image grid container
+      const imageGrid = document.createElement('div');
+      imageGrid.className = 'image-grid';
+      
+      // Add Google attribution
+      const attribution = document.createElement('div');
+      attribution.className = 'google-attribution';
+      attribution.innerHTML = 'Images powered by Google Images';
+      resultsElement.appendChild(attribution);
+      
+      // Add images to grid
+      images.forEach((image, index) => {
+        const imageCard = document.createElement('div');
+        imageCard.className = 'image-card';
+        imageCard.style.animationDelay = `${index * 50}ms`;
+        
+        imageCard.innerHTML = `
+          <div class="image-container">
+            <img src="${image.thumbnail}" alt="${image.title}" loading="lazy" />
+          </div>
+          <div class="image-title">${image.title}</div>
+          <div class="image-source">${image.source}</div>
+        `;
+        
+        // Add click handler to open full image
+        imageCard.addEventListener('click', () => {
+          openImageModal(image.url, image.title);
+        });
+        
+        imageGrid.appendChild(imageCard);
+      });
+      
+      resultsElement.appendChild(imageGrid);
+    } else {
+      resultsElement.innerHTML = '<div class="no-results">No images found for your query. Try a different search term.</div>';
     }
   }
   
@@ -593,7 +779,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
   
-  // Update tab selection
+  // Update tab selection without refreshing results
   function updateTabSelection(tab) {
     if (!navTabs) return;
     
@@ -602,18 +788,43 @@ document.addEventListener('DOMContentLoaded', () => {
       t.classList.toggle('active', t.dataset.tab === tab);
     });
     
-    currentView = tab;
-    
-    // Toggle content visibility
-    const tabContents = document.querySelectorAll('.tab-content');
-    tabContents.forEach(content => {
-      content.classList.toggle('active', content.id === `${tab}-content`);
-    });
-    
-    // Hide/show AI summary for images view
-    const aiSummaryEl = document.getElementById('ai-summary');
-    if (aiSummaryEl) {
-      aiSummaryEl.style.display = tab === 'images' ? 'none' : 'block';
+    // Only update if we're changing tabs
+    if (currentView !== tab) {
+      currentView = tab;
+      
+      // Toggle content visibility
+      const tabContents = document.querySelectorAll('.tab-content');
+      tabContents.forEach(content => {
+        content.classList.toggle('active', content.id === `${tab}-content`);
+      });
+      
+      const resultsElement = document.getElementById('results');
+      const aiSummaryElement = document.getElementById('ai-summary');
+      
+      // Handle tab-specific display
+      if (tab === 'images') {
+        // Hide AI summary for images view
+        if (aiSummaryElement) {
+          aiSummaryElement.style.display = 'none';
+        }
+        
+        // If we have a query, display images for it
+        const query = searchBar.value.trim() || new URLSearchParams(window.location.search).get('f');
+        if (query && resultsElement) {
+          fetchAndDisplayImages(query);
+        }
+      } else {
+        // Show AI summary for search view
+        if (aiSummaryElement) {
+          aiSummaryElement.style.display = 'block';
+        }
+        
+        // If we have stored results, display them
+        if (currentResults && resultsElement) {
+          resultsElement.innerHTML = '';
+          displayResults(currentResults);
+        }
+      }
     }
   }
   
@@ -639,14 +850,6 @@ document.addEventListener('DOMContentLoaded', () => {
       tabs.forEach(tab => {
         tab.addEventListener('click', () => {
           updateTabSelection(tab.dataset.tab);
-          
-          // Re-run search with current query if available
-          const query = (searchBar && searchBar.value.trim()) || 
-                      new URLSearchParams(window.location.search).get('f');
-          
-          if (query) {
-            performSearch(query, tab.dataset.tab);
-          }
         });
       });
     } else {
@@ -655,14 +858,6 @@ document.addEventListener('DOMContentLoaded', () => {
       tabs.forEach(tab => {
         tab.addEventListener('click', () => {
           updateTabSelection(tab.dataset.tab);
-          
-          // Re-run search with current query if available
-          const query = (searchBar && searchBar.value.trim()) || 
-                      new URLSearchParams(window.location.search).get('f');
-          
-          if (query) {
-            performSearch(query, tab.dataset.tab);
-          }
         });
       });
     }
@@ -694,7 +889,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const site = sites.find(s => s.alias && s.alias.includes(tag));
         
         if (site && site.title) {
-          // Show the site info with 
+          // Show the site info with favicon
           let favicon = '';
           try {
             const domain = new URL(site.site).hostname;
@@ -815,6 +1010,478 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
   
+  // Add CSS for new followup components
+  function addFollowupStyles() {
+    const styleElement = document.createElement('style');
+    styleElement.textContent = `
+      .followup-container {
+        margin-top: 20px;
+        padding: 15px;
+        background-color: #f9fafb;
+        border-radius: 12px;
+        border: 1px solid #e5e7eb;
+      }
+      
+      .followup-header {
+        font-size: 14px;
+        color: #6b7280;
+        margin-bottom: 10px;
+      }
+      
+      .followup-input-container {
+        display: flex;
+      }
+      
+      .followup-input {
+        flex: 1;
+        padding: 10px 15px;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        font-size: 14px;
+      }
+      
+      .followup-button {
+        margin-left: 10px;
+        padding: 10px 15px;
+        background-color: #6366f1;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: background-color 0.2s;
+      }
+      
+      .followup-button:hover {
+        background-color: #4f46e5;
+      }
+      
+      .followup-question {
+        margin-top: 20px;
+        padding: 10px 15px;
+        background-color: #f3f4f6;
+        border-radius: 8px;
+        border-left: 3px solid #6366f1;
+      }
+      
+      .followup-response {
+        margin-top: 10px;
+      }
+      
+      .user-query {
+        color: #374151;
+      }
+    `;
+    document.head.appendChild(styleElement);
+  }
+  
+  // Add CSS for images that actually works
+  function addImageStyles() {
+    const styleElement = document.createElement('style');
+    styleElement.textContent = `
+      .image-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 16px;
+        margin-top: 20px;
+      }
+      
+      .google-attribution {
+        text-align: right;
+        font-size: 12px;
+        color: #6b7280;
+        margin-bottom: 10px;
+      }
+      
+      .image-card {
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s, box-shadow 0.2s;
+        cursor: pointer;
+        background-color: white;
+        animation: fadeInUp 0.5s forwards;
+        opacity: 0;
+      }
+      
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      
+      .image-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      }
+      
+      .image-container {
+        height: 150px;
+        overflow: hidden;
+      }
+      
+      .image-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s;
+      }
+      
+      .image-card:hover .image-container img {
+        transform: scale(1.05);
+      }
+      
+      .image-title {
+        padding: 10px;
+        font-size: 14px;
+        font-weight: 500;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      
+      .image-source {
+        padding: 0 10px 10px;
+        font-size: 12px;
+        color: #6b7280;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      
+      .image-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.85);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s;
+      }
+      
+      .image-modal.visible {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      
+      .modal-content {
+        position: relative;
+        max-width: 90%;
+        max-height: 90%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .modal-image {
+        max-width: 100%;
+        max-height: 80vh;
+        object-fit: contain;
+        border-radius: 4px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+      }
+      
+      .modal-title {
+        margin-top: 15px;
+        color: white;
+        text-align: center;
+        max-width: 100%;
+        font-size: 16px;
+      }
+      
+      .close-modal {
+        position: absolute;
+        top: -30px;
+        right: -30px;
+        font-size: 30px;
+        color: white;
+        cursor: pointer;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background-color: rgba(0, 0, 0, 0.5);
+      }
+      
+      .no-results {
+        text-align: center;
+        padding: 40px;
+        color: #6b7280;
+        font-size: 16px;
+      }
+      
+      .error-message {
+        text-align: center;
+        padding: 40px;
+        color: #ef4444;
+        font-size: 16px;
+      }
+    `;
+    document.head.appendChild(styleElement);
+  }
+  
+  // Add the followup styles
+  addFollowupStyles();
+  
+  // Add fixed image styles
+  addImageStyles();
+  
   // Initialize the page
   init();
+  
+  // Check for URL parameter to handle default search engine redirects
+  window.addEventListener('load', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const queryParam = urlParams.get('f');
+    
+    // If we're on home page with a query parameter, redirect to search results
+    if (queryParam && window.location.pathname === '/') {
+      const query = decodeURIComponent(queryParam);
+      if (searchBar) searchBar.value = query;
+      
+      // Check if it has a flashtag
+      const flashtagMatch = query.match(/^(.*?)\s+!(\w+)$/);
+      if (flashtagMatch) {
+        // This is a flashtag search
+        handleFlashTagSearch(query, flashtagMatch);
+      } else {
+        // Normal search - redirect to results page
+        window.location.href = `/results?f=${encodeURIComponent(query)}`;
+      }
+    }
+  });
+  
+  // For displaying cached results when switching between tabs
+  function showCachedResults() {
+    if (currentView === 'search' && currentResults) {
+      const resultsElement = document.getElementById('results');
+      if (resultsElement) {
+        resultsElement.innerHTML = '';
+        displayResults(currentResults);
+      }
+      
+      // Show AI summary if available
+      const aiSummaryElement = document.getElementById('ai-summary');
+      if (aiSummaryElement) {
+        aiSummaryElement.style.display = 'block';
+      }
+    } else if (currentView === 'images' && currentImageResults) {
+      const resultsElement = document.getElementById('results');
+      if (resultsElement) {
+        resultsElement.innerHTML = '';
+        displayImageResults(currentImageResults.images);
+      }
+      
+      // Hide AI summary for images
+      const aiSummaryElement = document.getElementById('ai-summary');
+      if (aiSummaryElement) {
+        aiSummaryElement.style.display = 'none';
+      }
+    }
+  }
+  
+  // Override the updateTabSelection function to use cached results
+  function updateTabSelection(tab) {
+    if (!navTabs) return;
+    
+    const tabs = navTabs.querySelectorAll('.nav-tab');
+    tabs.forEach(t => {
+      t.classList.toggle('active', t.dataset.tab === tab);
+    });
+    
+    // Only update if we're changing tabs
+    if (currentView !== tab) {
+      currentView = tab;
+      
+      // Toggle content visibility
+      const tabContents = document.querySelectorAll('.tab-content');
+      tabContents.forEach(content => {
+        content.classList.toggle('active', content.id === `${tab}-content`);
+      });
+      
+      const aiSummaryElement = document.getElementById('ai-summary');
+      
+      // Handle tab-specific display using cached results when available
+      if (tab === 'images') {
+        // Hide AI summary for images view
+        if (aiSummaryElement) {
+          aiSummaryElement.style.display = 'none';
+        }
+        
+        // Use cached image results if available
+        const query = searchBar?.value.trim() || new URLSearchParams(window.location.search).get('f');
+        if (query) {
+          if (currentImageResults && currentImageResults.query === query) {
+            showCachedResults();
+          } else {
+            fetchAndDisplayImages(query);
+          }
+        }
+      } else {
+        // Show AI summary for search view
+        if (aiSummaryElement) {
+          aiSummaryElement.style.display = 'block';
+        }
+        
+        // Use cached search results if available
+        if (currentResults) {
+          showCachedResults();
+        } else {
+          // If no cached results, perform search if we have a query
+          const query = searchBar?.value.trim() || new URLSearchParams(window.location.search).get('f');
+          if (query) {
+            handleStreamingResponse(query);
+          }
+        }
+      }
+      
+      // Update URL to reflect current view
+      const urlParams = new URLSearchParams(window.location.search);
+      urlParams.set('view', tab);
+      const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
+      window.history.replaceState({}, '', newUrl);
+    }
+  }
+  
+  // Enhanced image loading with preloading for better performance
+  function preloadImages(images, startIndex, count) {
+    for (let i = startIndex; i < Math.min(startIndex + count, images.length); i++) {
+      const img = new Image();
+      img.src = images[i].thumbnail;
+    }
+  }
+  
+  // Override displayImageResults to include preloading
+  function displayImageResults(images) {
+    const resultsElement = document.getElementById('results');
+    if (!resultsElement) return;
+    
+    if (images && images.length > 0) {
+      // Create image grid container
+      const imageGrid = document.createElement('div');
+      imageGrid.className = 'image-grid';
+      
+      // Add Google attribution
+      const attribution = document.createElement('div');
+      attribution.className = 'google-attribution';
+      attribution.innerHTML = 'Images powered by Google Images';
+      resultsElement.appendChild(attribution);
+      
+      // Add initial batch of images to grid
+      const initialBatchSize = 12; // Number of images to show initially
+      
+      // Preload the first batch of images
+      preloadImages(images, 0, initialBatchSize);
+      
+      // Add all images to grid with staggered loading
+      images.forEach((image, index) => {
+        const imageCard = document.createElement('div');
+        imageCard.className = 'image-card';
+        imageCard.style.animationDelay = `${index * 50}ms`;
+        
+        imageCard.innerHTML = `
+          <div class="image-container">
+            <img src="${image.thumbnail}" alt="${image.title}" loading="${index < initialBatchSize ? 'eager' : 'lazy'}" />
+          </div>
+          <div class="image-title">${image.title}</div>
+          <div class="image-source">${image.source}</div>
+        `;
+        
+        // Add click handler to open full image
+        imageCard.addEventListener('click', () => {
+          openImageModal(image.url, image.title);
+        });
+        
+        imageGrid.appendChild(imageCard);
+        
+        // Preload next batch when initial batch is viewed
+        if (index === initialBatchSize - 1) {
+          setTimeout(() => {
+            preloadImages(images, initialBatchSize, images.length - initialBatchSize);
+          }, 1000);
+        }
+      });
+      
+      resultsElement.appendChild(imageGrid);
+      
+      // Implement intersection observer to load images as they come into view
+      if ('IntersectionObserver' in window) {
+        const imageObserver = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              const img = entry.target.querySelector('img');
+              if (img && img.dataset.src) {
+                img.src = img.dataset.src;
+                delete img.dataset.src;
+              }
+              imageObserver.unobserve(entry.target);
+            }
+          });
+        }, { rootMargin: '200px' });
+        
+        document.querySelectorAll('.image-card').forEach(card => {
+          imageObserver.observe(card);
+        });
+      }
+    } else {
+      resultsElement.innerHTML = '<div class="no-results">No images found for your query. Try a different search term.</div>';
+    }
+  }
+  
+  // Keyboard navigation for image modal
+  document.addEventListener('keydown', (e) => {
+    const modal = document.getElementById('image-modal');
+    if (modal && modal.classList.contains('visible')) {
+      if (e.key === 'Escape') {
+        closeImageModal();
+      }
+    }
+  });
+  
+  // Function to search for flashtags.tech?f=%s search parameter
+  function checkForDefaultSearchParameter() {
+    const searchParams = new URLSearchParams(window.location.search);
+    return searchParams.has('f');
+  }
+  
+  // Update the init function to better handle URL parameters
+  function enhancedInit() {
+    // First check if we have a search parameter
+    if (checkForDefaultSearchParameter()) {
+      // Get the search parameter
+      const urlParams = new URLSearchParams(window.location.search);
+      const queryParam = urlParams.get('f');
+      
+      if (queryParam) {
+        // If we're on the homepage, redirect to results
+        if (window.location.pathname === '/') {
+          window.location.href = `/results?f=${encodeURIComponent(queryParam)}`;
+          return;
+        }
+      }
+    }
+    
+    // Run the original init function
+    init();
+  }
+  
+  // Replace init with enhanced version
+  const originalInit = init;
+  init = enhancedInit;
+  
+  // Call init to start the page
+  enhancedInit();
 });
