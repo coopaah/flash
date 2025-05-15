@@ -3,22 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Flash Search</title>
-  <meta name="description" content="A powerful search engine designed for speed and efficiency. Search hundreds of sites in one place." />
+  <title>FlashTags - Search Results</title>
+  <meta name="description" content="A powerful AI-powered search engine that delivers fast, comprehensive results with intelligent summaries." />
   <meta name="robots" content="noindex, follow" />
   
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://flashtags.tech/results" />
-  <meta property="og:title" content="Flash Search" />
-  <meta property="og:description" content="A powerful search engine designed for speed and efficiency. Search hundreds of sites in one place." />
+  <meta property="og:title" content="FlashTags - Search Results" />
+  <meta property="og:description" content="A powerful AI-powered search engine that delivers fast, comprehensive results with intelligent summaries." />
   <meta property="og:image" content="https://flashtags.tech/logo.png" />
   
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:url" content="https://flashtags.tech/results" />
-  <meta name="twitter:title" content="Flash Search" />
-  <meta name="twitter:description" content="A powerful search engine designed for speed and efficiency. Search hundreds of sites in one place." />
+  <meta name="twitter:title" content="FlashTags - Search Results" />
+  <meta name="twitter:description" content="A powerful AI-powered search engine that delivers fast, comprehensive results with intelligent summaries." />
   <meta name="twitter:image" content="https://flashtags.tech/logo.png" />
   
   <!-- Canonical URL with search parameter -->
@@ -28,21 +28,28 @@
   <link rel="icon" href="/favicon.ico" />
   <link rel="apple-touch-icon" href="/logo.png" />
   
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     :root {
       --primary-color: #6366f1;
-      --secondary-color: #059669;
-      --bg-color: #ffffff;
-      --card-bg: #f8fafc;
-      --text-color: #1e293b;
+      --primary-light: #818cf8;
+      --primary-dark: #4f46e5;
+      --secondary-color: #14b8a6;
+      --bg-color: #f8fafc;
+      --card-bg: #ffffff;
+      --text-color: #0f172a;
       --muted-text: #64748b;
       --input-bg: #ffffff;
       --transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     }
     
     * {
       box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
 
     html {
@@ -50,13 +57,14 @@
     }
     
     body {
-      font-family: 'Roboto', sans-serif;
+      font-family: 'Inter', sans-serif;
       background-color: var(--bg-color);
+      color: var(--text-color);
       margin: 0;
       padding: 0;
       display: flex;
       flex-direction: column;
-      align-items: center;
+      min-height: 100vh;
       opacity: 0;
       animation: fadeIn 0.6s var(--transition-timing) forwards;
     }
@@ -70,17 +78,17 @@
       width: 100%;
       display: flex;
       align-items: center;
-      padding: 20px 40px;
-      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
-      backdrop-filter: blur(12px);
-      background: rgba(255, 255, 255, 0.85);
+      padding: 1rem 2rem;
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow-sm);
       position: sticky;
       top: 0;
       z-index: 1000;
     }
     
-    .logo {
-      width: 150px;
+    .header-logo {
+      width: 120px;
       cursor: pointer;
     }
     
@@ -88,65 +96,76 @@
       flex-grow: 1;
       display: flex;
       align-items: center;
-      margin-left: 20px;
+      margin-left: 1.5rem;
       position: relative;
     }
     
     .search-bar {
       width: 100%;
-      padding: 14px 28px;
-      font-size: 16px;
-      border: 1px solid #e2e8f0;
+      padding: 0.875rem 1.25rem;
+      font-size: 1rem;
+      border: 2px solid rgba(99, 102, 241, 0.2);
       border-radius: 50px;
       background-color: var(--input-bg);
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+      box-shadow: var(--shadow-sm);
       transition: all 0.3s var(--transition-timing);
     }
     
     .search-bar:focus {
       outline: none;
-      box-shadow: 0 3px 8px rgba(99, 102, 241, 0.15);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3), var(--shadow-md);
       border-color: var(--primary-color);
+    }
+    
+    .search-icon-container {
+      position: absolute;
+      right: 0.5rem;
+      display: flex;
+      align-items: center;
     }
     
     .search-icon,
     .ai-icon {
       width: 32px;
       height: 32px;
-      margin-left: 12px;
+      padding: 6px;
+      margin: 0 4px;
       cursor: pointer;
       fill: var(--primary-color);
-      transition: transform 0.2s var(--transition-timing),
-                  opacity 0.2s ease;
+      transition: all 0.2s var(--transition-timing);
+      border-radius: 50%;
     }
     
     .search-icon:hover,
     .ai-icon:hover {
       transform: translateY(-2px);
-      opacity: 0.9;
+      background-color: rgba(99, 102, 241, 0.1);
     }
     
     .nav-tabs {
       display: flex;
-      margin-top: 20px;
+      width: 100%;
+      max-width: 800px;
+      margin: 1.5rem auto 0;
       border-bottom: 1px solid #e2e8f0;
-      padding: 0 20px;
+      padding: 0 1.5rem;
     }
     
     .nav-tab {
-      padding: 12px 20px;
-      margin-right: 16px;
-      font-size: 15px;
+      padding: 0.75rem 1.25rem;
+      margin-right: 1rem;
+      font-size: 0.875rem;
       color: var(--muted-text);
       cursor: pointer;
       border-bottom: 2px solid transparent;
       transition: all 0.2s ease;
+      font-weight: 500;
     }
     
     .nav-tab.active {
       color: var(--primary-color);
       border-bottom: 2px solid var(--primary-color);
-      font-weight: 500;
+      font-weight: 600;
     }
     
     .nav-tab:hover:not(.active) {
@@ -157,71 +176,34 @@
     .tab-content {
       display: none;
       width: 100%;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
     }
     
     .tab-content.active {
       display: block;
     }
     
-    .results-container {
-      width: 90%;
-      max-width: 800px;
-      padding: 20px;
-      margin-top: 10px;
-    }
-    
     .ai-summary {
       background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
-      padding: 24px;
+      padding: 1.5rem;
       border-radius: 16px;
-      margin-bottom: 24px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.04);
-      font-size: 17px;
+      margin: 1.5rem 0;
+      box-shadow: var(--shadow-md);
+      font-size: 1rem;
       color: var(--text-color);
       line-height: 1.6;
-      border: 1px solid #f1f5f9;
+      border: 1px solid rgba(99, 102, 241, 0.1);
       position: relative;
       overflow: hidden;
-    }
-
-    .toast {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      padding: 12px 24px;
-      border-radius: 25px;
-      color: white;
-      font-size: 14px;
-      z-index: 10000;
-      animation: toastIn 0.3s ease;
-    }
-
-    .toast.error {
-      background-color: #ef4444;
-    }
-
-    .toast.success {
-      background-color: #10b981;
-    }
-
-    @keyframes toastIn {
-      from { opacity: 0; transform: translate(-50%, 20px); }
-      to { opacity: 1; transform: translate(-50%, 0); }
-    }
-
-    .sparkle-icon {
-      width: 20px;
-      height: 20px;
-      fill: var(--primary-color);
-      margin-right: 8px;
     }
 
     .ai-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 16px;
+      margin-bottom: 1rem;
     }
     
     .ai-header-left {
@@ -231,40 +213,51 @@
 
     .ai-header h3 {
       margin: 0;
-      font-size: 18px;
+      font-size: 1.125rem;
       color: var(--primary-color);
+      font-weight: 600;
+    }
+
+    .sparkle-icon {
+      width: 20px;
+      height: 20px;
+      fill: var(--primary-color);
+      margin-right: 0.5rem;
+    }
+
+    .ai-summary-content {
+      font-size: 1rem;
+      line-height: 1.6;
     }
 
     .ai-footer {
-      margin-top: 16px;
-      padding-top: 12px;
-      border-top: 1px solid rgba(0,0,0,0.1);
-      font-size: 12px;
+      margin-top: 1rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid rgba(99, 102, 241, 0.1);
+      font-size: 0.75rem;
       color: var(--muted-text);
       text-align: center;
     }
     
     .result {
-      margin-bottom: 20px;
+      margin-bottom: 1.5rem;
       background: var(--card-bg);
-      padding: 20px;
+      padding: 1.25rem;
       border-radius: 12px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
-      opacity: 0;
-      animation: fadeIn 0.8s var(--transition-timing) forwards;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid rgba(99, 102, 241, 0.05);
       transition: all 0.3s var(--transition-timing);
-      border: 1px solid #f1f5f9;
     }
     
     .result:hover {
       transform: translateY(-4px);
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+      box-shadow: var(--shadow-md);
     }
     
     /* Curated results styling */
     .result.curated {
-      background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-      border: 1px solid #bae6fd;
+      background: linear-gradient(135deg, #eef2ff 0%, #e0f2fe 100%);
+      border: 1px solid rgba(99, 102, 241, 0.1);
       position: relative;
       overflow: hidden;
     }
@@ -273,10 +266,10 @@
       position: absolute;
       top: 12px;
       right: 12px;
-      background-color: #0ea5e9;
+      background-color: var(--primary-color);
       color: white;
-      font-size: 12px;
-      padding: 4px 8px;
+      font-size: 0.75rem;
+      padding: 0.25rem 0.5rem;
       border-radius: 4px;
       display: flex;
       align-items: center;
@@ -284,18 +277,20 @@
     }
     
     .curated-for {
-      margin-top: 8px;
-      font-size: 13px;
-      color: #0284c7;
+      margin-top: 0.5rem;
+      font-size: 0.8125rem;
+      color: var(--primary-color);
       font-style: italic;
     }
     
     .result-title {
-      font-size: 20px;
+      font-size: 1.125rem;
       color: var(--primary-color);
       text-decoration: none;
       font-weight: 500;
       transition: color 0.2s ease;
+      display: block;
+      margin-bottom: 0.375rem;
     }
     
     .result-title:hover {
@@ -303,25 +298,24 @@
     }
     
     .result-url {
-      font-size: 14px;
+      font-size: 0.875rem;
       color: var(--secondary-color);
-      margin-top: 6px;
+      margin-bottom: 0.5rem;
       display: flex;
       align-items: center;
     }
     
     .result-description {
-      font-size: 15px;
+      font-size: 0.9375rem;
       color: var(--muted-text);
-      margin-top: 10px;
       line-height: 1.5;
     }
     
     .highlight {
-      background: linear-gradient(120deg, #6366f166, #6366f100 80%);
+      background: linear-gradient(120deg, rgba(99, 102, 241, 0.1), rgba(99, 102, 241, 0) 80%);
       color: var(--primary-color);
-      padding: 2px 6px;
-      border-radius: 6px;
+      padding: 2px 4px;
+      border-radius: 4px;
     }
     
     .loading {
@@ -329,8 +323,8 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 30px;
-      margin: 30px 0;
+      padding: 1.875rem;
+      margin: 1.875rem 0;
       text-align: center;
     }
     
@@ -341,7 +335,7 @@
       border-radius: 50%;
       border-top-color: var(--primary-color);
       animation: spin 1s linear infinite;
-      margin-bottom: 20px;
+      margin-bottom: 1.25rem;
     }
 
     @keyframes spin {
@@ -349,29 +343,8 @@
       100% { transform: rotate(360deg); }
     }
 
-    .swirly-circle {
-      width: 60px;
-      height: 60px;
-    }
-
-    .swirly-circle path {
-      fill: none;
-      stroke-width: 3;
-    }
-
-    @keyframes draw {
-      0% { stroke-dashoffset: 251; }
-      100% { stroke-dashoffset: 0; }
-    }
-
-    .swirly-animation {
-      width: 60px;
-      height: 60px;
-      margin-bottom: 16px;
-    }
-
     .deep-searching {
-      margin-top: 8px;
+      margin-top: 0.5rem;
       font-weight: 500;
       color: var(--primary-color);
       animation: pulse 1.5s infinite;
@@ -390,9 +363,9 @@
       background: transparent;
       border: none;
       color: var(--primary-color);
-      font-size: 14px;
+      font-size: 0.875rem;
       cursor: pointer;
-      padding: 6px 12px;
+      padding: 0.375rem 0.75rem;
       border-radius: 16px;
       transition: background-color 0.2s ease;
     }
@@ -404,7 +377,7 @@
     .thinking-toggle svg {
       width: 16px;
       height: 16px;
-      margin-right: 6px;
+      margin-right: 0.375rem;
       transition: transform 0.3s ease;
     }
     
@@ -417,27 +390,27 @@
       overflow: hidden;
       transition: max-height 0.5s ease;
       margin-top: 0;
-      background: #f8fafc;
+      background: rgba(99, 102, 241, 0.05);
       border-radius: 8px;
       font-family: monospace;
-      font-size: 14px;
+      font-size: 0.875rem;
       line-height: 1.5;
-      color: #4b5563;
-      padding: 0 12px;
+      color: var(--muted-text);
+      padding: 0 0.75rem;
     }
     
     .thinking-container.visible {
       max-height: 300px;
-      margin-top: 12px;
-      margin-bottom: 16px;
+      margin-top: 0.75rem;
+      margin-bottom: 1rem;
       overflow-y: auto;
-      padding: 12px;
+      padding: 0.75rem;
     }
     
     .thinking-item {
-      margin-bottom: 4px;
-      padding-left: 8px;
-      border-left: 2px solid #d1d5db;
+      margin-bottom: 0.25rem;
+      padding-left: 0.5rem;
+      border-left: 2px solid rgba(99, 102, 241, 0.3);
     }
     
     .thinking-item:last-child {
@@ -446,14 +419,14 @@
     
     /* Refined queries styles */
     .refined-queries {
-      margin-top: 16px;
-      padding: 16px 0;
-      border-top: 1px dashed #e2e8f0;
+      margin-top: 1rem;
+      padding: 1rem 0 0;
+      border-top: 1px dashed rgba(99, 102, 241, 0.2);
     }
     
     .refined-queries h4 {
-      margin: 0 0 12px 0;
-      font-size: 16px;
+      margin: 0 0 0.75rem 0;
+      font-size: 0.9375rem;
       color: var(--muted-text);
       font-weight: 500;
     }
@@ -461,53 +434,40 @@
     .query-chips {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
+      gap: 0.5rem;
     }
     
     .query-chip {
-      padding: 8px 16px;
-      background-color: #f1f5f9;
+      padding: 0.5rem 1rem;
+      background-color: rgba(99, 102, 241, 0.1);
       border-radius: 50px;
-      font-size: 14px;
-      color: var(--text-color);
+      font-size: 0.875rem;
+      color: var(--primary-color);
       cursor: pointer;
       transition: all 0.2s ease;
-      border: 1px solid #e2e8f0;
+      border: 1px solid rgba(99, 102, 241, 0.2);
     }
     
     .query-chip:hover {
-      background-color: #e2e8f0;
+      background-color: rgba(99, 102, 241, 0.15);
       transform: translateY(-2px);
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      box-shadow: var(--shadow-sm);
     }
 
-    /* Markdown support */
-    .ai-summary-content strong {
-      font-weight: 600;
-    }
-    
-    .ai-summary-content em {
-      font-style: italic;
-    }
-    
-    .ai-summary-content del {
-      text-decoration: line-through;
-    }
-    
     /* Site info tooltip */
     .site-info-tooltip {
       display: inline-flex;
       align-items: center;
-      background-color: #f9fafb;
-      border: 1px solid #e5e7eb;
+      background-color: var(--card-bg);
+      border: 1px solid rgba(0,0,0,0.05);
       border-radius: 8px;
-      padding: 6px 10px;
-      font-size: 14px;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.875rem;
       position: absolute;
       top: 100%;
-      left: 24px;
-      margin-top: 8px;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      left: 1.5rem;
+      margin-top: 0.5rem;
+      box-shadow: var(--shadow-md);
       z-index: 100;
       opacity: 0;
       transform: translateY(-5px);
@@ -524,105 +484,139 @@
     .favicon-img {
       width: 16px;
       height: 16px;
-      margin-right: 8px;
+      margin-right: 0.5rem;
       vertical-align: middle;
     }
     
     .suggestions {
       position: absolute;
-      top: 100%;
+      top: calc(100% + 0.5rem);
       left: 0;
       right: 0;
-      background: #fff;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      z-index: 100;
-      overflow: hidden;
+      background: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: var(--shadow-lg);
       margin-top: 4px;
-      max-height: 300px;
-      overflow-y: auto;
+      overflow: hidden;
+      z-index: 1000;
       display: none;
+      border: 1px solid rgba(0,0,0,0.05);
     }
     
     .suggestions.visible {
       display: block;
+      animation: slideDown 0.3s var(--transition-timing) forwards;
+    }
+    
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
     
     .suggestion {
-      padding: 12px 16px;
+      padding: 0.75rem 1rem;
       cursor: pointer;
-      border-bottom: 1px solid #f1f5f9;
-      transition: background-color 0.2s ease;
+      transition: all 0.2s var(--transition-timing);
+      display: flex;
+      align-items: center;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
     }
     
-    .suggestion:hover,
-    .suggestion:focus {
-      background-color: #f8fafc;
+    .suggestion:last-child {
+      border-bottom: none;
+    }
+    
+    .suggestion:hover {
+      background: rgba(99, 102, 241, 0.05);
+    }
+    
+    .suggestion-icon {
+      width: 16px;
+      height: 16px;
+      fill: var(--muted-text);
+      margin-right: 0.75rem;
+      flex-shrink: 0;
+    }
+    
+    .suggestion-text {
+      font-size: 0.875rem;
+      color: var(--text-color);
     }
 
     /* Image results styles */
     .image-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-      gap: 16px;
-      padding: 20px 0;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 1rem;
+      padding: 1.25rem 0;
     }
     
-    .image-result {
+    .image-card {
       border-radius: 8px;
       overflow: hidden;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      transition: transform 0.2s ease;
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
       cursor: pointer;
-      position: relative;
+      background-color: white;
+      animation: fadeInUp 0.5s forwards;
       opacity: 0;
-      animation: fadeIn 0.5s var(--transition-timing) forwards;
-      animation-delay: calc(var(--animation-order) * 0.05s);
     }
     
-    .image-result:hover {
-      transform: scale(1.05);
-      z-index: 2;
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
     
-    .image-thumb {
+    .image-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-md);
+    }
+    
+    .image-container {
+      height: 150px;
+      overflow: hidden;
+    }
+    
+    .image-container img {
       width: 100%;
-      aspect-ratio: 1 / 1;
+      height: 100%;
       object-fit: cover;
-      display: block;
+      transition: transform 0.3s;
     }
     
-    .image-info {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: rgba(0, 0, 0, 0.7);
-      color: white;
-      padding: 8px;
-      font-size: 12px;
-      transform: translateY(100%);
-      transition: transform 0.2s ease;
-    }
-    
-    .image-result:hover .image-info {
-      transform: translateY(0);
+    .image-card:hover .image-container img {
+      transform: scale(1.05);
     }
     
     .image-title {
+      padding: 10px;
+      font-size: 14px;
+      font-weight: 500;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      margin: 0;
-      font-weight: normal;
     }
     
-    .powered-by-google {
+    .image-source {
+      padding: 0 10px 10px;
       font-size: 12px;
       color: var(--muted-text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .google-attribution {
       text-align: right;
-      margin-top: 8px;
-      padding-right: 16px;
+      font-size: 0.75rem;
+      color: var(--muted-text);
+      margin-bottom: 0.625rem;
     }
     
     /* Image modal */
@@ -632,14 +626,14 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background: rgba(0, 0, 0, 0.8);
+      background-color: rgba(0, 0, 0, 0.85);
       display: flex;
       align-items: center;
       justify-content: center;
-      z-index: 9999;
+      z-index: 1000;
       opacity: 0;
       pointer-events: none;
-      transition: opacity 0.3s ease;
+      transition: opacity 0.3s;
     }
     
     .image-modal.visible {
@@ -648,54 +642,54 @@
     }
     
     .modal-content {
+      position: relative;
       max-width: 90%;
       max-height: 90%;
-      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
     
     .modal-image {
       max-width: 100%;
-      max-height: 90vh;
-      display: block;
+      max-height: 80vh;
+      object-fit: contain;
       border-radius: 4px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
     }
     
-    .modal-close {
-      position: absolute;
-      top: -40px;
-      right: 0;
-      background: none;
-      border: none;
+    .modal-title {
+      margin-top: 15px;
       color: white;
-      font-size: 24px;
-      cursor: pointer;
-    }
-    
-    .modal-caption {
-      position: absolute;
-      bottom: -40px;
-      left: 0;
-      right: 0;
       text-align: center;
-      color: white;
-      font-size: 14px;
+      max-width: 100%;
+      font-size: 16px;
     }
     
-    .curated-section-heading {
-      font-size: 18px;
-      color: var(--primary-color);
-      margin: 32px 0 16px 0;
-      padding-bottom: 10px;
-      border-bottom: 1px solid #e5e7eb;
+    .close-modal {
+      position: absolute;
+      top: -30px;
+      right: -30px;
+      font-size: 30px;
+      color: white;
+      cursor: pointer;
+      width: 30px;
+      height: 30px;
       display: flex;
       align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background-color: rgba(0, 0, 0, 0.5);
     }
     
-    .curated-section-heading svg {
-      margin-right: 8px;
-      width: 20px;
-      height: 20px;
+    .curated-results-header {
+      font-size: 1.125rem;
+      color: var(--primary-color);
+      margin: 2rem 0 1rem 0;
+      padding-bottom: 0.625rem;
+      border-bottom: 1px solid rgba(99, 102, 241, 0.1);
+      display: flex;
+      align-items: center;
     }
     
     @keyframes slide-in {
@@ -709,164 +703,381 @@
       }
     }
     
-    .curated-results-container {
-      animation: slide-in 0.5s var(--transition-timing) forwards;
+    /* Followup styles */
+    .followup-container {
+      margin-top: 1.25rem;
+      padding: 0.9375rem;
+      background-color: rgba(99, 102, 241, 0.05);
+      border-radius: 12px;
+      border: 1px solid rgba(99, 102, 241, 0.1);
+    }
+    
+    .followup-header {
+      font-size: 0.875rem;
+      color: var(--muted-text);
+      margin-bottom: 0.625rem;
+    }
+    
+    .followup-input-container {
+      display: flex;
+    }
+    
+    .followup-input {
+      flex: 1;
+      padding: 0.625rem 0.9375rem;
+      border: 1px solid rgba(99, 102, 241, 0.2);
+      border-radius: 8px;
+      font-size: 0.875rem;
+    }
+    
+    .followup-button {
+      margin-left: 0.625rem;
+      padding: 0.625rem 0.9375rem;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.875rem;
+      transition: background-color 0.2s;
+    }
+    
+    .followup-button:hover {
+      background-color: var(--primary-dark);
+    }
+    
+    .followup-question {
+      margin-top: 1.25rem;
+      padding: 0.625rem 0.9375rem;
+      background-color: #f3f4f6;
+      border-radius: 8px;
+      border-left: 3px solid var(--primary-color);
+    }
+    
+    .followup-response {
+      margin-top: 0.625rem;
+    }
+    
+    .user-query {
+      color: var(--text-color);
+    }
+    
+    /* Animated content */
+    .animated-word {
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+    
+    /* No results message */
+    .no-results {
+      text-align: center;
+      padding: 2.5rem;
+      color: var(--muted-text);
+      font-size: 1rem;
+    }
+    
+    .error-message {
+      text-align: center;
+      padding: 2.5rem;
+      color: #ef4444;
+      font-size: 1rem;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: var(--primary-color);
+      color: white;
+      padding: 0.75rem 1.5rem;
+      border-radius: 50px;
+      box-shadow: var(--shadow-md);
+      font-size: 0.9rem;
+      z-index: 10000;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    .toast.visible {
+      opacity: 1;
+    }
+    
+    .toast.error {
+      background-color: #ef4444;
+    }
+    
+    .toast.success {
+      background-color: #10b981;
+    }
+    
+    /* Responsive styles */
+    @media (max-width: 768px) {
+      .header {
+        padding: 0.75rem 1rem;
+      }
+      
+      .header-logo {
+        width: 100px;
+      }
+      
+      .nav-tabs {
+        padding: 0 1rem;
+      }
+      
+      .tab-content {
+        padding: 0 1rem;
+      }
+      
+      .search-container {
+        margin-left: 1rem;
+      }
+      
+      .search-bar {
+        padding: 0.75rem 1rem;
+      }
+      
+      .ai-summary {
+        padding: 1.25rem;
+        margin: 1rem 0;
+      }
+      
+      .result {
+        padding: 1rem;
+      }
+      
+      .image-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      }
+    }
+
+    @media (max-width: 480px) {
+      .image-grid {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      }
+      
+      .close-modal {
+        top: -20px;
+        right: -10px;
+      }
+      
+      .query-chips {
+        flex-wrap: wrap;
+      }
+      
+      .search-icon-container {
+        right: 0.25rem;
+      }
+      
+      .search-icon, 
+      .ai-icon {
+        width: 28px;
+        height: 28px;
+        padding: 4px;
+        margin: 0 2px;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="header">
-    <img src="logo.png" alt="Logo" class="logo" onclick="window.location.href='/'">
+  <div class="header" id="header">
+    <img src="logo.png" alt="FlashTags" class="header-logo" onclick="window.location.href='/'" />
     <div class="search-container">
-      <input type="text" id="search-bar" class="search-bar" placeholder="Search...">
+      <input type="text" id="search-bar" class="search-bar" placeholder="Search the web with AI..." />
       <div id="site-info-tooltip" class="site-info-tooltip"></div>
+      <div class="search-icon-container">
+        <svg id="search-icon" class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <path d="M10 2a8 8 0 105.293 14.707l5 5a1 1 0 001.414-1.414l-5-5A8 8 0 0010 2zm0 2a6 6 0 110 12 6 6 0 010-12z" />
+        </svg>
+        <svg id="ai-icon" class="ai-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+        </svg>
+      </div>
       <div id="suggestions" class="suggestions"></div>
-      <svg id="search-icon" class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-        <path d="M10 2a8 8 0 105.293 14.707l5 5a1 1 0 001.414-1.414l-5-5A8 8 0 0010 2zm0 2a6 6 0 110 12 6 6 0 010-12z" />
-      </svg>
-      <!-- AI Icon SVG -->
-      <svg id="ai-icon" class="ai-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
-      </svg>
     </div>
   </div>
   
   <div class="nav-tabs">
-    <div id="tab-all" class="nav-tab active">All</div>
-    <div id="tab-images" class="nav-tab">Images</div>
+    <div class="nav-tab active" id="tab-search" data-tab="search">Search</div>
+    <div class="nav-tab" id="tab-images" data-tab="images">Images</div>
   </div>
   
-  <div class="results-container">
-    <div id="tab-content-all" class="tab-content active">
-      <div id="ai-summary" class="ai-summary">
-        <div class="ai-header">
-          <div class="ai-header-left">
-            <svg class="sparkle-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-              <path d="M10 2L12 6L16 4L14 8L18 10L14 12L16 16L12 14L10 18L8 14L4 16L6 12L2 10L6 8L4 4L8 6L10 2Z" />
-            </svg>
-            <h3>FlashAI</h3>
-          </div>
-          <button id="thinking-toggle" class="thinking-toggle">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-            </svg>
-            <span>Show thinking</span>
-          </button>
+  <div id="search-content" class="tab-content active">
+    <div id="ai-summary" class="ai-summary">
+      <div class="ai-header">
+        <div class="ai-header-left">
+          <svg class="sparkle-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M10 2L12 6L16 4L14 8L18 10L14 12L16 16L12 14L10 18L8 14L4 16L6 12L2 10L6 8L4 4L8 6L10 2Z" />
+          </svg>
+          <h3>FlashAI Summary</h3>
         </div>
-        <div id="thinking-container" class="thinking-container">
-          <div id="thinking-content"></div>
-        </div>
-        <div id="ai-summary-content" class="ai-summary-content"></div>
-        <div id="refined-queries" class="refined-queries" style="display: none;">
-          <h4>Try refining your search:</h4>
-          <div id="query-chips" class="query-chips"></div>
-        </div>
-        <div class="ai-footer">AI-generated, for reference only.</div>
+        <button id="thinking-toggle" class="thinking-toggle">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+          </svg>
+          <span>Show thinking</span>
+        </button>
       </div>
-      <div id="results"></div>
-      <div id="curated-results"></div>
-      <div class="loading" id="loading">
-        <svg class="swirly-animation" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stop-color="#6366f1" />
-              <stop offset="100%" stop-color="#059669" />
-            </linearGradient>
-          </defs>
-          <path d="M50,10 C70,10 85,25 85,45 C85,65 70,80 50,80 C30,80 15,65 15,45 C15,25 30,10 50,10 Z" 
-                fill="none" 
-                stroke="url(#gradient)" 
-                stroke-width="3" 
-                stroke-dasharray="251" 
-                stroke-dashoffset="0">
-            <animate attributeName="stroke-dashoffset" 
-                     values="251;0;251" 
-                     dur="3s" 
-                     repeatCount="indefinite" />
-            <animateTransform attributeName="transform" 
-                              type="rotate" 
-                              from="0 50 50" 
-                              to="360 50 50" 
-                              dur="8s" 
-                              repeatCount="indefinite" />
-          </path>
-          <path d="M50,20 C65,20 75,30 75,45 C75,60 65,70 50,70 C35,70 25,60 25,45 C25,30 35,20 50,20 Z" 
-                fill="none" 
-                stroke="url(#gradient)" 
-                stroke-width="2" 
-                stroke-dasharray="157" 
-                stroke-dashoffset="0">
-            <animate attributeName="stroke-dashoffset" 
-                     values="0;157;0" 
-                     dur="4s" 
-                     repeatCount="indefinite" />
-            <animateTransform attributeName="transform" 
-                              type="rotate" 
-                              from="360 50 50" 
-                              to="0 50 50" 
-                              dur="6s" 
-                              repeatCount="indefinite" />
-          </path>
-        </svg>
-        <div class="deep-searching">Deep Searching...</div>
+      <div id="thinking-container" class="thinking-container">
+        <div id="thinking-content"></div>
       </div>
+      <div id="ai-summary-content" class="ai-summary-content"></div>
+      <div id="refined-queries" class="refined-queries" style="display: none;">
+        <h4>Try refining your search:</h4>
+        <div id="query-chips" class="query-chips"></div>
+      </div>
+      <div class="ai-footer">AI-generated content for reference only.</div>
     </div>
     
-    <div id="tab-content-images" class="tab-content">
-      <div id="image-results" class="image-grid"></div>
-      <div class="powered-by-google">Images powered by Google</div>
-      <div class="loading" id="image-loading">
-        <div class="spinner"></div>
-        <div>Loading images...</div>
-      </div>
+    <div id="results"></div>
+    
+    <div id="loading" class="loading">
+      <svg class="swirly-animation" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" width="60" height="60">
+        <defs>
+          <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#6366f1" />
+            <stop offset="100%" stop-color="#14b8a6" />
+          </linearGradient>
+        </defs>
+        <path d="M50,10 C70,10 85,25 85,45 C85,65 70,80 50,80 C30,80 15,65 15,45 C15,25 30,10 50,10 Z" 
+              fill="none" 
+              stroke="url(#gradient)" 
+              stroke-width="3" 
+              stroke-dasharray="251" 
+              stroke-dashoffset="0">
+          <animate attributeName="stroke-dashoffset" 
+                   values="251;0;251" 
+                   dur="3s" 
+                   repeatCount="indefinite" />
+          <animateTransform attributeName="transform" 
+                            type="rotate" 
+                            from="0 50 50" 
+                            to="360 50 50" 
+                            dur="8s" 
+                            repeatCount="indefinite" />
+        </path>
+        <path d="M50,20 C65,20 75,30 75,45 C75,60 65,70 50,70 C35,70 25,60 25,45 C25,30 35,20 50,20 Z" 
+              fill="none" 
+              stroke="url(#gradient)" 
+              stroke-width="2" 
+              stroke-dasharray="157" 
+              stroke-dashoffset="0">
+          <animate attributeName="stroke-dashoffset" 
+                   values="0;157;0" 
+                   dur="4s" 
+                   repeatCount="indefinite" />
+          <animateTransform attributeName="transform" 
+                            type="rotate" 
+                            from="360 50 50" 
+                            to="0 50 50" 
+                            dur="6s" 
+                            repeatCount="indefinite" />
+        </path>
+      </svg>
+      <div class="deep-searching">Deep Searching...</div>
+    </div>
+  </div>
+  
+  <div id="images-content" class="tab-content">
+    <div class="google-attribution">Images powered by Google Images</div>
+    <div id="image-results" class="image-grid"></div>
+    <div id="image-loading" class="loading">
+      <div class="spinner"></div>
+      <div>Loading images...</div>
     </div>
   </div>
   
   <div id="image-modal" class="image-modal">
     <div class="modal-content">
-      <button id="modal-close" class="modal-close">×</button>
-      <img id="modal-image" class="modal-image" src="" alt="">
-      <div id="modal-caption" class="modal-caption"></div>
+      <span class="close-modal" id="close-modal">&times;</span>
+      <img class="modal-image" id="modal-image" src="" alt="" />
+      <div class="modal-title" id="modal-title"></div>
     </div>
   </div>
 
-  <script src="/script.js"></script>
-  
+  <div id="toast" class="toast"></div>
+
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      // Tab switching
-      const tabAll = document.getElementById('tab-all');
+      // DOM Elements
+      const searchBar = document.getElementById('search-bar');
+      const searchIcon = document.getElementById('search-icon');
+      const aiIcon = document.getElementById('ai-icon');
+      const suggestionsContainer = document.getElementById('suggestions');
+      const tabSearch = document.getElementById('tab-search');
       const tabImages = document.getElementById('tab-images');
-      const tabContentAll = document.getElementById('tab-content-all');
-      const tabContentImages = document.getElementById('tab-content-images');
-      
-      tabAll.addEventListener('click', () => {
-        tabAll.classList.add('active');
-        tabImages.classList.remove('active');
-        tabContentAll.classList.add('active');
-        tabContentImages.classList.remove('active');
-      });
-      
-      tabImages.addEventListener('click', () => {
-        tabImages.classList.add('active');
-        tabAll.classList.remove('active');
-        tabContentImages.classList.add('active');
-        tabContentAll.classList.remove('active');
-        
-        // Load images if they haven't been loaded yet
-        loadImagesTab();
-      });
-      
-      // Toggle thinking section
+      const searchContent = document.getElementById('search-content');
+      const imagesContent = document.getElementById('images-content');
       const thinkingToggle = document.getElementById('thinking-toggle');
       const thinkingContainer = document.getElementById('thinking-container');
-      
+      const imageModal = document.getElementById('image-modal');
+      const modalImage = document.getElementById('modal-image');
+      const modalTitle = document.getElementById('modal-title');
+      const closeModal = document.getElementById('close-modal');
+      const toast = document.getElementById('toast');
+
+      // State management
+      let currentView = 'search';
+      let currentQuery = '';
+      let hasLoadedImages = false;
+
+      // Parse URL parameters
+      const urlParams = new URLSearchParams(window.location.search);
+      const queryParam = urlParams.get('f');
+      const viewParam = urlParams.get('view') || 'search';
+
+      // Initialize UI based on URL parameters
+      if (queryParam) {
+        currentQuery = decodeURIComponent(queryParam);
+        searchBar.value = currentQuery;
+        document.title = `${currentQuery} - FlashTags Search`;
+
+        if (viewParam === 'images') {
+          currentView = 'images';
+          updateTabSelection('images');
+        } else {
+          updateTabSelection('search');
+        }
+      }
+
+      // Tab switching
+      function updateTabSelection(tab) {
+        if (tab === 'search') {
+          tabSearch.classList.add('active');
+          tabImages.classList.remove('active');
+          searchContent.classList.add('active');
+          imagesContent.classList.remove('active');
+        } else {
+          tabImages.classList.add('active');
+          tabSearch.classList.remove('active');
+          imagesContent.classList.add('active');
+          searchContent.classList.remove('active');
+          
+          if (!hasLoadedImages && currentQuery) {
+            loadImages(currentQuery);
+            hasLoadedImages = true;
+          }
+        }
+
+        // Update URL without reloading
+        const params = new URLSearchParams(window.location.search);
+        params.set('view', tab);
+        const newUrl = `${window.location.pathname}?${params.toString()}`;
+        window.history.replaceState({}, '', newUrl);
+        
+        currentView = tab;
+      }
+
+      // Tab click event listeners
+      tabSearch.addEventListener('click', () => updateTabSelection('search'));
+      tabImages.addEventListener('click', () => updateTabSelection('images'));
+
+      // Thinking toggle
       if (thinkingToggle && thinkingContainer) {
         thinkingToggle.addEventListener('click', () => {
           thinkingContainer.classList.toggle('visible');
           thinkingToggle.classList.toggle('open');
           
-          // Update text content
           const spanEl = thinkingToggle.querySelector('span');
           if (spanEl) {
             spanEl.textContent = thinkingContainer.classList.contains('visible') 
@@ -875,16 +1086,11 @@
           }
         });
       }
-      
+
       // Image modal functionality
-      const imageModal = document.getElementById('image-modal');
-      const modalImage = document.getElementById('modal-image');
-      const modalCaption = document.getElementById('modal-caption');
-      const modalClose = document.getElementById('modal-close');
-      
-      function openImageModal(imageUrl, caption) {
+      function openImageModal(imageUrl, title) {
         modalImage.src = imageUrl;
-        modalCaption.textContent = caption || '';
+        modalTitle.textContent = title || '';
         imageModal.classList.add('visible');
         document.body.style.overflow = 'hidden';
       }
@@ -894,30 +1100,20 @@
         document.body.style.overflow = '';
       }
       
-      if (modalClose) {
-        modalClose.addEventListener('click', closeImageModal);
-      }
-      
-      if (imageModal) {
-        imageModal.addEventListener('click', (e) => {
-          if (e.target === imageModal) {
-            closeImageModal();
-          }
-        });
-      }
-      
-      // Function to load images tab content
-      function loadImagesTab() {
+      closeModal.addEventListener('click', closeImageModal);
+      imageModal.addEventListener('click', (e) => {
+        if (e.target === imageModal) closeImageModal();
+      });
+
+      // Load images tab content
+      function loadImages(query) {
         const imageResults = document.getElementById('image-results');
         const imageLoading = document.getElementById('image-loading');
         
-        // Skip if already loaded or no query
-        if (imageResults.children.length > 0 || !window.currentQuery) return;
-        
         if (imageLoading) imageLoading.style.display = 'flex';
+        imageResults.innerHTML = '';
         
-        // Fetch images for the current query
-        fetch(`https://api.coopr.tech:8148/flashtag-ai/images?q=${encodeURIComponent(window.currentQuery)}`)
+        fetch(`https://api.coopr.tech:8148/flashtag-ai/images?q=${encodeURIComponent(query)}`)
           .then(response => response.json())
           .then(data => {
             if (imageLoading) imageLoading.style.display = 'none';
@@ -925,14 +1121,15 @@
             if (data.images && data.images.length > 0) {
               data.images.forEach((image, index) => {
                 const imageEl = document.createElement('div');
-                imageEl.className = 'image-result';
-                imageEl.style.setProperty('--animation-order', index);
+                imageEl.className = 'image-card';
+                imageEl.style.animationDelay = `${index * 0.05}s`;
                 
                 imageEl.innerHTML = `
-                  <img src="${image.thumbnail}" alt="${image.title}" class="image-thumb">
-                  <div class="image-info">
-                    <h4 class="image-title">${image.title}</h4>
+                  <div class="image-container">
+                    <img src="${image.thumbnail}" alt="${image.title}" loading="lazy">
                   </div>
+                  <div class="image-title">${image.title || 'Untitled image'}</div>
+                  <div class="image-source">${new URL(image.source_url).hostname}</div>
                 `;
                 
                 imageEl.addEventListener('click', () => {
@@ -942,35 +1139,392 @@
                 imageResults.appendChild(imageEl);
               });
             } else {
-              imageResults.innerHTML = '<p>No images found for this query.</p>';
+              imageResults.innerHTML = '<div class="no-results">No images found for this query. Try a different search term.</div>';
             }
           })
           .catch(error => {
             console.error('Error loading images:', error);
             if (imageLoading) imageLoading.style.display = 'none';
-            imageResults.innerHTML = '<p>Error loading images. Please try again.</p>';
+            imageResults.innerHTML = '<div class="error-message">Error loading images. Please try again later.</div>';
+          });
+      }
+
+      // Search functionality
+      function performSearch(query, isAI = false) {
+        if (!query.trim()) return;
+        
+        currentQuery = query.trim();
+        document.title = `${currentQuery} - FlashTags Search`;
+        
+        // Update URL
+        const params = new URLSearchParams();
+        params.set('f', currentQuery);
+        params.set('view', currentView);
+        if (isAI) params.set('ai', 'true');
+        
+        const newUrl = `${window.location.pathname}?${params.toString()}`;
+        window.history.pushState({}, '', newUrl);
+        
+        if (currentView === 'images') {
+          hasLoadedImages = true;
+          loadImages(currentQuery);
+        } else {
+          // Clear previous results
+          const resultsElement = document.getElementById('results');
+          const aiSummaryContent = document.getElementById('ai-summary-content');
+          const loadingElement = document.getElementById('loading');
+          const refinedQueries = document.getElementById('refined-queries');
+          
+          if (resultsElement) resultsElement.innerHTML = '';
+          if (aiSummaryContent) aiSummaryContent.innerHTML = '';
+          if (refinedQueries) refinedQueries.style.display = 'none';
+          if (loadingElement) loadingElement.style.display = 'flex';
+          
+          // Initialize streaming response from API
+          const eventSource = new EventSource(`https://api.coopr.tech:8148/flashtag-ai/search?q=${encodeURIComponent(currentQuery)}&stream=true`);
+          
+          let summaryText = '';
+          let curatedResults = [];
+          
+          eventSource.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            
+            switch (data.type) {
+              case 'thinking':
+                if (data.thought && thinkingContainer) {
+                  const thoughtEl = document.createElement('div');
+                  thoughtEl.className = 'thinking-item';
+                  thoughtEl.textContent = data.thought;
+                  document.getElementById('thinking-content').appendChild(thoughtEl);
+                }
+                break;
+                
+              case 'content':
+                if (data.text) {
+                  summaryText += data.text;
+                  aiSummaryContent.innerHTML = summaryText;
+                }
+                break;
+                
+              case 'curated_queries':
+                if (data.queries && data.queries.length > 0 && refinedQueries) {
+                  const queryChips = document.getElementById('query-chips');
+                  queryChips.innerHTML = '';
+                  
+                  data.queries.forEach(refinedQuery => {
+                    const chipEl = document.createElement('div');
+                    chipEl.className = 'query-chip';
+                    chipEl.textContent = refinedQuery;
+                    chipEl.addEventListener('click', () => {
+                      performSearch(refinedQuery);
+                    });
+                    queryChips.appendChild(chipEl);
+                  });
+                  
+                  refinedQueries.style.display = 'block';
+                }
+                break;
+                
+              case 'results':
+                if (data.results && data.results.length > 0) {
+                  displayResults(data.results);
+                }
+                break;
+                
+              case 'curated_results':
+                if (data.results && data.results.length > 0) {
+                  curatedResults.push({
+                    query: data.query,
+                    results: data.results
+                  });
+                }
+                break;
+                
+              case 'end':
+                eventSource.close();
+                if (loadingElement) loadingElement.style.display = 'none';
+                
+                // Display curated results if available
+                if (curatedResults.length > 0) {
+                  setTimeout(() => {
+                    const resultsElement = document.getElementById('results');
+                    
+                    curatedResults.forEach(set => {
+                      const sectionHeader = document.createElement('h3');
+                      sectionHeader.className = 'curated-results-header';
+                      sectionHeader.textContent = `AI Curated Results for "${set.query}"`;
+                      resultsElement.appendChild(sectionHeader);
+                      
+                      displayResults(set.results, true, set.query);
+                    });
+                  }, 500);
+                }
+                
+                // Add followup UI
+                addFollowupUI();
+                break;
+                
+              case 'error':
+                showToast('An error occurred. Please try again.', 'error');
+                if (loadingElement) loadingElement.style.display = 'none';
+                eventSource.close();
+                break;
+            }
+          };
+          
+          eventSource.onerror = function() {
+            showToast('Connection error. Please try again.', 'error');
+            if (loadingElement) loadingElement.style.display = 'none';
+            eventSource.close();
+          };
+        }
+      }
+      
+      // Display search results
+      function displayResults(results, isCurated = false, curatedFor = '') {
+        const resultsContainer = document.getElementById('results');
+        if (!results || !resultsContainer) return;
+        
+        results.forEach(result => {
+          if (!result || !result.result_url) return;
+          
+          const resultElement = document.createElement('div');
+          resultElement.className = isCurated ? 'result curated' : 'result';
+          resultElement.style.opacity = '0';
+          resultElement.style.transform = 'translateY(10px)';
+          
+          let faviconHtml = '';
+          try {
+            const domain = new URL(result.result_url).hostname;
+            faviconHtml = `<img class="favicon-img" src="/favicon/${encodeURIComponent(domain)}" alt="" />`;
+          } catch (err) {
+            console.error('Error parsing URL for favicon:', err);
+          }
+          
+          const curatedBadge = isCurated ? '<div class="curated-badge">AI Curated</div>' : '';
+          const curatedForHtml = isCurated && curatedFor ? 
+            `<div class="curated-for">For search: "${curatedFor}"</div>` : '';
+          
+          resultElement.innerHTML = `
+            ${curatedBadge}
+            <a href="${result.result_url}" class="result-title" target="_blank">${result.result_title || 'Untitled'}</a>
+            <div class="result-url">${faviconHtml}${new URL(result.result_url).hostname}</div>
+            <div class="result-description">${result.result_og_description || ''}</div>
+            ${curatedForHtml}
+          `;
+          
+          resultsContainer.appendChild(resultElement);
+          
+          setTimeout(() => {
+            resultElement.style.opacity = '1';
+            resultElement.style.transform = 'translateY(0)';
+          }, 50);
+        });
+      }
+      
+      // Follow-up functionality
+      function addFollowupUI() {
+        const aiSummaryContent = document.getElementById('ai-summary-content');
+        if (!aiSummaryContent) return;
+        
+        // Remove any existing followup container
+        const existingFollowup = document.querySelector('.followup-container');
+        if (existingFollowup) existingFollowup.remove();
+        
+        const followupContainer = document.createElement('div');
+        followupContainer.className = 'followup-container';
+        
+        followupContainer.innerHTML = `
+          <div class="followup-header">Ask a follow-up question</div>
+          <div class="followup-input-container">
+            <input type="text" class="followup-input" placeholder="Ask a follow-up question..." />
+            <button class="followup-button">Ask</button>
+          </div>
+        `;
+        
+        aiSummaryContent.appendChild(followupContainer);
+        
+        const followupInput = followupContainer.querySelector('.followup-input');
+        const followupButton = followupContainer.querySelector('.followup-button');
+        
+        followupInput.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter' && followupInput.value.trim()) {
+            handleFollowup(followupInput.value.trim());
+          }
+        });
+        
+        followupButton.addEventListener('click', () => {
+          if (followupInput.value.trim()) {
+            handleFollowup(followupInput.value.trim());
+          }
+        });
+        
+        setTimeout(() => followupInput.focus(), 100);
+      }
+      
+      function handleFollowup(query) {
+        const previousQuery = currentQuery;
+        
+        // Display the followup question
+        const aiSummaryContent = document.getElementById('ai-summary-content');
+        const followupContainer = document.querySelector('.followup-container');
+        
+        if (followupContainer) followupContainer.remove();
+        
+        const followupElement = document.createElement('div');
+        followupElement.className = 'followup-question';
+        followupElement.innerHTML = `
+          <strong>You asked:</strong> ${query}
+          <div class="followup-response">
+            <div class="spinner" style="width: 20px; height: 20px; margin: 10px 0;"></div>
+          </div>
+        `;
+        
+        aiSummaryContent.appendChild(followupElement);
+        
+        // Fetch the followup response
+        fetch(`https://api.coopr.tech:8148/flashtag-ai/followup?q=${encodeURIComponent(query)}&context=${encodeURIComponent(previousQuery)}`)
+          .then(response => response.json())
+          .then(data => {
+            const responseElement = followupElement.querySelector('.followup-response');
+            
+            if (data.answer) {
+              responseElement.innerHTML = data.answer;
+              // Add new followup UI
+              addFollowupUI();
+            } else {
+              responseElement.innerHTML = 'Sorry, I couldn\'t find an answer for that question.';
+              addFollowupUI();
+            }
+          })
+          .catch(error => {
+            console.error('Error fetching followup response:', error);
+            const responseElement = followupElement.querySelector('.followup-response');
+            responseElement.innerHTML = 'Sorry, there was an error processing your question.';
+            addFollowupUI();
           });
       }
       
-      // Support for non-streaming version (legacy support)
-      const urlParams = new URLSearchParams(window.location.search);
-      const query = urlParams.get('f');
-      
-      // Set the search bar value and track current query
-      const searchBar = document.getElementById('search-bar');
-      if (searchBar && query) {
-        searchBar.value = decodeURIComponent(query);
-        window.currentQuery = decodeURIComponent(query);
-        
-        // Update page title with search query
-        const decodedQuery = decodeURIComponent(query);
-        document.title = `${decodedQuery} - Flash Search Results`;
+      // Search suggestions
+      function fetchSuggestions(query) {
+        return fetch(`https://api.coopr.tech:8148/flashtag-ai/autocomplete?q=${encodeURIComponent(query)}`)
+          .then(response => response.json())
+          .then(data => data.suggestions || [])
+          .catch(error => {
+            console.error('Error fetching suggestions:', error);
+            return [];
+          });
       }
       
-      // Legacy highlighting function (used by older code path)
-      window.highlightText = function(text) {
-        return text.replace(/__(.*?)__/g, '<span class="highlight">$1</span>');
-      };
+      function updateSuggestions(query) {
+        if (!query || !suggestionsContainer) return;
+        
+        fetchSuggestions(query).then(suggestions => {
+          suggestionsContainer.innerHTML = '';
+          
+          if (suggestions.length > 0) {
+            suggestionsContainer.classList.add('visible');
+            
+            suggestions.forEach(suggestion => {
+              const item = document.createElement('div');
+              item.className = 'suggestion';
+              item.innerHTML = `
+                <svg class="suggestion-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                  <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
+                </svg>
+                <div class="suggestion-text">${suggestion}</div>
+              `;
+              
+              item.addEventListener('click', () => {
+                searchBar.value = suggestion;
+                suggestionsContainer.classList.remove('visible');
+                performSearch(suggestion);
+              });
+              
+              suggestionsContainer.appendChild(item);
+            });
+          } else {
+            suggestionsContainer.classList.remove('visible');
+          }
+        });
+      }
+      
+      // Debounce function
+      function debounce(func, wait) {
+        let timeout;
+        return function(...args) {
+          clearTimeout(timeout);
+          timeout = setTimeout(() => func.apply(this, args), wait);
+        };
+      }
+      
+      // Event listeners
+      const debouncedSuggestions = debounce(updateSuggestions, 300);
+      
+      searchBar.addEventListener('input', () => {
+        const query = searchBar.value.trim();
+        if (query.length >= 2) {
+          debouncedSuggestions(query);
+        } else {
+          suggestionsContainer.classList.remove('visible');
+        }
+      });
+      
+      searchBar.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          const query = searchBar.value.trim();
+          if (query) {
+            suggestionsContainer.classList.remove('visible');
+            performSearch(query);
+          }
+        }
+      });
+      
+      searchIcon.addEventListener('click', () => {
+        const query = searchBar.value.trim();
+        if (query) {
+          suggestionsContainer.classList.remove('visible');
+          performSearch(query);
+        }
+      });
+      
+      aiIcon.addEventListener('click', () => {
+        const query = searchBar.value.trim();
+        if (query) {
+          suggestionsContainer.classList.remove('visible');
+          performSearch(query, true);
+        }
+      });
+      
+      // Close suggestions when clicking outside
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.search-container')) {
+          suggestionsContainer.classList.remove('visible');
+        }
+      });
+      
+      // Show toast message
+      function showToast(message, type = '') {
+        toast.textContent = message;
+        toast.className = 'toast';
+        if (type) toast.classList.add(type);
+        
+        toast.classList.add('visible');
+        
+        setTimeout(() => {
+          toast.classList.remove('visible');
+        }, 3000);
+      }
+      
+      // Start search if we have a query parameter
+      if (queryParam) {
+        if (currentView === 'images') {
+          loadImages(currentQuery);
+          hasLoadedImages = true;
+        } else {
+          performSearch(currentQuery);
+        }
+      }
     });
   </script>
 </body>
