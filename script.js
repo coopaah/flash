@@ -1,5 +1,5 @@
-// script.js with follow-up conversation feature and fixes
 document.addEventListener('DOMContentLoaded', () => {
+  // DOM elements
   const searchBar = document.getElementById('search-bar');
   const searchIcon = document.getElementById('search-icon');
   const aiIcon = document.getElementById('ai-icon');
@@ -10,70 +10,30 @@ document.addEventListener('DOMContentLoaded', () => {
   const navTabs = document.querySelector('.nav-tabs');
   const header = document.getElementById('header');
   
-  // View state management
+  // State management
   let currentView = 'search'; // 'search' or 'images'
-  let currentResults = null; // Store current search results
-  let currentImageResults = null; // Store current image results
-  let conversationHistory = []; // Store conversation history
-  let followupCount = 0; // Track number of follow-ups for current search
-  const MAX_FOLLOWUPS = 3; // Maximum number of followups allowed per search
-  let hasLoadedImages = false; // Track if images have been loaded
-  let hasLoadedSearch = false; // Track if search results have been loaded
+  let currentResults = null;
+  let currentImageResults = null;
+  let conversationHistory = [];
+  let followupCount = 0;
+  const MAX_FOLLOWUPS = 3;
+  let hasLoadedImages = false;
+  let hasLoadedSearch = false;
   
-  // Check for query parameter in URL on page load
-  function checkUrlQueryParam() {
-    // Check if we have a query in the URL (for direct searches via ?f=)
-    const urlParams = new URLSearchParams(window.location.search);
-    const queryParam = urlParams.get('f');
-    
-    if (queryParam) {
-      // We're on the home page with a query param, perform immediate search
-      const query = decodeURIComponent(queryParam);
-      if (searchBar) searchBar.value = query;
-      
-      // Determine where to redirect
-      if (window.location.pathname === '/') {
-        // Redirect to results page
-        window.location.href = `/results?f=${encodeURIComponent(query)}`;
-        return;
-      }
-      
-      // Check if it has a flashtag
-      const flashtagMatch = query.match(/^(.*?)\s+!(\w+)$/);
-      if (flashtagMatch) {
-        // This is a flashtag search
-        handleFlashTagSearch(query, flashtagMatch);
-      } else if (window.location.pathname === '/results') {
-        // For results page, check view parameter
-        const viewParam = urlParams.get('view');
-        if (viewParam === 'images') {
-          updateTabSelection('images');
-          if (!hasLoadedImages) {
-            fetchAndDisplayImages(query);
-          }
-        } else {
-          updateTabSelection('search');
-          if (!hasLoadedSearch) {
-            performSearch(query);
-          }
-        }
-      }
-    }
-  }
-  
-  function debounce(func, timeout = 150) {
+  // Helper function for delayed execution
+  const debounce = (func, timeout = 150) => {
     let timer;
     return (...args) => {
       clearTimeout(timer);
       timer = setTimeout(() => func.apply(this, args), timeout);
     };
-  }
+  };
   
-  // Initialize thinking toggle if available
-  const thinkingToggle = document.getElementById('thinking-toggle');
-  const thinkingContainer = document.getElementById('thinking-container');
-  
-  if (thinkingToggle && thinkingContainer) {
+  // Initialize thinking toggle
+  if (document.getElementById('thinking-toggle') && document.getElementById('thinking-container')) {
+    const thinkingToggle = document.getElementById('thinking-toggle');
+    const thinkingContainer = document.getElementById('thinking-container');
+    
     thinkingToggle.addEventListener('click', () => {
       thinkingContainer.classList.toggle('visible');
       thinkingToggle.classList.toggle('open');
@@ -81,8 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const spanEl = thinkingToggle.querySelector('span');
       if (spanEl) {
         spanEl.textContent = thinkingContainer.classList.contains('visible') 
-          ? 'Hide thinking' 
-          : 'Show thinking';
+          ? 'Hide thinking' : 'Show thinking';
       }
     });
   }
@@ -110,7 +69,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     const suggestions = await fetchSuggestions(query);
-    
     suggestionsContainer.innerHTML = '';
     
     if (suggestions.length > 0) {
@@ -118,55 +76,75 @@ document.addEventListener('DOMContentLoaded', () => {
         const suggestionEl = document.createElement('div');
         suggestionEl.className = 'suggestion';
         suggestionEl.textContent = suggestion;
-        
-        // Make suggestion clickable
         suggestionEl.addEventListener('click', () => {
           searchBar.value = suggestion;
           suggestionsContainer.innerHTML = '';
           performSearch(suggestion);
         });
-        
         suggestionsContainer.appendChild(suggestionEl);
       });
     }
   }, 300);
   
+  // Process URL query parameters
+  const checkUrlQueryParam = () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const queryParam = urlParams.get('f');
+
+if (window.location.pathname === '/' && urlParams.get('f')) {
+  performSearch(decodeURIComponent(urlParams.get('f')));
+  return;
+}
+    
+    if (queryParam) {
+      const query = decodeURIComponent(queryParam);
+      if (searchBar) searchBar.value = query;
+      
+      if (window.location.pathname === '/') {
+        window.location.href = `/results?f=${encodeURIComponent(query)}`;
+        return;
+      }
+      
+      const flashtagMatch = query.match(/^(.*?)\s+!(\w+)$/);
+      if (flashtagMatch) {
+        handleFlashTagSearch(query, flashtagMatch);
+      } else if (window.location.pathname === '/results') {
+        const viewParam = urlParams.get('view');
+        if (viewParam === 'images') {
+          updateTabSelection('images');
+          if (!hasLoadedImages) fetchAndDisplayImages(query);
+        } else {
+          updateTabSelection('search');
+          if (!hasLoadedSearch) performSearch(query);
+        }
+      }
+    }
+  };
+  
   // Main search function
   const performSearch = (query, view = currentView) => {
-    // Hide suggestions when search is performed
-    if (suggestionsContainer) {
-      suggestionsContainer.innerHTML = '';
-    }
+    if (suggestionsContainer) suggestionsContainer.innerHTML = '';
     
-    // Check for Flashtag format (query !tag)
     const flashtagMatch = query.match(/^(.*?)\s+!(\w+)$/);
-    if (flashtagMatch) {
-      return handleFlashTagSearch(query, flashtagMatch);
-    }
+    if (flashtagMatch) return handleFlashTagSearch(query, flashtagMatch);
     
-    // For image search
     if (view === 'images') {
       fetchAndDisplayImages(query);
       updateTabSelection('images');
       return;
     }
     
-    // Reset conversation history for new search
     conversationHistory = [];
     followupCount = 0;
     
-    // For regular search
     if (window.location.pathname !== '/results') {
       window.location.href = `/results?f=${encodeURIComponent(query)}`;
     } else {
-      // If already on results page, update content
       const queryParams = new URLSearchParams(window.location.search);
       queryParams.set('f', query);
       window.history.pushState({}, '', `${window.location.pathname}?${queryParams}`);
       
-      // Don't restream if we've already loaded this search
       if (!hasLoadedSearch) {
-        // Stream content
         handleStreamingResponse(query);
         hasLoadedSearch = true;
       }
@@ -178,27 +156,126 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchTerm = match[1].trim();
     const tag = match[2].toLowerCase();
     
-    // Load sites.json to find matching tag
     fetch('/sites.json')
       .then(response => response.json())
       .then(sites => {
         const site = sites.find(s => s.alias && s.alias.includes(tag));
         
         if (site) {
-          // Redirect to the appropriate site with the search term
           window.location.href = `${site.site}${encodeURIComponent(searchTerm)}`;
         } else {
-          // If tag not found, perform regular search
           const cleanQuery = query.replace(/\s+!\w+$/, '');
           performSearch(cleanQuery);
         }
       })
       .catch(error => {
         console.error('Error loading sites:', error);
-        // Fall back to regular search if sites.json fails to load
         const cleanQuery = query.replace(/\s+!\w+$/, '');
         performSearch(cleanQuery);
       });
+  };
+  
+  // Parse markdown in AI responses
+  const parseMarkdown = (text) => {
+    if (!text) return '';
+    return text
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.*?)\*/g, '<em>$1</em>')
+      .replace(/__(.*?)__/g, '<span class="highlight">$1</span>')
+      .replace(/~~(.*?)~~/g, '<del>$1</del>')
+      .replace(/\n/g, '<br>');
+  };
+  
+  // Animate words in the response
+  const animateWords = (element, newWords) => {
+    if (!newWords || newWords.length === 0) return;
+    
+    const container = document.createElement('span');
+    container.className = 'animated-word-container';
+    
+    newWords.forEach((word, index) => {
+      const wordSpan = document.createElement('span');
+      wordSpan.innerHTML = word + ' ';
+      wordSpan.className = 'animated-word';
+      wordSpan.style.opacity = '0';
+      wordSpan.style.transition = `opacity 0.2s ease ${index * 0.05}s`;
+      container.appendChild(wordSpan);
+      
+      setTimeout(() => { wordSpan.style.opacity = '1'; }, 10);
+    });
+    
+    element.appendChild(container);
+  };
+  
+  // Generate thought for thinking section
+  const generateThought = (text, query, existingThoughts) => {
+    const thoughts = [
+      `Analyzing information about "${query}"...`,
+      `Identifying key points related to "${query}"...`,
+      `Finding supporting evidence for this claim...`,
+      `Cross-referencing data from multiple sources...`,
+      `Evaluating the credibility of this information...`,
+      `Considering alternative perspectives on this topic...`,
+      `Looking for recent updates or changes to this information...`,
+      `Summarizing the main findings about "${query}"...`,
+      `Checking if this addresses the user's search intent...`,
+      `Determining the most relevant details to include...`
+    ];
+    
+    const availableThoughts = thoughts.filter(t => !existingThoughts.includes(t));
+    return availableThoughts.length > 0 
+      ? availableThoughts[Math.floor(Math.random() * availableThoughts.length)] 
+      : thoughts[Math.floor(Math.random() * thoughts.length)];
+  };
+  
+  // Display search results
+  const displayResults = (results, isCurated = false, curatedFor = '') => {
+    if (!results || !resultsContainer) return;
+    
+    if (!isCurated && !followupCount) currentResults = results;
+    
+    results.forEach(result => {
+      if (!result || !result.result_url) return;
+      
+      const resultElement = document.createElement('div');
+      resultElement.className = isCurated ? 'result curated' : 'result';
+      resultElement.style.opacity = '0';
+      resultElement.style.transform = 'translateY(20px)';
+      
+      let faviconHtml = '';
+      try {
+        const domain = new URL(result.result_url).hostname;
+        faviconHtml = `<img class="favicon-img" src="/favicon/${encodeURIComponent(domain)}" alt="" />`;
+      } catch (err) {
+        console.error('Error parsing URL for favicon:', err);
+      }
+      
+      const curatedBadge = isCurated ? 
+        `<div class="curated-badge">
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+          </svg>
+          AI Curated
+        </div>` : '';
+      
+      const curatedForHtml = isCurated && curatedFor ? 
+        `<div class="curated-for">For search: "${curatedFor}"</div>` : '';
+      
+      resultElement.innerHTML = `
+        ${curatedBadge}
+        <a href="${result.result_url}" class="result-title" target="_blank">${result.result_title || 'Untitled'}</a>
+        <div class="result-url">${faviconHtml}${new URL(result.result_url).hostname}</div>
+        <div class="result-description">${result.result_og_description || ''}</div>
+        ${curatedForHtml}
+      `;
+      
+      resultsContainer.appendChild(resultElement);
+      
+      setTimeout(() => {
+        resultElement.style.opacity = '1';
+        resultElement.style.transform = 'translateY(0)';
+      }, 50);
+    });
   };
   
   // Handle AI streaming response
@@ -218,24 +295,19 @@ document.addEventListener('DOMContentLoaded', () => {
     if (thinkingContent) thinkingContent.innerHTML = '';
     if (queryChips && !isFollowup) queryChips.innerHTML = '';
     if (refinedQueries && !isFollowup) refinedQueries.style.display = 'none';
-    
-    // Show loading state
     if (loadingElement) loadingElement.style.display = 'flex';
     
-    // Clear existing results only if this is a new search, not a followup
-    if (!isFollowup) {
-      resultsElement.innerHTML = '';
-    }
+    if (!isFollowup) resultsElement.innerHTML = '';
     
     try {
-      // Prepare conversation history for the API
       let historyParam = '';
       if (isFollowup && conversationHistory.length > 0) {
         historyParam = `&history=${encodeURIComponent(JSON.stringify(conversationHistory))}`;
       }
       
-      // Set up Server-Sent Events connection
-      const eventSource = new EventSource(`https://api.coopr.tech:8148/flashtag-ai/stream?f=${encodeURIComponent(query)}${historyParam}${isFollowup ? '&followup=true' : ''}`);
+      const eventSource = new EventSource(
+        `https://api.coopr.tech:8148/flashtag-ai/stream?f=${encodeURIComponent(query)}${historyParam}${isFollowup ? '&followup=true' : ''}`
+      );
       
       // Stream processing state
       let summaryText = '';
@@ -246,7 +318,6 @@ document.addEventListener('DOMContentLoaded', () => {
       let allThoughts = [];
       let curatedResults = [];
       
-      // If this is a followup, add it to conversation UI
       if (isFollowup) {
         const followupQuestion = document.createElement('div');
         followupQuestion.className = 'followup-question';
@@ -257,13 +328,11 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
         aiSummaryContent.appendChild(followupQuestion);
         
-        // Add a response container
         const followupResponse = document.createElement('div');
         followupResponse.className = 'followup-response';
         followupResponse.innerHTML = `<strong>AI:</strong> `;
         aiSummaryContent.appendChild(followupResponse);
         
-        // Update aiSummaryContent to be this response container for streaming
         aiSummaryContent = followupResponse;
       }
       
@@ -274,14 +343,10 @@ document.addEventListener('DOMContentLoaded', () => {
         isProcessing = true;
         const batch = animationQueue.shift();
         
-        // Apply markdown formatting to the words
         const formattedWords = parseMarkdown(batch.join(' ')).split(' ');
-        
         animateWords(aiSummaryContent, formattedWords);
         
-        // Add thinking/reasoning to the thinking section
         if (thinkingContent) {
-          // Generate a thinking thought for this batch of words
           const thought = generateThought(batch.join(' '), query, allThoughts);
           allThoughts.push(thought);
           
@@ -296,145 +361,13 @@ document.addEventListener('DOMContentLoaded', () => {
         processAnimationQueue();
       };
       
-      // Generate simulated reasoning points
-      const generateThought = (text, query, existingThoughts) => {
-        const thoughts = [
-          `Analyzing information about "${query}"...`,
-          `Identifying key points related to "${query}"...`,
-          `Finding supporting evidence for this claim...`,
-          `Cross-referencing data from multiple sources...`,
-          `Evaluating the credibility of this information...`,
-          `Considering alternative perspectives on this topic...`,
-          `Looking for recent updates or changes to this information...`,
-          `Summarizing the main findings about "${query}"...`,
-          `Checking if this addresses the user's search intent...`,
-          `Determining the most relevant details to include...`
-        ];
-        
-        // Filter out thoughts we've already used
-        const availableThoughts = thoughts.filter(t => !existingThoughts.includes(t));
-        
-        // If we've used all thoughts, reset
-        if (availableThoughts.length === 0) return thoughts[Math.floor(Math.random() * thoughts.length)];
-        
-        return availableThoughts[Math.floor(Math.random() * availableThoughts.length)];
-      };
-      
-      // Parse markdown in AI responses
-      function parseMarkdown(text) {
-        if (!text) return '';
-        
-        // Handle bold (** syntax)
-        text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-        
-        // Handle italic (* syntax)
-        text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');
-        
-        // Handle highlight/underline with __
-        text = text.replace(/__(.*?)__/g, '<span class="highlight">$1</span>');
-        
-        // Handle strikethrough
-        text = text.replace(/~~(.*?)~~/g, '<del>$1</del>');
-        
-        // Convert line breaks to HTML breaks
-        text = text.replace(/\n/g, '<br>');
-        
-        return text;
-      }
-      
-      // Word animation
-      function animateWords(element, newWords) {
-        if (!newWords || newWords.length === 0) return;
-        
-        // Create a new span for each word with staggered animation
-        const container = document.createElement('span');
-        container.className = 'animated-word-container';
-        
-        newWords.forEach((word, index) => {
-          const wordSpan = document.createElement('span');
-          wordSpan.innerHTML = word + ' '; // Use innerHTML to support HTML from markdown
-          wordSpan.className = 'animated-word';
-          wordSpan.style.opacity = '0';
-          wordSpan.style.transition = `opacity 0.2s ease ${index * 0.05}s`;
-          container.appendChild(wordSpan);
-          
-          // Start the fade-in animation
-          setTimeout(() => {
-            wordSpan.style.opacity = '1';
-          }, 10);
-        });
-        
-        // Append the new words to the content
-        element.appendChild(container);
-      }
-      
-      // Display search results
-      const displayResults = (results, isCurated = false, curatedFor = '') => {
-        if (!results || !resultsElement) return;
-        
-        // Store results for tab switching
-        if (!isCurated && !isFollowup) {
-          currentResults = results;
-        }
-        
-        results.forEach(result => {
-          if (!result || !result.result_url) return;
-          
-          const resultElement = document.createElement('div');
-          resultElement.className = isCurated ? 'result curated' : 'result';
-          
-          // For animation of new results
-          resultElement.style.opacity = '0';
-          resultElement.style.transform = 'translateY(20px)';
-          
-          // Add favicon using our favicon endpoint
-          let faviconHtml = '';
-          try {
-            const domain = new URL(result.result_url).hostname;
-            faviconHtml = `<img class="favicon-img" src="/favicon/${encodeURIComponent(domain)}" alt="" />`;
-          } catch (err) {
-            console.error('Error parsing URL for favicon:', err);
-          }
-          
-          // Create curated badge if needed
-          const curatedBadge = isCurated ? 
-            `<div class="curated-badge">
-              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-              </svg>
-              AI Curated
-            </div>` : '';
-          
-          // Add curated-for text if applicable
-          const curatedForHtml = isCurated && curatedFor ? 
-            `<div class="curated-for">For search: "${curatedFor}"</div>` : '';
-          
-          resultElement.innerHTML = `
-            ${curatedBadge}
-            <a href="${result.result_url}" class="result-title" target="_blank">${result.result_title || 'Untitled'}</a>
-            <div class="result-url">${faviconHtml}${new URL(result.result_url).hostname}</div>
-            <div class="result-description">${result.result_og_description || ''}</div>
-            ${curatedForHtml}
-          `;
-          
-          resultsElement.appendChild(resultElement);
-          
-          // Animate in
-          setTimeout(() => {
-            resultElement.style.opacity = '1';
-            resultElement.style.transform = 'translateY(0)';
-          }, 50);
-        });
-      };
-      
-      // Handle various event stream message types
+      // Event handlers for SSE
       eventSource.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
           
           switch (data.type) {
             case 'results':
-              // Initial search results
               if (data.results && data.results.length > 0 && !isFollowup) {
                 displayResults(data.results);
                 hasResults = true;
@@ -442,27 +375,18 @@ document.addEventListener('DOMContentLoaded', () => {
               break;
               
             case 'content':
-              // Streaming AI content
               if (data.text) {
                 summaryText += data.text;
-                
-                // Split the new text into words and add to animation queue
                 newWords = data.text.trim().split(' ').filter(w => w);
                 
                 if (newWords.length > 0) {
-                  // Group words in batches for smoother animation
                   animationQueue.push(newWords);
-                  
-                  // Process the animation queue
-                  if (!isProcessing) {
-                    processAnimationQueue();
-                  }
+                  if (!isProcessing) processAnimationQueue();
                 }
               }
               break;
               
             case 'curated_queries':
-              // AI-generated refined search queries (only for new searches, not followups)
               if (!isFollowup && data.queries && data.queries.length > 0 && queryChips && refinedQueries) {
                 queryChips.innerHTML = '';
                 
@@ -481,7 +405,6 @@ document.addEventListener('DOMContentLoaded', () => {
               break;
               
             case 'curated_results':
-              // Store curated results to display them (only for new searches, not followups)
               if (!isFollowup && data.results && data.results.length > 0) {
                 curatedResults.push({
                   query: data.query,
@@ -491,20 +414,16 @@ document.addEventListener('DOMContentLoaded', () => {
               break;
               
             case 'end':
-              // End of stream, display curated results
               if (loadingElement) loadingElement.style.display = 'none';
               
-              // Display all curated results after a short delay (only for new searches)
               if (!isFollowup) {
                 setTimeout(() => {
                   if (curatedResults.length > 0) {
-                    // Create a section header for curated results
                     const curatedHeader = document.createElement('h3');
                     curatedHeader.className = 'curated-results-header';
                     curatedHeader.textContent = 'AI Curated Results';
                     resultsElement.appendChild(curatedHeader);
                     
-                    // Display each set of curated results
                     curatedResults.forEach(set => {
                       displayResults(set.results, true, set.query);
                     });
@@ -512,7 +431,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }, 1000);
               }
               
-              // Add the finalized conversation to history
               if (summaryText) {
                 conversationHistory.push({
                   role: 'user',
@@ -523,17 +441,10 @@ document.addEventListener('DOMContentLoaded', () => {
                   content: summaryText
                 });
                 
-                // If this was a followup, increment the counter
                 if (isFollowup) {
                   followupCount++;
-                  
-                  // After response, show the followup UI if we haven't reached max
-                  if (followupCount < MAX_FOLLOWUPS) {
-                    // Show followup UI after a slight delay
-                    setTimeout(addFollowupUI, 500);
-                  }
+                  if (followupCount < MAX_FOLLOWUPS) setTimeout(addFollowupUI, 500);
                 } else {
-                  // For new searches, add followup UI
                   setTimeout(addFollowupUI, 500);
                 }
               }
@@ -575,18 +486,16 @@ document.addEventListener('DOMContentLoaded', () => {
   };
   
   // Add followup UI
-  function addFollowupUI() {
+  const addFollowupUI = () => {
     const aiSummaryContent = document.getElementById('ai-summary-content');
     if (!aiSummaryContent) return;
     
-    // Check if we already have a followup container
     let followupContainer = document.querySelector('.followup-container');
     
     if (!followupContainer) {
       followupContainer = document.createElement('div');
       followupContainer.className = 'followup-container';
       
-      // Create the followup container with input and button
       followupContainer.innerHTML = `
         <div class="followup-header">Ask a follow-up question (${followupCount}/${MAX_FOLLOWUPS})</div>
         <div class="followup-input-container">
@@ -597,7 +506,6 @@ document.addEventListener('DOMContentLoaded', () => {
       
       aiSummaryContent.appendChild(followupContainer);
       
-      // Add event listeners
       const followupInput = followupContainer.querySelector('.followup-input');
       const followupButton = followupContainer.querySelector('.followup-button');
       
@@ -607,7 +515,7 @@ document.addEventListener('DOMContentLoaded', () => {
           if (followupQuery) {
             handleFollowup(followupQuery);
             followupInput.value = '';
-            followupContainer.remove(); // Remove the container after submission
+            followupContainer.remove();
           }
         }
       });
@@ -617,47 +525,41 @@ document.addEventListener('DOMContentLoaded', () => {
         if (followupQuery) {
           handleFollowup(followupQuery);
           followupInput.value = '';
-          followupContainer.remove(); // Remove the container after submission
+          followupContainer.remove();
         }
       });
       
-      // Focus the input
       setTimeout(() => followupInput.focus(), 100);
     } else {
-      // Update the header to show correct count
       const header = followupContainer.querySelector('.followup-header');
       if (header) {
         header.textContent = `Ask a follow-up question (${followupCount}/${MAX_FOLLOWUPS})`;
       }
     }
-  }
+  };
   
   // Handle followup question
-  function handleFollowup(query) {
-    // Process the followup query
+  const handleFollowup = (query) => {
     handleStreamingResponse(query, true);
-  }
+  };
   
   // Fetch and display images
-  async function fetchAndDisplayImages(query) {
+  const fetchAndDisplayImages = async (query) => {
     const resultsElement = document.getElementById('results');
     const loadingElement = document.getElementById('loading');
     const aiSummaryElement = document.getElementById('ai-summary');
     
     if (!resultsElement) return;
     
-    // If we already have images for this query, just show them
     if (currentImageResults && currentImageResults.query === query) {
       if (loadingElement) loadingElement.style.display = 'none';
       if (aiSummaryElement) aiSummaryElement.style.display = 'none';
       
-      // Display the cached images
       resultsElement.innerHTML = '';
       displayImageResults(currentImageResults.images);
       return;
     }
     
-    // Clear existing content and show loading state
     resultsElement.innerHTML = '';
     if (loadingElement) loadingElement.style.display = 'flex';
     if (aiSummaryElement) aiSummaryElement.style.display = 'none';
@@ -668,13 +570,11 @@ document.addEventListener('DOMContentLoaded', () => {
       
       if (loadingElement) loadingElement.style.display = 'none';
       
-      // Cache the image results
       currentImageResults = {
         query: query,
         images: data.images || []
       };
       
-      // Display images
       displayImageResults(data.images || []);
       
     } catch (error) {
@@ -682,25 +582,29 @@ document.addEventListener('DOMContentLoaded', () => {
       if (loadingElement) loadingElement.style.display = 'none';
       resultsElement.innerHTML = '<div class="error-message">Sorry, there was an error loading images. Please try again later.</div>';
     }
-  }
+  };
   
   // Display image results
-  function displayImageResults(images) {
+  const displayImageResults = (images) => {
     const resultsElement = document.getElementById('results');
     if (!resultsElement) return;
     
     if (images && images.length > 0) {
-      // Create image grid container
       const imageGrid = document.createElement('div');
       imageGrid.className = 'image-grid';
       
-      // Add Google attribution
       const attribution = document.createElement('div');
       attribution.className = 'google-attribution';
       attribution.innerHTML = 'Images powered by Google Images';
       resultsElement.appendChild(attribution);
       
-      // Add images to grid
+      // Preload first batch of images
+      const initialBatchSize = 12;
+      images.slice(0, initialBatchSize).forEach(image => {
+        const img = new Image();
+        img.src = image.thumbnail;
+      });
+      
       images.forEach((image, index) => {
         const imageCard = document.createElement('div');
         imageCard.className = 'image-card';
@@ -708,13 +612,12 @@ document.addEventListener('DOMContentLoaded', () => {
         
         imageCard.innerHTML = `
           <div class="image-container">
-            <img src="${image.thumbnail}" alt="${image.title}" loading="lazy" />
+            <img src="${image.thumbnail}" alt="${image.title}" loading="${index < initialBatchSize ? 'eager' : 'lazy'}" />
           </div>
           <div class="image-title">${image.title}</div>
           <div class="image-source">${image.source}</div>
         `;
         
-        // Add click handler to open full image
         imageCard.addEventListener('click', () => {
           openImageModal(image.url, image.title);
         });
@@ -723,13 +626,21 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       
       resultsElement.appendChild(imageGrid);
+      
+      // Preload remaining images after initial batch
+      setTimeout(() => {
+        images.slice(initialBatchSize).forEach(image => {
+          const img = new Image();
+          img.src = image.thumbnail;
+        });
+      }, 1000);
     } else {
       resultsElement.innerHTML = '<div class="no-results">No images found for your query. Try a different search term.</div>';
     }
-  }
+  };
   
   // Image modal functionality
-  function openImageModal(imageUrl, title) {
+  const openImageModal = (imageUrl, title) => {
     const modal = document.getElementById('image-modal') || createImageModal();
     const modalImg = modal.querySelector('.modal-image');
     const modalTitle = modal.querySelector('.modal-title');
@@ -737,13 +648,11 @@ document.addEventListener('DOMContentLoaded', () => {
     modalImg.src = imageUrl;
     modalTitle.textContent = title;
     modal.classList.add('visible');
-    
-    // Prevent body scrolling when modal is open
     document.body.style.overflow = 'hidden';
-  }
+  };
   
   // Create image modal if it doesn't exist
-  function createImageModal() {
+  const createImageModal = () => {
     const modal = document.createElement('div');
     modal.id = 'image-modal';
     modal.className = 'image-modal';
@@ -758,7 +667,6 @@ document.addEventListener('DOMContentLoaded', () => {
     
     document.body.appendChild(modal);
     
-    // Close modal when clicking the close button or outside the image
     const closeBtn = modal.querySelector('.close-modal');
     closeBtn.addEventListener('click', closeImageModal);
     
@@ -767,71 +675,70 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     return modal;
-  }
+  };
   
   // Close image modal
-  function closeImageModal() {
+  const closeImageModal = () => {
     const modal = document.getElementById('image-modal');
     if (modal) {
       modal.classList.remove('visible');
-      // Restore body scrolling
       document.body.style.overflow = '';
     }
-  }
+  };
   
-  // Update tab selection without refreshing results
-  function updateTabSelection(tab) {
+  // Update tab selection
+  const updateTabSelection = (tab) => {
     if (!navTabs) return;
     
     const tabs = navTabs.querySelectorAll('.nav-tab');
-    tabs.forEach(t => {
-      t.classList.toggle('active', t.dataset.tab === tab);
-    });
+    tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
     
-    // Only update if we're changing tabs
     if (currentView !== tab) {
       currentView = tab;
       
-      // Toggle content visibility
       const tabContents = document.querySelectorAll('.tab-content');
       tabContents.forEach(content => {
         content.classList.toggle('active', content.id === `${tab}-content`);
       });
       
-      const resultsElement = document.getElementById('results');
       const aiSummaryElement = document.getElementById('ai-summary');
       
-      // Handle tab-specific display
       if (tab === 'images') {
-        // Hide AI summary for images view
-        if (aiSummaryElement) {
-          aiSummaryElement.style.display = 'none';
-        }
+        if (aiSummaryElement) aiSummaryElement.style.display = 'none';
         
-        // If we have a query, display images for it
-        const query = searchBar.value.trim() || new URLSearchParams(window.location.search).get('f');
-        if (query && resultsElement) {
-          fetchAndDisplayImages(query);
+        const query = searchBar?.value.trim() || new URLSearchParams(window.location.search).get('f');
+        if (query) {
+          if (currentImageResults && currentImageResults.query === query) {
+            const resultsElement = document.getElementById('results');
+            if (resultsElement) {
+              resultsElement.innerHTML = '';
+              displayImageResults(currentImageResults.images);
+            }
+          } else {
+            fetchAndDisplayImages(query);
+          }
         }
       } else {
-        // Show AI summary for search view
-        if (aiSummaryElement) {
-          aiSummaryElement.style.display = 'block';
-        }
+        if (aiSummaryElement) aiSummaryElement.style.display = 'block';
         
-        // If we have stored results, display them
-        if (currentResults && resultsElement) {
-          resultsElement.innerHTML = '';
-          displayResults(currentResults);
+        if (currentResults) {
+          const resultsElement = document.getElementById('results');
+          if (resultsElement) {
+            resultsElement.innerHTML = '';
+            displayResults(currentResults);
+          }
         }
       }
+      
+      const urlParams = new URLSearchParams(window.location.search);
+      urlParams.set('view', tab);
+      window.history.replaceState({}, '', `${window.location.pathname}?${urlParams}`);
     }
-  }
+  };
   
-  // Initialize navigation tabs if they exist
-  function initNavTabs() {
+  // Initialize navigation tabs
+  const initNavTabs = () => {
     if (!navTabs) {
-      // Create navigation tabs if they don't exist
       const tabsContainer = document.createElement('div');
       tabsContainer.className = 'nav-tabs';
       tabsContainer.innerHTML = `
@@ -839,32 +746,23 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="nav-tab" data-tab="images">Images</div>
       `;
       
-      // Insert tabs after header
       const header = document.querySelector('.header');
       if (header && header.nextSibling) {
         header.parentNode.insertBefore(tabsContainer, header.nextSibling);
       }
       
-      // Add click handlers to tabs
-      const tabs = tabsContainer.querySelectorAll('.nav-tab');
-      tabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-          updateTabSelection(tab.dataset.tab);
-        });
+      tabsContainer.querySelectorAll('.nav-tab').forEach(tab => {
+        tab.addEventListener('click', () => updateTabSelection(tab.dataset.tab));
       });
     } else {
-      // Add click handlers to existing tabs
-      const tabs = navTabs.querySelectorAll('.nav-tab');
-      tabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-          updateTabSelection(tab.dataset.tab);
-        });
+      navTabs.querySelectorAll('.nav-tab').forEach(tab => {
+        tab.addEventListener('click', () => updateTabSelection(tab.dataset.tab));
       });
     }
-  }
+  };
   
-  // Flashtag detection and site info tooltip
-  function checkForFlashTag() {
+  // Check for Flashtag pattern
+  const checkForFlashTag = () => {
     if (!searchBar || !siteInfoTooltip) return;
     
     const query = searchBar.value.trim();
@@ -873,7 +771,6 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
     
-    // Look for flashtag pattern
     const match = query.match(/^(.*?)\s+!(\w+)$/);
     if (!match) {
       siteInfoTooltip.classList.remove('visible');
@@ -882,14 +779,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const tag = match[2].toLowerCase();
     
-    // Load sites for Flashtags
     fetch('/sites.json')
       .then(response => response.json())
       .then(sites => {
         const site = sites.find(s => s.alias && s.alias.includes(tag));
         
         if (site && site.title) {
-          // Show the site info with favicon
           let favicon = '';
           try {
             const domain = new URL(site.site).hostname;
@@ -908,112 +803,13 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error('Error loading sites:', error);
         siteInfoTooltip.classList.remove('visible');
       });
-  }
+  };
   
-  // Event listeners
-  if (searchBar) {
-    searchBar.addEventListener('input', () => {
-      updateSuggestions();
-      checkForFlashTag();
-    });
-    
-    searchBar.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') {
-        const query = searchBar.value.trim();
-        if (query) {
-          performSearch(query, currentView);
-        }
-      }
-    });
-    
-    // Hide suggestions when clicking elsewhere
-    document.addEventListener('click', (e) => {
-      if (e.target !== searchBar && suggestionsContainer) {
-        suggestionsContainer.innerHTML = '';
-      }
-    });
-  }
-  
-  if (searchIcon) {
-    searchIcon.addEventListener('click', () => {
-      const query = searchBar.value.trim();
-      if (query) {
-        performSearch(query, currentView);
-      }
-    });
-  }
-  
-  if (aiIcon) {
-    aiIcon.addEventListener('click', () => {
-      const query = searchBar.value.trim();
-      if (query) {
-        performSearch(query, 'search'); // AI icon always triggers search view
-      }
-    });
-  }
-  
-  // Initialize the page
-  function init() {
-    // First check if we have a query param in the URL
-    checkUrlQueryParam();
-    
-    // If we're on the home page and the header is centered
-    if (header && header.classList.contains('centered')) {
-      // Set up the header animation on focus
-      if (searchBar) {
-        searchBar.addEventListener('focus', () => {
-          header.classList.remove('centered');
-          header.classList.add('top');
-        });
-      }
-    }
-    
-    // Initialize navigation tabs
-    initNavTabs();
-    
-    // If we're on the results page, process query param
-    if (window.location.pathname === '/results') {
-      const urlParams = new URLSearchParams(window.location.search);
-      const queryParam = urlParams.get('f');
-      const viewParam = urlParams.get('view') || 'search';
-      const isResearch = urlParams.get('research') === 'true';
-      
-      if (queryParam) {
-        // Set the search bar value
-        if (searchBar) searchBar.value = decodeURIComponent(queryParam);
-        
-        // Set current view
-        currentView = viewParam;
-        updateTabSelection(currentView);
-        
-        // Perform the search only if this isn't a continued search from a previous page
-        // or if it's explicitly marked as a research (from clicking a search suggestion)
-        if (currentView === 'images') {
-          fetchAndDisplayImages(decodeURIComponent(queryParam));
-        } else if (!document.referrer.includes('/results') || isResearch) {
-          // Only perform the search if we didn't come from another results page
-          // or if we're explicitly requesting a new search
-          handleStreamingResponse(decodeURIComponent(queryParam));
-        }
-      }
-    }
-    
-    // Register service worker for caching if not already registered
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/service-worker.js')
-        .then(registration => {
-          console.log('ServiceWorker registration successful with scope: ', registration.scope);
-        })
-        .catch(err => {
-          console.log('ServiceWorker registration failed: ', err);
-        });
-    }
-  }
-  
-  // Add CSS for new followup components
-  function addFollowupStyles() {
+  // Add styles for followup components
+  const addStyles = () => {
     const styleElement = document.createElement('style');
     styleElement.textContent = `
+      /* Followup styles */
       .followup-container {
         margin-top: 20px;
         padding: 15px;
@@ -1071,14 +867,8 @@ document.addEventListener('DOMContentLoaded', () => {
       .user-query {
         color: #374151;
       }
-    `;
-    document.head.appendChild(styleElement);
-  }
-  
-  // Add CSS for images that actually works
-  function addImageStyles() {
-    const styleElement = document.createElement('style');
-    styleElement.textContent = `
+      
+      /* Image styles */
       .image-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -1105,14 +895,8 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       
       @keyframes fadeInUp {
-        from {
-          opacity: 0;
-          transform: translateY(20px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
       }
       
       .image-card:hover {
@@ -1215,273 +999,123 @@ document.addEventListener('DOMContentLoaded', () => {
         border-radius: 50%;
         background-color: rgba(0, 0, 0, 0.5);
       }
-      
-      .no-results {
-        text-align: center;
-        padding: 40px;
-        color: #6b7280;
-        font-size: 16px;
-      }
-      
-      .error-message {
-        text-align: center;
-        padding: 40px;
-        color: #ef4444;
-        font-size: 16px;
-      }
     `;
     document.head.appendChild(styleElement);
-  }
+  };
   
-  // Add the followup styles
-  addFollowupStyles();
+  // Event listeners setup
+  const setupEventListeners = () => {
+    // Search bar events
+    if (searchBar) {
+      searchBar.addEventListener('input', () => {
+        updateSuggestions();
+        checkForFlashTag();
+      });
+      
+      searchBar.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          const query = searchBar.value.trim();
+          if (query) performSearch(query, currentView);
+        }
+      });
+      
+      // Hide suggestions when clicking elsewhere
+      document.addEventListener('click', (e) => {
+        if (e.target !== searchBar && suggestionsContainer) {
+          suggestionsContainer.innerHTML = '';
+        }
+      });
+    }
+    
+    // Search icon events
+    if (searchIcon) {
+      searchIcon.addEventListener('click', () => {
+        const query = searchBar.value.trim();
+        if (query) performSearch(query, currentView);
+      });
+    }
+    
+    // AI icon events
+    if (aiIcon) {
+      aiIcon.addEventListener('click', () => {
+        const query = searchBar.value.trim();
+        if (query) performSearch(query, 'search');
+      });
+    }
+    
+    // Keyboard navigation for image modal
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        const modal = document.getElementById('image-modal');
+        if (modal && modal.classList.contains('visible')) {
+          closeImageModal();
+        }
+      }
+    });
+  };
   
-  // Add fixed image styles
-  addImageStyles();
+  // Register service worker
+  const registerServiceWorker = () => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/service-worker.js')
+        .then(registration => {
+          console.log('ServiceWorker registration successful with scope: ', registration.scope);
+        })
+        .catch(err => {
+          console.log('ServiceWorker registration failed: ', err);
+        });
+    }
+  };
   
   // Initialize the page
-  init();
-  
-  // Check for URL parameter to handle default search engine redirects
-  window.addEventListener('load', () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const queryParam = urlParams.get('f');
+  const init = () => {
+    // Add styles
+    addStyles();
     
-    // If we're on home page with a query parameter, redirect to search results
-    if (queryParam && window.location.pathname === '/') {
-      const query = decodeURIComponent(queryParam);
-      if (searchBar) searchBar.value = query;
-      
-      // Check if it has a flashtag
-      const flashtagMatch = query.match(/^(.*?)\s+!(\w+)$/);
-      if (flashtagMatch) {
-        // This is a flashtag search
-        handleFlashTagSearch(query, flashtagMatch);
-      } else {
-        // Normal search - redirect to results page
-        window.location.href = `/results?f=${encodeURIComponent(query)}`;
-      }
-    }
-  });
-  
-  // For displaying cached results when switching between tabs
-  function showCachedResults() {
-    if (currentView === 'search' && currentResults) {
-      const resultsElement = document.getElementById('results');
-      if (resultsElement) {
-        resultsElement.innerHTML = '';
-        displayResults(currentResults);
-      }
-      
-      // Show AI summary if available
-      const aiSummaryElement = document.getElementById('ai-summary');
-      if (aiSummaryElement) {
-        aiSummaryElement.style.display = 'block';
-      }
-    } else if (currentView === 'images' && currentImageResults) {
-      const resultsElement = document.getElementById('results');
-      if (resultsElement) {
-        resultsElement.innerHTML = '';
-        displayImageResults(currentImageResults.images);
-      }
-      
-      // Hide AI summary for images
-      const aiSummaryElement = document.getElementById('ai-summary');
-      if (aiSummaryElement) {
-        aiSummaryElement.style.display = 'none';
-      }
-    }
-  }
-  
-  // Override the updateTabSelection function to use cached results
-  function updateTabSelection(tab) {
-    if (!navTabs) return;
+    // Check URL parameters
+    checkUrlQueryParam();
     
-    const tabs = navTabs.querySelectorAll('.nav-tab');
-    tabs.forEach(t => {
-      t.classList.toggle('active', t.dataset.tab === tab);
-    });
-    
-    // Only update if we're changing tabs
-    if (currentView !== tab) {
-      currentView = tab;
-      
-      // Toggle content visibility
-      const tabContents = document.querySelectorAll('.tab-content');
-      tabContents.forEach(content => {
-        content.classList.toggle('active', content.id === `${tab}-content`);
-      });
-      
-      const aiSummaryElement = document.getElementById('ai-summary');
-      
-      // Handle tab-specific display using cached results when available
-      if (tab === 'images') {
-        // Hide AI summary for images view
-        if (aiSummaryElement) {
-          aiSummaryElement.style.display = 'none';
-        }
-        
-        // Use cached image results if available
-        const query = searchBar?.value.trim() || new URLSearchParams(window.location.search).get('f');
-        if (query) {
-          if (currentImageResults && currentImageResults.query === query) {
-            showCachedResults();
-          } else {
-            fetchAndDisplayImages(query);
-          }
-        }
-      } else {
-        // Show AI summary for search view
-        if (aiSummaryElement) {
-          aiSummaryElement.style.display = 'block';
-        }
-        
-        // Use cached search results if available
-        if (currentResults) {
-          showCachedResults();
-        } else {
-          // If no cached results, perform search if we have a query
-          const query = searchBar?.value.trim() || new URLSearchParams(window.location.search).get('f');
-          if (query) {
-            handleStreamingResponse(query);
-          }
-        }
-      }
-      
-      // Update URL to reflect current view
-      const urlParams = new URLSearchParams(window.location.search);
-      urlParams.set('view', tab);
-      const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
-      window.history.replaceState({}, '', newUrl);
-    }
-  }
-  
-  // Enhanced image loading with preloading for better performance
-  function preloadImages(images, startIndex, count) {
-    for (let i = startIndex; i < Math.min(startIndex + count, images.length); i++) {
-      const img = new Image();
-      img.src = images[i].thumbnail;
-    }
-  }
-  
-  // Override displayImageResults to include preloading
-  function displayImageResults(images) {
-    const resultsElement = document.getElementById('results');
-    if (!resultsElement) return;
-    
-    if (images && images.length > 0) {
-      // Create image grid container
-      const imageGrid = document.createElement('div');
-      imageGrid.className = 'image-grid';
-      
-      // Add Google attribution
-      const attribution = document.createElement('div');
-      attribution.className = 'google-attribution';
-      attribution.innerHTML = 'Images powered by Google Images';
-      resultsElement.appendChild(attribution);
-      
-      // Add initial batch of images to grid
-      const initialBatchSize = 12; // Number of images to show initially
-      
-      // Preload the first batch of images
-      preloadImages(images, 0, initialBatchSize);
-      
-      // Add all images to grid with staggered loading
-      images.forEach((image, index) => {
-        const imageCard = document.createElement('div');
-        imageCard.className = 'image-card';
-        imageCard.style.animationDelay = `${index * 50}ms`;
-        
-        imageCard.innerHTML = `
-          <div class="image-container">
-            <img src="${image.thumbnail}" alt="${image.title}" loading="${index < initialBatchSize ? 'eager' : 'lazy'}" />
-          </div>
-          <div class="image-title">${image.title}</div>
-          <div class="image-source">${image.source}</div>
-        `;
-        
-        // Add click handler to open full image
-        imageCard.addEventListener('click', () => {
-          openImageModal(image.url, image.title);
-        });
-        
-        imageGrid.appendChild(imageCard);
-        
-        // Preload next batch when initial batch is viewed
-        if (index === initialBatchSize - 1) {
-          setTimeout(() => {
-            preloadImages(images, initialBatchSize, images.length - initialBatchSize);
-          }, 1000);
-        }
-      });
-      
-      resultsElement.appendChild(imageGrid);
-      
-      // Implement intersection observer to load images as they come into view
-      if ('IntersectionObserver' in window) {
-        const imageObserver = new IntersectionObserver((entries) => {
-          entries.forEach(entry => {
-            if (entry.isIntersecting) {
-              const img = entry.target.querySelector('img');
-              if (img && img.dataset.src) {
-                img.src = img.dataset.src;
-                delete img.dataset.src;
-              }
-              imageObserver.unobserve(entry.target);
-            }
-          });
-        }, { rootMargin: '200px' });
-        
-        document.querySelectorAll('.image-card').forEach(card => {
-          imageObserver.observe(card);
+    // If we're on the home page and the header is centered
+    if (header && header.classList.contains('centered')) {
+      if (searchBar) {
+        searchBar.addEventListener('focus', () => {
+          header.classList.remove('centered');
+          header.classList.add('top');
         });
       }
-    } else {
-      resultsElement.innerHTML = '<div class="no-results">No images found for your query. Try a different search term.</div>';
     }
-  }
-  
-  // Keyboard navigation for image modal
-  document.addEventListener('keydown', (e) => {
-    const modal = document.getElementById('image-modal');
-    if (modal && modal.classList.contains('visible')) {
-      if (e.key === 'Escape') {
-        closeImageModal();
-      }
-    }
-  });
-  
-  // Function to search for flashtags.tech?f=%s search parameter
-  function checkForDefaultSearchParameter() {
-    const searchParams = new URLSearchParams(window.location.search);
-    return searchParams.has('f');
-  }
-  
-  // Update the init function to better handle URL parameters
-  function enhancedInit() {
-    // First check if we have a search parameter
-    if (checkForDefaultSearchParameter()) {
-      // Get the search parameter
+    
+    // Initialize navigation tabs
+    initNavTabs();
+    
+    // Set up event listeners
+    setupEventListeners();
+    
+    // Register service worker
+    registerServiceWorker();
+    
+    // If we're on the results page, process query param
+    if (window.location.pathname === '/results') {
       const urlParams = new URLSearchParams(window.location.search);
       const queryParam = urlParams.get('f');
+      const viewParam = urlParams.get('view') || 'search';
+      const isResearch = urlParams.get('research') === 'true';
       
       if (queryParam) {
-        // If we're on the homepage, redirect to results
-        if (window.location.pathname === '/') {
-          window.location.href = `/results?f=${encodeURIComponent(queryParam)}`;
-          return;
+        if (searchBar) searchBar.value = decodeURIComponent(queryParam);
+        
+        currentView = viewParam;
+        updateTabSelection(currentView);
+        
+        if (currentView === 'images') {
+          fetchAndDisplayImages(decodeURIComponent(queryParam));
+        } else if (!document.referrer.includes('/results') || isResearch) {
+          handleStreamingResponse(decodeURIComponent(queryParam));
         }
       }
     }
-    
-    // Run the original init function
-    init();
-  }
+  };
   
-  // Replace init with enhanced version
-  const originalInit = init;
-  init = enhancedInit;
-  
-  // Call init to start the page
-  enhancedInit();
+  // Start the application
+  init();
 });
