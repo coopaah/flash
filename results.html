@@ -1181,7 +1181,7 @@
           if (loadingElement) loadingElement.style.display = 'flex';
           
           // Initialize streaming response from API
-          const eventSource = new EventSource(`https://api.coopr.tech:8148/flashtag-ai/stream?q=${encodeURIComponent(currentQuery)}&stream=true`);
+          const eventSource = new EventSource(`https://api.coopr.tech:8148/flashtag-ai/stream?f=${encodeURIComponent(currentQuery)}&stream=true`);
           
           let summaryText = '';
           let curatedResults = [];
