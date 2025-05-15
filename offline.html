@@ -3,179 +3,572 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Offline - Flash</title>
+  <title>Offline - FlashTags</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --primary-color: #6366f1;
+      --primary-light: #818cf8;
+      --bg-color: #f9fafb;
+      --card-bg: #ffffff;
+      --text-color: #1f2937;
+      --muted-text: #6b7280;
+      --border-color: #e5e7eb;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
     body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      height: 100vh;
-      margin: 0;
-      font-family: 'Roboto', sans-serif;
-      background-color: #f5f5f5;
-      text-align: center;
+      min-height: 100vh;
       padding: 20px;
+      animation: fadeIn 0.8s ease-in-out;
     }
-    .logo {
-      margin-bottom: 20px;
-      animation: fadeIn 1s ease-in-out;
-      max-width: 150px;
-    }
-    .message {
-      font-size: 18px;
-      color: #333;
-      margin-bottom: 30px;
-    }
-    .flashtag-section {
-      background-color: white;
-      border-radius: 8px;
-      padding: 20px;
-      width: 100%;
-      max-width: 500px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-    .search-container {
-      display: flex;
-      margin-bottom: 20px;
-    }
-    .search-bar {
-      flex-grow: 1;
-      padding: 12px 16px;
-      font-size: 16px;
-      border: 1px solid #e2e8f0;
-      border-radius: 50px 0 0 50px;
-      outline: none;
-    }
-    .search-button {
-      background-color: #6366f1;
-      color: white;
-      border: none;
-      border-radius: 0 50px 50px 0;
-      padding: 0 20px;
-      cursor: pointer;
-    }
-    .flashtag-title {
-      font-size: 16px;
-      font-weight: 500;
-      margin-bottom: 10px;
-      color: #555;
-    }
-    .tags-container {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 20px;
-    }
-    .tag {
-      background-color: #f0f0f0;
-      padding: 6px 12px;
-      border-radius: 50px;
-      font-size: 14px;
-      cursor: pointer;
-      transition: background-color 0.2s ease;
-    }
-    .tag:hover {
-      background-color: #e0e0e0;
-    }
-    .info {
-      font-size: 14px;
-      color: #666;
-      margin-bottom: 0;
-    }
+    
     @keyframes fadeIn {
       from { opacity: 0; }
       to { opacity: 1; }
     }
+    
+    .container {
+      width: 100%;
+      max-width: 600px;
+      text-align: center;
+    }
+    
+    .logo {
+      width: 140px;
+      margin-bottom: 24px;
+    }
+    
+    .status-card {
+      background-color: var(--card-bg);
+      border-radius: 16px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
+      padding: 32px;
+      margin-bottom: 24px;
+      border: 1px solid var(--border-color);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .status-badge {
+      position: absolute;
+      top: 0;
+      right: 0;
+      background-color: #f3f4f6;
+      color: #6b7280;
+      padding: 6px 12px;
+      font-size: 14px;
+      border-bottom-left-radius: 8px;
+      font-weight: 500;
+    }
+    
+    h1 {
+      font-size: 24px;
+      margin-bottom: 12px;
+      color: var(--text-color);
+    }
+    
+    p {
+      color: var(--muted-text);
+      margin-bottom: 24px;
+      font-size: 16px;
+      line-height: 1.5;
+    }
+    
+    .flashtag-container {
+      background-color: #f3f4f6;
+      padding: 24px;
+      border-radius: 12px;
+      margin-top: 16px;
+      border: 1px solid var(--border-color);
+    }
+    
+    .search-container {
+      display: flex;
+      margin-bottom: 16px;
+    }
+    
+    .search-input {
+      flex-grow: 1;
+      padding: 12px 16px;
+      border: 1px solid var(--border-color);
+      border-radius: 10px 0 0 10px;
+      font-size: 16px;
+      font-family: 'Inter', sans-serif;
+      outline: none;
+    }
+    
+    .search-input:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    }
+    
+    .search-btn {
+      padding: 0 20px;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 0 10px 10px 0;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background-color 0.2s ease;
+    }
+    
+    .search-btn:hover {
+      background-color: #4f46e5;
+    }
+    
+    .flashtag-title {
+      font-size: 16px;
+      margin-bottom: 16px;
+      color: var(--text-color);
+      text-align: left;
+      font-weight: 500;
+    }
+    
+    .tag-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    
+    .tag {
+      padding: 8px 4px;
+      background-color: white;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: center;
+    }
+    
+    .tag:hover {
+      background-color: #f9fafb;
+      transform: translateY(-2px);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      border-color: #d1d5db;
+    }
+    
+    .tip {
+      font-size: 14px;
+      color: var(--muted-text);
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px dashed var(--border-color);
+    }
+    
+    .offline-searches {
+      margin-top: 24px;
+      text-align: left;
+    }
+    
+    .offline-searches h2 {
+      font-size: 18px;
+      margin-bottom: 12px;
+      color: var(--text-color);
+    }
+    
+    .search-item {
+      background-color: white;
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      border: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .search-query {
+      font-size: 14px;
+    }
+    
+    .retry-btn {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.2s ease;
+    }
+    
+    .retry-btn:hover {
+      background-color: #4f46e5;
+    }
+    
+    .status-indicator {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 12px;
+      background-color: #fee2e2;
+      color: #dc2626;
+      border-radius: 50px;
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 20px;
+    }
+    
+    .status-indicator.online {
+      background-color: #dcfce7;
+      color: #16a34a;
+    }
+    
+    .status-indicator::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: currentColor;
+      margin-right: 8px;
+      animation: blink 1.5s infinite;
+    }
+    
+    @keyframes blink {
+      0% { opacity: 0.6; }
+      50% { opacity: 1; }
+      100% { opacity: 0.6; }
+    }
+    
+    .actions {
+      margin-top: 24px;
+    }
+    
+    .action-btn {
+      padding: 10px 20px;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .action-btn:hover {
+      background-color: #4f46e5;
+      transform: translateY(-2px);
+    }
+    
+    .connection-status-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      padding: 8px 16px;
+      background-color: #fee2e2;
+      color: #dc2626;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 500;
+      z-index: 100;
+      transform: translateY(-100%);
+      transition: transform 0.3s ease;
+    }
+    
+    .connection-status-bar.visible {
+      transform: translateY(0);
+    }
+    
+    .connection-status-bar.online {
+      background-color: #dcfce7;
+      color: #16a34a;
+    }
   </style>
 </head>
 <body>
-  <img src="logo.png" alt="Flash Search Logo" class="logo">
-  <div class="message">
-    <p>You're currently offline</p>
-    <p>But you can still use Flashtags!</p>
-  </div>
-  
-  <div class="flashtag-section">
-    <div class="search-container">
-      <input type="text" id="offlineSearchBar" class="search-bar" placeholder="Try a flashtag search...">
-      <button id="searchButton" class="search-button">Go</button>
+  <div id="connection-status" class="connection-status-bar">You are currently offline</div>
+
+  <div class="container">
+    <img src="/logo.png" alt="FlashTags Logo" class="logo">
+    
+    <div id="status-indicator" class="status-indicator">
+      You are offline
     </div>
     
-    <div class="flashtag-title">Popular Flashtags:</div>
-    <div class="tags-container" id="popularTags">
-      <!-- Tags will be loaded from cached sites.json -->
+    <div class="status-card">
+      <span class="status-badge">Offline Mode</span>
+      <h1>No internet connection</h1>
+      <p>But you can still use FlashTags! Try searching with FlashTags to quickly navigate to popular sites when your connection is restored.</p>
+      
+      <div class="flashtag-container">
+        <div class="search-container">
+          <input type="text" id="search-input" class="search-input" placeholder="Type search !tag...">
+          <button id="search-btn" class="search-btn">Go</button>
+        </div>
+        
+        <div class="flashtag-title">Popular FlashTags</div>
+        <div id="tag-grid" class="tag-grid">
+          <!-- Tags will be populated by JavaScript -->
+        </div>
+        
+        <p class="tip"><strong>Tip:</strong> Type your search and add a tag like <code>search !g</code> to search Google when back online.</p>
+      </div>
     </div>
     
-    <p class="info">Type your search followed by a tag (e.g., "weather forecast !g" for Google)</p>
+    <div id="offline-searches" class="offline-searches" style="display: none;">
+      <h2>Pending Searches</h2>
+      <div id="search-list">
+        <!-- Offline searches will be listed here -->
+      </div>
+    </div>
+    
+    <div class="actions">
+      <button id="refresh-btn" class="action-btn">Retry Connection</button>
+    </div>
   </div>
 
   <script>
-    // Load flashtags from cache when offline
     document.addEventListener('DOMContentLoaded', async () => {
-      const searchBar = document.getElementById('offlineSearchBar');
-      const searchButton = document.getElementById('searchButton');
-      const tagsContainer = document.getElementById('popularTags');
+      const connectionStatus = document.getElementById('connection-status');
+      const statusIndicator = document.getElementById('status-indicator');
+      const searchInput = document.getElementById('search-input');
+      const searchBtn = document.getElementById('search-btn');
+      const tagGrid = document.getElementById('tag-grid');
+      const refreshBtn = document.getElementById('refresh-btn');
+      const offlineSearchesSection = document.getElementById('offline-searches');
+      const searchList = document.getElementById('search-list');
       
-      try {
-        // Try to load sites.json from cache
-        const cache = await caches.open('flash-cache-v2');
-        const sitesResponse = await cache.match('/sites.json');
+      // Check connection status
+      const updateConnectionStatus = () => {
+        const isOnline = navigator.onLine;
         
-        if (sitesResponse) {
-          const sites = await sitesResponse.json();
+        if (isOnline) {
+          statusIndicator.textContent = 'Connection restored';
+          statusIndicator.classList.add('online');
           
-          // Add most popular tags to the UI
-          const popularSites = ['Google', 'YouTube', 'Twitter', 'Reddit', 'GitHub', 'Wikipedia'];
+          connectionStatus.textContent = 'You are back online!';
+          connectionStatus.classList.add('online', 'visible');
           
-          popularSites.forEach(siteName => {
-            const site = sites.find(s => s.title === siteName);
-            if (site && site.alias && site.alias.length > 0) {
-              const tag = document.createElement('div');
-              tag.className = 'tag';
-              tag.textContent = `!${site.alias[0]}`;
-              tag.addEventListener('click', () => {
-                const currentText = searchBar.value.trim();
-                const baseQuery = currentText.split(' !')[0].trim();
-                searchBar.value = baseQuery ? `${baseQuery} !${site.alias[0]}` : `search !${site.alias[0]}`;
-                searchBar.focus();
+          // Hide it after 3 seconds
+          setTimeout(() => {
+            connectionStatus.classList.remove('visible');
+          }, 3000);
+        } else {
+          statusIndicator.textContent = 'You are offline';
+          statusIndicator.classList.remove('online');
+          
+          connectionStatus.textContent = 'You are currently offline';
+          connectionStatus.classList.remove('online');
+        }
+      };
+      
+      // Load flashtags from cache
+      const loadFlashTags = async () => {
+        try {
+          // Try to load sites.json from cache
+          const cache = await caches.open('flash-cache-v3');
+          const sitesResponse = await cache.match('/sites.json');
+          
+          if (sitesResponse) {
+            const sites = await sitesResponse.json();
+            
+            // Add most popular tags to the UI
+            const popularSites = [
+              'Google', 'YouTube', 'Twitter', 'Reddit', 
+              'GitHub', 'Wikipedia', 'Amazon', 'LinkedIn'
+            ];
+            
+            tagGrid.innerHTML = '';
+            
+            popularSites.forEach(siteName => {
+              const site = sites.find(s => s.title === siteName);
+              if (site && site.alias && site.alias.length > 0) {
+                const tag = document.createElement('div');
+                tag.className = 'tag';
+                tag.textContent = `!${site.alias[0]}`;
+                tag.addEventListener('click', () => {
+                  const currentText = searchInput.value.trim();
+                  const baseQuery = currentText.split(' !')[0].trim();
+                  searchInput.value = baseQuery ? `${baseQuery} !${site.alias[0]}` : `search !${site.alias[0]}`;
+                  searchInput.focus();
+                });
+                tagGrid.appendChild(tag);
+              }
+            });
+          } else {
+            tagGrid.innerHTML = '<div style="grid-column: span 3; text-align: center; padding: 16px;">No cached sites available</div>';
+          }
+        } catch (error) {
+          console.error('Error loading cached sites:', error);
+          tagGrid.innerHTML = '<div style="grid-column: span 3; text-align: center; padding: 16px;">Failed to load tags</div>';
+        }
+      };
+      
+      // Handle search functionality
+      const handleSearch = () => {
+        const query = searchInput.value.trim();
+        if (!query) return;
+        
+        // Store the query for when online
+        storeOfflineSearch(query);
+        
+        // Check if it's a flashtag search
+        const flashtagMatch = query.match(/^(.*?)\s+!(\w+)$/);
+        
+        if (flashtagMatch) {
+          // When back online, this will be processed by the service worker
+          showNotification('Search saved for when you\'re back online');
+        } else {
+          showNotification('Search saved for when you\'re back online');
+        }
+        
+        // Clear the input
+        searchInput.value = '';
+        
+        // Refresh the pending searches list
+        loadOfflineSearches();
+      };
+      
+      // Load pending searches from IndexedDB
+      const loadOfflineSearches = async () => {
+        try {
+          const db = await openSearchDatabase();
+          const tx = db.transaction('offline-searches', 'readonly');
+          const store = tx.objectStore('offline-searches');
+          const searches = await store.getAll();
+          
+          if (searches && searches.length > 0) {
+            offlineSearchesSection.style.display = 'block';
+            searchList.innerHTML = '';
+            
+            searches.forEach(search => {
+              const searchItem = document.createElement('div');
+              searchItem.className = 'search-item';
+              searchItem.innerHTML = `
+                <span class="search-query">${search.query}</span>
+                <button class="retry-btn" data-query="${search.query}">Retry</button>
+              `;
+              searchList.appendChild(searchItem);
+            });
+            
+            // Add event listeners to retry buttons
+            document.querySelectorAll('.retry-btn').forEach(btn => {
+              btn.addEventListener('click', () => {
+                const query = btn.getAttribute('data-query');
+                if (navigator.onLine) {
+                  window.location.href = `/?f=${encodeURIComponent(query)}`;
+                } else {
+                  showNotification('Still offline. Search saved for later.');
+                }
               });
-              tagsContainer.appendChild(tag);
-            }
+            });
+          } else {
+            offlineSearchesSection.style.display = 'none';
+          }
+        } catch (error) {
+          console.error('Failed to load offline searches:', error);
+        }
+      };
+      
+      // Store search in IndexedDB
+      const storeOfflineSearch = async (query) => {
+        try {
+          const db = await openSearchDatabase();
+          const tx = db.transaction('offline-searches', 'readwrite');
+          const store = tx.objectStore('offline-searches');
+          
+          await store.put({
+            query,
+            timestamp: Date.now()
           });
           
-          // Setup search functionality
-          const handleSearch = () => {
-            const query = searchBar.value.trim();
-            if (!query) return;
-            
-            const [searchTerm, tag] = query.split(' !');
-            
-            if (tag) {
-              const site = sites.find(s => s.alias.includes(tag));
-              if (site) {
-                // Redirect to the site with the search term
-                window.location.href = site.site + encodeURIComponent(searchTerm);
-                return;
-              }
+          return new Promise((resolve, reject) => {
+            tx.oncomplete = () => resolve(true);
+            tx.onerror = () => reject(tx.error);
+          });
+        } catch (error) {
+          console.error('Failed to store offline search:', error);
+          return false;
+        }
+      };
+      
+      // Open or create IndexedDB for offline searches
+      const openSearchDatabase = () => {
+        return new Promise((resolve, reject) => {
+          const request = indexedDB.open('FlashSearch', 1);
+          
+          request.onupgradeneeded = e => {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains('offline-searches')) {
+              db.createObjectStore('offline-searches', { keyPath: 'timestamp' });
             }
-            
-            // If no valid flashtag, store the query for when we're back online
-            localStorage.setItem('pendingSearch', query);
-            alert('This search will run when you are back online.');
           };
           
-          searchButton.addEventListener('click', handleSearch);
-          searchBar.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') handleSearch();
-          });
-        } else {
-          tagsContainer.innerHTML = '<p>No cached sites available</p>';
+          request.onsuccess = e => resolve(e.target.result);
+          request.onerror = e => reject(e.target.error);
+        });
+      };
+      
+      // Show notification
+      const showNotification = (message) => {
+        connectionStatus.textContent = message;
+        connectionStatus.classList.remove('online');
+        connectionStatus.classList.add('visible');
+        
+        setTimeout(() => {
+          connectionStatus.classList.remove('visible');
+        }, 3000);
+      };
+      
+      // Register event listeners
+      searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          handleSearch();
         }
-      } catch (error) {
-        console.error('Error loading cached sites:', error);
-        tagsContainer.innerHTML = '<p>Could not load tags</p>';
-      }
+      });
+      
+      searchBtn.addEventListener('click', handleSearch);
+      
+      refreshBtn.addEventListener('click', () => {
+        window.location.reload();
+      });
+      
+      window.addEventListener('online', () => {
+        updateConnectionStatus();
+        
+        // Trigger sync event when back online
+        if ('serviceWorker' in navigator && 'SyncManager' in window) {
+          navigator.serviceWorker.ready
+            .then(registration => {
+              registration.sync.register('retry-search');
+            })
+            .catch(error => {
+              console.error('Failed to register sync event:', error);
+            });
+        }
+      });
+      
+      window.addEventListener('offline', updateConnectionStatus);
+      
+      // Listen for messages from service worker
+      navigator.serviceWorker.addEventListener('message', event => {
+        if (event.data && event.data.type === 'offline-searches-processed') {
+          loadOfflineSearches();
+          showNotification('Processing your offline searches');
+        }
+      });
+      
+      // Initial setup
+      updateConnectionStatus();
+      await loadFlashTags();
+      await loadOfflineSearches();
     });
   </script>
 </body>
